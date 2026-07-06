@@ -69,14 +69,46 @@ $pdf-to-latex 把这个 PDF 重排成 LaTeX 项目
 
 ## Update
 
-If installed with Git:
+Recommended Codex prompt:
 
-```bash
-cd "${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex"
-git pull --ff-only
+```text
+更新 skill https://github.com/zuchengchen/pdf-to-latex.git
 ```
 
-Restart Codex after updating.
+If using SSH credentials, this form is also fine:
+
+```text
+更新 skill git@github.com:zuchengchen/pdf-to-latex.git
+```
+
+Prefer the full `https://github.com/...` or `git@github.com:...` URL over the abbreviated `github.com:owner/repo.git` form so Codex can parse the repository unambiguously.
+
+If the installed skill directory is a Git checkout, update it in place:
+
+```bash
+SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex"
+git -C "$SKILL_DIR" remote set-url origin https://github.com/zuchengchen/pdf-to-latex.git
+git -C "$SKILL_DIR" pull --ff-only
+```
+
+If the installed skill directory exists but is not a Git checkout, back it up and clone a fresh copy:
+
+```bash
+SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex"
+BACKUP="${SKILL_DIR}.backup.$(date +%Y%m%d%H%M%S)"
+
+mv "$SKILL_DIR" "$BACKUP"
+git clone https://github.com/zuchengchen/pdf-to-latex.git "$SKILL_DIR"
+```
+
+If the directory does not exist yet, install it normally:
+
+```bash
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
+git clone https://github.com/zuchengchen/pdf-to-latex.git "${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex"
+```
+
+Restart Codex after updating or reinstalling.
 
 ## Uninstall
 
@@ -102,6 +134,6 @@ If GitHub archive download is rate-limited, ask Codex to use a normal Git clone 
 
 Do not use sparse installer git mode with `--path .` for this repo; it can fetch only top-level files and omit `agents/` and `references/`.
 
-If installation says the destination already exists, remove the existing directory or update it with `git pull`.
+If installation says the destination already exists, use the Update section above. The GitHub skill installer is installation-oriented and may abort instead of overwriting an existing skill directory.
 
 If the skill installs but does not appear, restart Codex and confirm that `SKILL.md` exists under `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex/`.

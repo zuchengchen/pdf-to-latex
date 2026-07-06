@@ -22,6 +22,16 @@ If GitHub archive download is rate-limited, ask Codex to install with a normal `
 
 After installation, restart Codex so the new skill is discovered.
 
+## Quick Update
+
+On a machine where this skill is already installed, ask Codex:
+
+```text
+更新 skill https://github.com/zuchengchen/pdf-to-latex.git
+```
+
+Codex should update `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex` in place with `git pull --ff-only` when it is a Git checkout. If the installed directory is not a Git checkout, Codex should back it up and clone a fresh copy from GitHub. Restart Codex after updating so the new skill instructions are loaded.
+
 ## What It Does
 
 - Inspects digital, scanned, or mixed PDFs.
