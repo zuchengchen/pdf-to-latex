@@ -10,6 +10,8 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar is
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references.
 5. Update `conversion-notes.md` with verification results and remaining uncertainties.
 
+For normal PDF-to-LaTeX work, perform at least one refinement pass after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
+
 ## Compile
 
 Prefer `latexmk` when available:
@@ -88,6 +90,17 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 
 If the notes contain unresolved critical gaps, report them clearly in the final answer.
 
+## Refinement Acceptance
+
+Before delivering a refined project, confirm:
+
+- The latest compile succeeds.
+- User-stated issues have been addressed or explicitly documented as unresolved.
+- No new missing file, undefined command, or unresolved reference issue was introduced.
+- Representative rendered pages are readable and nonblank.
+- Key semantic content from the source PDF remains present after refinement.
+- `conversion-notes.md` lists the refinement passes, commands, fixes, and remaining issues.
+
 ## Delivery Checklist
 
 Before final response:
@@ -102,4 +115,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete the task only when the rebuilt PDF compiles and the key semantic content is present. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete the task only when the rebuilt PDF compiles, the key semantic content is present, and at least one refinement pass has checked or improved the generated LaTeX. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

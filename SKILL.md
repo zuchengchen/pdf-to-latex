@@ -1,13 +1,13 @@
 ---
 name: pdf-to-latex
-description: "Use when Codex needs to convert, rebuild, re-typeset, or recreate a PDF as an editable LaTeX or XeLaTeX project and compiled PDF, including digital PDFs, scanned PDFs, reports, papers, figures, tables, formulas, references, OCR or visual page review, semantic restructuring, compilation, and quality checks."
+description: "Use when Codex needs to automatically convert, rebuild, re-typeset, refine, polish, repair, or improve a PDF as an editable LaTeX or XeLaTeX project and compiled PDF, including digital PDFs, scanned PDFs, generated LaTeX cleanup, iterative refinement, compile fixes, layout cleanup, figures, tables, formulas, references, OCR or visual page review, semantic restructuring, compilation, and quality checks."
 ---
 
 # PDF to LaTeX
 
 ## Purpose
 
-Use this skill to rebuild a user-provided PDF into an editable LaTeX project and a compiled PDF. Prioritize semantic structure, readability, and maintainable LaTeX over pixel-perfect recreation.
+Use this skill to rebuild a user-provided PDF into an editable LaTeX project, compile it, and refine the generated LaTeX until the result is semantically complete, readable, and maintainable. Prioritize semantic structure and practical polish over pixel-perfect recreation.
 
 Codex performs the conversion work directly with local tools, visual reasoning, and LaTeX editing. This skill does not provide or require a bundled CLI, `scripts/` directory, installer, or cloud OCR API.
 
@@ -15,6 +15,7 @@ Codex performs the conversion work directly with local tools, visual reasoning, 
 
 - Read `references/pdf-analysis.md` before inspecting or transcribing the source PDF.
 - Read `references/latex-rebuild.md` before creating or editing the LaTeX project.
+- Read `references/latex-refinement.md` before polishing generated LaTeX, fixing compile or layout issues, or comparing the rebuilt PDF against the source.
 - Read `references/quality-review.md` before compiling, reviewing, or delivering the result.
 
 ## Default Output Contract
@@ -34,15 +35,18 @@ latex/
 
 Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`.
 
-## Workflow
+## Automatic Conversion And Refinement Workflow
 
 1. Confirm the source PDF path and target output location.
 2. Inspect the PDF type, page count, text layer, images, tables, formulas, references, and any scanned pages using `references/pdf-analysis.md`.
 3. Build a semantic outline before writing LaTeX: title, authors or metadata, sections, body flow, figures, tables, formulas, citations, and appendices.
 4. Create the LaTeX project with XeLaTeX as the default engine using `references/latex-rebuild.md`.
-5. Mark uncertain or reconstructed content in both the LaTeX source and `conversion-notes.md`; do not present guesses as exact transcription.
-6. Compile and review the result using `references/quality-review.md`.
-7. Deliver the project path, compiled PDF path, verification performed, and remaining uncertainties.
+5. Compile the generated project and inspect errors, warnings, rendered pages, extracted text, and `conversion-notes.md`.
+6. Run the refinement loop in `references/latex-refinement.md`: fix compile issues, improve structure, tune tables and figures, repair formulas and references, adjust readable layout, and recompile after each focused pass.
+7. Repeat review and refinement until the rebuilt PDF passes the quality checks or the remaining issues are explicitly marked as unresolved.
+8. Deliver the project path, compiled PDF path, verification performed, refinements made, and remaining uncertainties.
+
+If the user provides an existing generated LaTeX project, skip initial reconstruction and start at step 5. Treat refinement as part of the default job, not as a separate optional follow-up.
 
 ## Conversion Rules
 
@@ -51,6 +55,7 @@ Small documents may use fewer subdirectories, but explain the simplification in 
 - Use public web lookup only when it helps identify public metadata, citations, public versions, standard formulas, or source context. Label web-sourced additions separately from PDF-derived content.
 - Use XeLaTeX by default, especially for Unicode, multilingual text, and CJK documents.
 - Keep LaTeX maintainable: use packages intentionally, split long content into chapters or sections, and avoid brittle absolute positioning unless the user explicitly requests visual recreation.
+- Make small, reviewable refinement edits. Compile after each focused batch before moving to the next class of issues.
 - Continue through content uncertainty when a reasonable approximation is possible, but clearly mark approximations, missing details, and inferred material.
 
 ## Stop And Ask

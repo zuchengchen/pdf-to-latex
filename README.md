@@ -1,6 +1,6 @@
 # PDF to LaTeX Skill
 
-`pdf-to-latex` is a Codex Agent Skill for rebuilding PDFs as editable XeLaTeX projects and compiled PDFs. It is designed for semantic reconstruction: preserve document structure, readable content, formulas, tables, figures, captions, and references rather than trying to recreate every page pixel-for-pixel.
+`pdf-to-latex` is a Codex Agent Skill for automatically rebuilding PDFs as editable XeLaTeX projects, compiling the result, and refining the generated LaTeX until the output is semantically complete and readable. It is designed for semantic reconstruction: preserve document structure, readable content, formulas, tables, figures, captions, and references rather than trying to recreate every page pixel-for-pixel.
 
 This is a workflow skill. It does not ship a CLI, bundled conversion scripts, or a cloud OCR dependency. Codex uses the instructions in `SKILL.md` and `references/` together with local tools and visual reasoning.
 
@@ -27,10 +27,11 @@ After installation, restart Codex so the new skill is discovered.
 - Inspects digital, scanned, or mixed PDFs.
 - Guides Codex through rendered page review and visual/OCR reasoning.
 - Rebuilds the document as a maintainable XeLaTeX project.
+- Automatically runs compile-review-refine loops after the first generated draft.
 - Defaults to creating a `latex/` directory next to the source PDF.
 - Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, and `conversion-notes.md`.
 - Records uncertain, inferred, approximated, or web-supplemented content.
-- Compiles and reviews the output PDF for semantic completeness and readability.
+- Compiles, reviews, and polishes the output PDF for semantic completeness and readability.
 
 ## Repository Structure
 
@@ -41,6 +42,7 @@ pdf-to-latex/
 │   └── openai.yaml
 ├── references/
 │   ├── latex-rebuild.md
+│   ├── latex-refinement.md
 │   ├── pdf-analysis.md
 │   └── quality-review.md
 ├── INSTALL.md
@@ -69,7 +71,13 @@ After installing and restarting Codex:
 $pdf-to-latex 把 ./paper.pdf 重排成可编辑 LaTeX 项目，并编译出 PDF
 ```
 
-Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, compile with XeLaTeX, and report any uncertain reconstruction.
+Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, compile with XeLaTeX, run at least one refinement pass, and report any uncertain reconstruction.
+
+For an existing generated project:
+
+```text
+$pdf-to-latex 对照 ./paper.pdf 自动精修 ./latex，并重新编译输出 PDF
+```
 
 ## More Installation Options
 
