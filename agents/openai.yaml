@@ -1,4 +1,4 @@
 interface:
   display_name: "PDF to LaTeX"
-  short_description: "Rebuild and refine PDFs as LaTeX projects"
-  default_prompt: "Use $pdf-to-latex to rebuild this PDF as an editable XeLaTeX project, compile it, and refine the generated LaTeX."
+  short_description: "Visually rebuild and polish PDFs as LaTeX"
+  default_prompt: "Use $pdf-to-latex to visually transcribe, rebuild, or resume this PDF as an editable XeLaTeX project, compile it, and polish the generated LaTeX."

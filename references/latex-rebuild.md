@@ -8,6 +8,8 @@ Use this reference when creating the target LaTeX project. The project should be
 - Use normal LaTeX sectioning, lists, tables, figures, equations, and bibliography tools.
 - Preserve the PDF's logical order, terminology, labels, captions, references, and important formatting.
 - Avoid absolute positioning, page-by-page overlays, and screenshot-only pages unless the user explicitly requests visual recreation.
+- For scanned or visually complex PDFs, do not make a compiling draft by embedding full-page screenshots. Use Codex visual transcription to create semantic text, math, tables, and figure assets instead.
+- For digital PDFs, treat `pdftotext` output as optional text-layer evidence only; visual review still controls reading order and correction.
 - Mark inferred or approximate content in source comments and in `conversion-notes.md`.
 
 ## Project Layout
@@ -22,10 +24,15 @@ latex/
 │   └── ...
 ├── figures/
 ├── tables/
+├── transcripts/
+├── page-manifest.md
+├── conversion-state.md
 └── conversion-notes.md
 ```
 
-Small documents may keep all content in `main.tex`, but still include `conversion-notes.md` unless the user explicitly says otherwise.
+Small documents may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. Keep `transcripts/` and `page-manifest.md` when page-level transcription, subagent batches, or resume behavior need them.
+
+Before creating files in an existing project, read `conversion-state.md` and `conversion-notes.md` when present. If they indicate an interrupted conversion, resume from the recorded next action and preserve existing generated or user-edited files.
 
 ## XeLaTeX Baseline
 
@@ -73,9 +80,11 @@ Build a semantic outline first:
 
 Do not preserve repeated page headers, footers, or page numbers unless they carry content.
 
+Build the outline from page transcripts, digital text-layer evidence, and visual page review. Record the outline checkpoint in `conversion-state.md` before drafting large LaTeX files. Include which chapters, figures, tables, formulas, or references are already planned and what should be written next.
+
 ## Text
 
-Normalize extracted text into readable LaTeX:
+Normalize transcribed or extracted text into readable LaTeX:
 
 - Fix broken line wraps and hyphenation.
 - Restore paragraph boundaries.
@@ -89,6 +98,10 @@ Example:
 % Approximation: the original scan is unclear around this phrase.
 The proposed method reduces reconstruction error while preserving semantic layout.
 ```
+
+For scanned PDFs, treat Codex page-level visual transcription as draft evidence until it has been merged into the document structure. Correct paragraph order, remove page headers and footers, restore headings, join cross-page continuations, and mark unreadable spans with short comments instead of replacing the page with an image.
+
+For digital PDFs, `pdftotext` output can speed transcription, but it must not bypass visual review. Repair multi-column ordering, formulas, captions, footnotes, hyphenation, ligatures, and missing spaces before writing final LaTeX.
 
 ## Figures
 
@@ -104,6 +117,8 @@ Place extracted or cropped images in `figures/`. Use semantic figure environment
 ```
 
 If a figure is recreated as text, TikZ, or a table, note that choice in `conversion-notes.md`.
+
+Only include images that are actual figures, diagrams, photos, charts, or other source visual content. Do not include full-page rendered scans as figure assets merely to preserve page appearance or make compilation easy.
 
 ## Tables
 
@@ -126,6 +141,8 @@ Prefer `booktabs` tables for clean semantic reconstruction:
 ```
 
 For large tables, consider `longtable`, landscape pages, or smaller font sizes only when needed. Mark uncertain cells with comments, not silent substitutions.
+
+For scanned tables, use Codex visual transcription to rebuild legible cells as semantic LaTeX tables. If a table is partly unreadable, include the clear rows or columns, mark uncertain cells, and document the gap; do not embed a screenshot table unless the user explicitly requests visual preservation.
 
 ## Formulas
 
@@ -165,9 +182,54 @@ Always maintain `conversion-notes.md` with:
 - Source PDF path and conversion date.
 - Tools and commands used.
 - PDF type and analysis summary.
+- Page manifest and page transcript status.
 - Inferred, approximated, or web-sourced content.
 - Missing or unclear regions.
 - Compile command and review status.
 - Suggested manual follow-up.
 
 Keep notes factual and actionable. They are part of the deliverable.
+
+## Conversion State
+
+Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when page evidence is rendered, when page transcripts are completed, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch is completed.
+
+Use this shape:
+
+```text
+# Conversion State
+
+Source PDF:
+Target directory:
+Last updated:
+Current phase:
+
+## Completed Checkpoints
+- [ ] PDF analysis complete
+- [ ] Page evidence rendered or split
+- [ ] Page manifest complete
+- [ ] Page transcription complete
+- [ ] Semantic outline complete
+- [ ] Project scaffold created
+- [ ] Main content drafted
+- [ ] Figures/assets handled
+- [ ] Tables/formulas handled
+- [ ] First compile attempted
+- [ ] First successful compile
+- [ ] Transcript merge pass complete
+- [ ] Structure pass complete
+- [ ] LaTeX idiom/object polish pass complete
+- [ ] Typography/visual review pass complete
+- [ ] Final cleanup pass complete
+- [ ] Quality review complete
+
+## Last Successful Command
+
+## Active Files
+
+## Next Action
+
+## Blockers Or Uncertainties
+```
+
+Keep the state file brief enough that a future Codex agent can read it first, then open only the referenced notes, logs, and source files needed for the next action.

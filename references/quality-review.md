@@ -9,8 +9,12 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar is
 3. Extract text from the compiled PDF when possible and compare it with key source content.
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references.
 5. Update `conversion-notes.md` with verification results and remaining uncertainties.
+6. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
+7. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
+8. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
+9. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
-For normal PDF-to-LaTeX work, perform at least one refinement pass after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
+For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
 
 ## Compile
 
@@ -69,6 +73,8 @@ Check:
 
 - Pages are not blank.
 - Text is readable and not clipped.
+- Scanned pages have been reconstructed as text, math, tables, and genuine figures instead of embedded full-page rendered scans.
+- Raw page transcript blocks, repeated page headers, footers, page numbers, and artificial page-boundary artifacts are absent from final chapters.
 - Figures and tables appear near their references.
 - Formulas are legible.
 - Captions and labels are clear.
@@ -84,11 +90,22 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 - What was derived directly from the PDF.
 - What was inferred visually.
 - What was approximated.
+- What came from optional digital text-layer extraction, when used.
+- Page transcript or page manifest status.
+- Polish passes completed and pages or sections reviewed.
 - What came from public web sources, with links or citations when used.
 - Known unresolved issues.
 - Verification commands and results.
 
 If the notes contain unresolved critical gaps, report them clearly in the final answer.
+
+`conversion-state.md` should be consistent with the notes and filesystem:
+
+- Current phase reflects the latest verified state.
+- Completed checkpoints have corresponding evidence.
+- Last successful command matches the latest successful compile or review command.
+- Active files point to the files a future Codex agent should open next.
+- Next action is concrete, or says `None; quality review complete`.
 
 ## Refinement Acceptance
 
@@ -97,6 +114,12 @@ Before delivering a refined project, confirm:
 - The latest compile succeeds.
 - User-stated issues have been addressed or explicitly documented as unresolved.
 - No new missing file, undefined command, or unresolved reference issue was introduced.
+- Minimum refinement passes completed or explicitly marked not applicable.
+- Local OCR engines were not used.
+- Full-page scanned-image placeholders are absent unless the user explicitly requested them.
+- Raw transcript artifacts and obvious page-boundary artifacts are absent from final chapters.
+- Major tables, formulas, figures, captions, citations, and references use semantic LaTeX where legible.
+- Severe overfull boxes, clipping, blank pages, huge whitespace, and bad float placement have been reviewed and fixed when reasonable.
 - Representative rendered pages are readable and nonblank.
 - Key semantic content from the source PDF remains present after refinement.
 - `conversion-notes.md` lists the refinement passes, commands, fixes, and remaining issues.
@@ -106,6 +129,8 @@ Before delivering a refined project, confirm:
 Before final response:
 
 - `main.tex` exists and is the project entry point.
+- `conversion-state.md` exists and reflects the latest completed checkpoint.
+- `page-manifest.md` and page transcripts exist when page-level visual transcription was used.
 - Chapter, figure, and table files are referenced correctly.
 - The compiled PDF exists.
 - The latest compile command succeeded.
@@ -115,4 +140,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete the task only when the rebuilt PDF compiles, the key semantic content is present, and at least one refinement pass has checked or improved the generated LaTeX. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete the task only when the rebuilt PDF compiles, key semantic content is present, minimum refinement passes have been completed or explicitly marked not applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

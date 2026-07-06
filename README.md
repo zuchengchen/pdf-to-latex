@@ -2,7 +2,7 @@
 
 `pdf-to-latex` is a Codex Agent Skill for automatically rebuilding PDFs as editable XeLaTeX projects, compiling the result, and refining the generated LaTeX until the output is semantically complete and readable. It is designed for semantic reconstruction: preserve document structure, readable content, formulas, tables, figures, captions, and references rather than trying to recreate every page pixel-for-pixel.
 
-This is a workflow skill. It does not ship a CLI, bundled conversion scripts, or a cloud OCR dependency. Codex uses the instructions in `SKILL.md` and `references/` together with local tools and visual reasoning.
+This is a workflow skill. It does not ship a CLI, bundled conversion scripts, local OCR dependency, or cloud OCR dependency. Codex uses the instructions in `SKILL.md` and `references/` together with local PDF tools and visual reasoning.
 
 ## Quick Install
 
@@ -25,11 +25,15 @@ After installation, restart Codex so the new skill is discovered.
 ## What It Does
 
 - Inspects digital, scanned, or mixed PDFs.
-- Guides Codex through rendered page review and visual/OCR reasoning.
+- Splits or renders PDFs into page-level evidence for Codex visual transcription.
+- Uses optional `pdftotext` extraction only for digital PDF text layers.
 - Rebuilds the document as a maintainable XeLaTeX project.
-- Automatically runs compile-review-refine loops after the first generated draft.
+- For scanned PDFs, uses Codex visual recognition to rebuild semantic content instead of embedding full-page screenshots by default.
+- Automatically runs compile-review-polish loops after the first generated draft.
+- De-pages rough transcripts into normal document structure and idiomatic LaTeX.
+- Maintains `conversion-state.md` so interrupted conversions can resume from the latest checkpoint.
 - Defaults to creating a `latex/` directory next to the source PDF.
-- Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, and `conversion-notes.md`.
+- Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, `transcripts/`, `page-manifest.md`, `conversion-state.md`, and `conversion-notes.md`.
 - Records uncertain, inferred, approximated, or web-supplemented content.
 - Compiles, reviews, and polishes the output PDF for semantic completeness and readability.
 
@@ -58,10 +62,10 @@ The skill itself has no package manager dependencies.
 Useful local tools for actual PDF-to-LaTeX work include:
 
 - XeLaTeX or `latexmk -xelatex`
-- Poppler tools such as `pdftotext`, `pdfinfo`, `pdftoppm`, or `pdfimages`
-- Optional OCR tools such as `tesseract` or `ocrmypdf`
+- Poppler tools such as `pdftotext`, `pdfinfo`, `pdfseparate`, `pdftoppm`, or `pdfimages`
+- Optional renderer alternatives such as `mutool draw`
 
-The skill is written so Codex can use visual reasoning first for scanned pages and local OCR as a supplement when available.
+The skill is written so Codex uses visual recognition for scanned pages. Do not use local OCR engines such as `tesseract` or `ocrmypdf`. Rendered page images are analysis inputs, not the default LaTeX output.
 
 ## Usage Example
 
@@ -71,12 +75,19 @@ After installing and restarting Codex:
 $pdf-to-latex 把 ./paper.pdf 重排成可编辑 LaTeX 项目，并编译出 PDF
 ```
 
-Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, compile with XeLaTeX, run at least one refinement pass, and report any uncertain reconstruction.
+Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction.
+It should also maintain `conversion-state.md` so a later Codex session can continue from the latest completed checkpoint.
 
 For an existing generated project:
 
 ```text
 $pdf-to-latex 对照 ./paper.pdf 自动精修 ./latex，并重新编译输出 PDF
+```
+
+To resume interrupted work:
+
+```text
+$pdf-to-latex 继续 ./latex 里上次中断的 PDF 转 LaTeX 任务
 ```
 
 ## More Installation Options
