@@ -26,13 +26,43 @@ latex/
 ├── tables/
 ├── transcripts/
 ├── page-manifest.md
+├── object-inventory.md
+├── style-profile.md
+├── document-ir.md
 ├── conversion-state.md
 └── conversion-notes.md
 ```
 
-Small documents may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. Keep `transcripts/` and `page-manifest.md` when page-level transcription, subagent batches, or resume behavior need them.
+Small documents may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. Keep `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, and `document-ir.md` when page-level transcription, subagent batches, resume behavior, or quality review need them.
 
 Before creating files in an existing project, read `conversion-state.md` and `conversion-notes.md` when present. If they indicate an interrupted conversion, resume from the recorded next action and preserve existing generated or user-edited files.
+
+## Document Model First
+
+Before drafting final LaTeX, build `document-ir.md` from transcripts, `object-inventory.md`, `style-profile.md`, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
+
+Use this compact shape:
+
+```text
+# Document IR
+
+Metadata:
+Style profile:
+
+Blocks:
+- type: title | abstract | section | paragraph | list | equation | figure | table | citation | bibliography | appendix | note
+  source pages:
+  content or reference:
+  label:
+  confidence:
+
+Cross-page merges:
+Objects:
+Unresolved blocks:
+Style decisions:
+```
+
+Generate `main.tex` and `chapters/*.tex` from this document model. The IR should make page order, section hierarchy, object placement, and unresolved uncertainties explicit before final source is written.
 
 ## XeLaTeX Baseline
 
@@ -64,11 +94,11 @@ Use XeLaTeX by default. Start with a simple, portable preamble and add packages 
 \end{document}
 ```
 
-For CJK or multilingual content, add appropriate XeLaTeX packages such as `xeCJK` when available in the local TeX installation. Use `\IfFontExistsTF` or a simpler default when a preferred font may be missing. If a package is missing, choose a simpler fallback or ask before installing system packages.
+Use `style-profile.md` to choose the document class, packages, and layout. For CJK or multilingual content, add appropriate XeLaTeX packages such as `xeCJK` when available in the local TeX installation. Use `\IfFontExistsTF` or a simpler default when a preferred font may be missing. If a package is missing, choose a simpler fallback or ask before installing system packages.
 
 ## Structure
 
-Build a semantic outline first:
+Build a semantic outline and document IR first:
 
 - Title, subtitle, authors, affiliations, date, abstract.
 - Sections and subsections.
@@ -80,7 +110,7 @@ Build a semantic outline first:
 
 Do not preserve repeated page headers, footers, or page numbers unless they carry content.
 
-Build the outline from page transcripts, digital text-layer evidence, and visual page review. Record the outline checkpoint in `conversion-state.md` before drafting large LaTeX files. Include which chapters, figures, tables, formulas, or references are already planned and what should be written next.
+Build the outline from page transcripts, digital text-layer evidence, `object-inventory.md`, `style-profile.md`, and visual page review. Record the IR checkpoint in `conversion-state.md` before drafting large LaTeX files. Include which chapters, figures, tables, formulas, or references are already planned and what should be written next.
 
 ## Text
 
@@ -120,6 +150,8 @@ If a figure is recreated as text, TikZ, or a table, note that choice in `convers
 
 Only include images that are actual figures, diagrams, photos, charts, or other source visual content. Do not include full-page rendered scans as figure assets merely to preserve page appearance or make compilation easy.
 
+Use `object-inventory.md` to verify that each major figure is either included, recreated, documented as unreadable, or intentionally omitted.
+
 ## Tables
 
 Prefer `booktabs` tables for clean semantic reconstruction:
@@ -140,9 +172,11 @@ Prefer `booktabs` tables for clean semantic reconstruction:
 \end{table}
 ```
 
-For large tables, consider `longtable`, landscape pages, or smaller font sizes only when needed. Mark uncertain cells with comments, not silent substitutions.
+For numeric tables, consider `siunitx` when available and useful, but fall back to ordinary alignment if the package is unavailable or unnecessary. For wide or long tables, consider `tabularx`, `longtable`, landscape pages, or smaller font sizes only when needed. Mark uncertain cells with comments, not silent substitutions.
 
 For scanned tables, use Codex visual transcription to rebuild legible cells as semantic LaTeX tables. If a table is partly unreadable, include the clear rows or columns, mark uncertain cells, and document the gap; do not embed a screenshot table unless the user explicitly requests visual preservation.
+
+Do not leave legible tables as space-aligned plain text in final chapters. If table structure remains uncertain, rebuild the clear structure and record the uncertainty in both source comments and `conversion-notes.md`.
 
 ## Formulas
 
@@ -154,7 +188,7 @@ Use standard LaTeX math:
 \end{equation}
 ```
 
-Preserve equation numbering when the source uses it. For uncertain symbols, add a local comment and a note:
+Use `equation` for single display formulas, `align` or `aligned` for multi-line derivations, and inline math for short terms. Preserve equation numbering when the source uses it. For uncertain symbols, add a local comment and a note:
 
 ```tex
 \begin{equation}
@@ -163,7 +197,7 @@ Preserve equation numbering when the source uses it. For uncertain symbols, add 
 % Uncertain: the scan makes beta difficult to distinguish from gamma.
 ```
 
-Use web lookup for standard formulas only when it improves accuracy, and record the source.
+Do not leave legible display math as ordinary text. Use web lookup for standard formulas only when it improves accuracy, and record the source.
 
 ## Citations And References
 
@@ -183,6 +217,7 @@ Always maintain `conversion-notes.md` with:
 - Tools and commands used.
 - PDF type and analysis summary.
 - Page manifest and page transcript status.
+- Document IR, object inventory, and style profile status.
 - Inferred, approximated, or web-sourced content.
 - Missing or unclear regions.
 - Compile command and review status.
@@ -192,7 +227,7 @@ Keep notes factual and actionable. They are part of the deliverable.
 
 ## Conversion State
 
-Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when page evidence is rendered, when page transcripts are completed, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch is completed.
+Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when page evidence is rendered, when page transcripts are completed, when the object inventory, style profile, and document IR are completed, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch is completed.
 
 Use this shape:
 
@@ -209,6 +244,9 @@ Current phase:
 - [ ] Page evidence rendered or split
 - [ ] Page manifest complete
 - [ ] Page transcription complete
+- [ ] Object inventory complete
+- [ ] Style profile complete
+- [ ] Document IR complete
 - [ ] Semantic outline complete
 - [ ] Project scaffold created
 - [ ] Main content drafted
@@ -219,6 +257,7 @@ Current phase:
 - [ ] Transcript merge pass complete
 - [ ] Structure pass complete
 - [ ] LaTeX idiom/object polish pass complete
+- [ ] Reviewer pass complete
 - [ ] Typography/visual review pass complete
 - [ ] Final cleanup pass complete
 - [ ] Quality review complete

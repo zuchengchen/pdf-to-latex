@@ -12,6 +12,8 @@ Capture:
 - Figures, tables, formulas, captions, footnotes, headers, footers, references, and appendices.
 - Pages or regions that need visual reasoning or approximation.
 - Page-level route map for digital, scanned, mixed, and damaged-text reconstruction.
+- Object inventory for figures, tables, formulas, citations, references, appendices, and unresolved visual regions.
+- Style profile for the document type and LaTeX strategy.
 
 Record findings in the target `latex/conversion-notes.md` as work proceeds. Also update `latex/conversion-state.md` after the first pass so interrupted work can resume without repeating PDF discovery.
 
@@ -43,7 +45,8 @@ pdftoppm -png -r 160 source.pdf /tmp/pdf-pages/page
 
 7. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
 8. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, and transcription status.
-9. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
+9. Create or update `object-inventory.md` and `style-profile.md` with the document objects and target LaTeX strategy discovered so far.
+10. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
 
@@ -120,6 +123,71 @@ Uncertainties:
 
 When permitted by the current system and user instructions, independent page batches may be delegated to subagents. Give each subagent a bounded batch, the relevant page images, optional digital text-layer excerpts, and the required page transcript format. The main agent must merge fragments, resolve cross-page continuity, and produce the final LaTeX project.
 
+## Object Inventory
+
+Create `object-inventory.md` before final LaTeX generation. Treat it as the checklist for high-value content that should not get lost during page merging.
+
+Use this shape:
+
+```text
+# Object Inventory
+
+Figures:
+- id:
+  source pages:
+  caption:
+  asset/crop needed:
+  status:
+
+Tables:
+- id:
+  source pages:
+  caption:
+  structure:
+  status:
+
+Equations:
+- id or number:
+  source pages:
+  surrounding text:
+  confidence:
+  status:
+
+References and citations:
+- citation style:
+- bibliography pages:
+- unresolved citations:
+
+Unresolved visual regions:
+- source page:
+  description:
+  next action:
+```
+
+Update each object's status as `pending`, `transcribed`, `rebuilt`, `compiled`, `reviewed`, or `uncertain`. The final LaTeX should account for every major object or explicitly document why an object was omitted.
+
+## Style Profile
+
+Create `style-profile.md` before drafting `main.tex`. Choose a practical target style that helps the rebuilt LaTeX look authored rather than mechanically transcribed.
+
+Capture:
+
+```text
+Document profile: article | academic paper | report | book chapter | thesis | manual | handout | form | math-heavy | table-heavy | CJK/multilingual | other
+Document class:
+Language and font needs:
+Sectioning depth:
+Bibliography strategy:
+Figure strategy:
+Table strategy:
+Math strategy:
+Layout notes:
+Packages likely needed:
+Packages to avoid unless necessary:
+```
+
+Use the profile to decide whether the baseline should stay minimal or add focused support such as `xeCJK`, `tabularx`, `longtable`, `siunitx`, `biblatex`, `multicol`, landscape pages, or theorem environments. If a package may be missing, prefer a portable fallback and record the decision.
+
 ## Figures And Images
 
 Identify whether figures should be:
@@ -169,6 +237,8 @@ Scanned or visual-only regions:
 Page/region route map:
 Page evidence:
 Optional digital text-layer extracts:
+Object inventory:
+Style profile:
 Structure:
 Figures:
 Tables:
@@ -190,9 +260,12 @@ Completed checkpoints:
 - Page count and text layer inspected
 - Representative pages rendered
 - Page manifest created
+- Object inventory created
+- Style profile created
+- Document IR inputs identified
 Last successful command:
 Active files:
-Next action: transcribe page batches or build semantic outline
+Next action: transcribe page batches or build document IR
 Blockers or uncertainties:
 ```
 

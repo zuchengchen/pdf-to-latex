@@ -1,6 +1,6 @@
 ---
 name: pdf-to-latex
-description: "Use when Codex needs to automatically convert, rebuild, re-typeset, refine, polish, repair, or improve a PDF as an editable LaTeX or XeLaTeX project and compiled PDF, including digital PDFs, scanned PDFs, generated LaTeX cleanup, iterative refinement, compile fixes, layout cleanup, figures, tables, formulas, references, Codex visual page transcription, semantic restructuring, compilation, and quality checks."
+description: "Use when Codex needs to automatically convert, rebuild, re-typeset, refine, polish, repair, or improve a PDF as an editable LaTeX or XeLaTeX project and compiled PDF, including digital PDFs, scanned PDFs, generated LaTeX cleanup, iterative refinement, compile fixes, layout cleanup, figures, tables, formulas, references, Codex visual page transcription, document modeling, object inventory tracking, semantic restructuring, compilation, and quality checks."
 ---
 
 # PDF to LaTeX
@@ -32,11 +32,14 @@ latex/
 ├── tables/
 ├── transcripts/
 ├── page-manifest.md
+├── object-inventory.md
+├── style-profile.md
+├── document-ir.md
 ├── conversion-state.md
 └── conversion-notes.md
 ```
 
-Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep page-level transcripts or fragments when they are useful for review, resume, or subagent integration.
+Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep page-level transcripts, object inventory, style profile, and document IR when they are useful for review, resume, or subagent integration.
 
 Always maintain `conversion-state.md` as the resumable checkpoint file. Keep it concise and update it whenever a milestone completes or the next action changes. It should include:
 
@@ -62,10 +65,10 @@ Use `conversion-notes.md` for richer evidence, decisions, commands, and unresolv
 4. Split or render the source into page-level evidence. Prefer per-page images for Codex visual transcription; keep single-page PDFs only when they help asset extraction or page-specific inspection.
 5. Create `page-manifest.md` with the page or region route map. For digital pages only, `pdftotext` may be used as optional text-layer evidence; never use local OCR engines.
 6. Use Codex visual recognition to transcribe each page or page batch into semantic LaTeX fragments under `transcripts/` or equivalent notes. Use subagents for independent page batches only when the current environment and user instructions permit parallel agent work.
-7. Build a semantic outline before writing final LaTeX: title, authors or metadata, sections, body flow, figures, tables, formulas, citations, and appendices. Record the outline checkpoint and next action.
-8. Create the LaTeX project with XeLaTeX as the default engine using `references/latex-rebuild.md`. Merge page fragments into coherent chapters and update the state file with created files and active gaps.
+7. Build `object-inventory.md`, `style-profile.md`, and `document-ir.md` before writing final LaTeX. Track document type, section hierarchy, body blocks, figures, tables, formulas, citations, appendices, cross-page merges, style decisions, and unresolved objects. Record the IR checkpoint and next action.
+8. Create the LaTeX project with XeLaTeX as the default engine using `references/latex-rebuild.md`. Generate final chapters from the document IR rather than directly stitching page fragments, and update the state file with created files and active gaps.
 9. Compile the generated project and inspect errors, warnings, rendered pages, extracted text, `conversion-state.md`, and `conversion-notes.md`. Record compile success or the first hard failure.
-10. Run the multi-pass polish loop in `references/latex-refinement.md`: fix compile issues, remove page-transcript artifacts, improve document structure, convert rough text into idiomatic LaTeX objects, tune typography, and visually compare rendered output. Update the state file after each focused pass.
+10. Run the multi-pass polish loop in `references/latex-refinement.md`: fix compile issues, remove page-transcript artifacts, improve document structure, convert rough text into idiomatic LaTeX objects, tune typography, run reviewer checks, and visually compare rendered output. Update the state file after each focused pass.
 11. Repeat review and refinement until the rebuilt PDF passes the quality gates or the remaining issues are explicitly marked as unresolved. Do not deliver the first compiling PDF as final unless the user explicitly requested only a rough draft.
 12. Deliver the project path, compiled PDF path, verification performed, refinements made, and remaining uncertainties.
 
@@ -79,8 +82,8 @@ For scanned, mixed, damaged-text, or visually complex PDFs, follow this normal p
 2. Give Codex the rendered page image, optional neighboring-page context, and optional digital text-layer excerpt when the page is digital.
 3. Transcribe each page into structured semantic LaTeX fragments, especially headings, paragraphs, formulas, tables, captions, footnotes, and references.
 4. Mark page starts, page ends, cross-page continuations, figure/table needs, and uncertain symbols or text.
-5. Build a semantic outline from the page transcripts and visual page review.
-6. Write LaTeX as editable text, math, semantic tables, citations, and cropped real figures only.
+5. Build an object inventory, style profile, and document IR from the page transcripts and visual page review.
+6. Write LaTeX from the document IR as editable text, math, semantic tables, citations, and cropped real figures only.
 7. Compile and refine the semantic LaTeX. If a region is unreadable, leave a concise placeholder and document the uncertainty instead of embedding the scanned page.
 
 Do not use `tesseract`, `ocrmypdf`, local OCR engines, or cloud OCR APIs. Do not use full-page scanned screenshots as a compile shortcut. They are expensive, uneditable, and outside the default purpose of this skill.

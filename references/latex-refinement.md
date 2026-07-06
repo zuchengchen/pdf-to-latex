@@ -28,6 +28,7 @@ Use whichever inputs are available:
 - LaTeX logs such as `main.log`, `.fls`, `.aux`, `.out`, or bibliography logs.
 - Rendered page images from the source and rebuilt PDFs.
 - Page transcripts, page fragments, and optional digital text-layer extracts.
+- `document-ir.md`, `object-inventory.md`, and `style-profile.md`.
 - Extracted text from rebuilt PDFs.
 - User-stated target changes.
 
@@ -44,9 +45,10 @@ When resuming an interrupted project, read `conversion-state.md` first. If it is
 5. Fix one focused category of issues or run the next polish pass below.
 6. Recompile.
 7. Inspect rendered output and extracted text.
-8. Compare against the source PDF or user target.
-9. Update `conversion-notes.md` and `conversion-state.md`.
-10. Repeat until the quality review passes or remaining issues are explicitly documented.
+8. Compare against the source PDF, document IR, object inventory, style profile, or user target.
+9. Run reviewer checks when they can catch a distinct class of issues.
+10. Update `conversion-notes.md` and `conversion-state.md`.
+11. Repeat until the quality review passes or remaining issues are explicitly documented.
 
 Keep changes small enough that a failed compile can be traced to the last batch.
 
@@ -59,8 +61,9 @@ After the first successful compile, run focused polish passes. The first compili
 3. **LaTeX Idiom Pass**: replace rough plain text with semantic environments such as `equation`, `align`, `figure`, `table`, `tabular`, `longtable`, `itemize`, `enumerate`, `quote`, and `thebibliography` where appropriate.
 4. **Object Polish Pass**: refine tables, formulas, figures, captions, labels, references, cross-references, units, and notes. Fix table-like plain text and display math left as ordinary paragraphs when legible.
 5. **Typography Pass**: tune margins, heading spacing, paragraph flow, figure sizes, table widths, float placement, severe overfull boxes, clipped content, blank pages, and awkward whitespace.
-6. **Visual Comparison Pass**: render the rebuilt PDF, compare representative pages against the source PDF for semantic coverage and readability, and revisit pages marked uncertain in `page-manifest.md` or `conversion-notes.md`.
-7. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
+6. **Reviewer Pass**: review the generated LaTeX and rendered PDF against `document-ir.md`, `object-inventory.md`, source pages, and the quality rubric below. Use a subagent reviewer when available and useful, but keep final edits under the main agent's control.
+7. **Visual Comparison Pass**: render the rebuilt PDF, compare representative pages against the source PDF for semantic coverage and readability, and revisit pages marked uncertain in `page-manifest.md`, `object-inventory.md`, or `conversion-notes.md`.
+8. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
 
 For small documents, complete every applicable pass. For long documents, complete at least the minimum refinement below and sample high-risk pages: title or first page, one normal body page, one table-heavy page, one formula-heavy page, references or appendices, and every page marked uncertain.
 
@@ -71,10 +74,47 @@ Unless the user explicitly requests a rough draft, complete at least:
 - One compile-fix pass after the first failed or successful compile.
 - One transcript merge and structure pass.
 - One LaTeX idiom or object polish pass for the roughest formulas, tables, figures, and references.
-- One typography and visual review pass over rendered output.
+- One reviewer, typography, and visual review pass over rendered output.
 - One final notes and state update naming completed passes and remaining issues.
 
 Do not deliver while raw transcript blocks, obvious page-boundary artifacts, severe layout defects, or unresolved compile problems remain fixable with reasonable effort.
+
+## Quality Rubric
+
+Before delivery, rate each area as `pass`, `needs work`, or `documented unresolved`. Fix `needs work` items before continuing unless the issue is not visible, extractable, or reasonably inferable.
+
+```text
+Structure:
+Transcript cleanup:
+Document IR alignment:
+Object inventory coverage:
+Style profile consistency:
+Math quality:
+Table quality:
+Figure and caption quality:
+Citation and reference quality:
+Typography and layout:
+Visual QA:
+Notes and state:
+```
+
+Record the rubric in `conversion-notes.md` during the reviewer or final cleanup pass.
+
+## Reviewer Pass
+
+Use the reviewer pass to catch problems the authoring pass may miss. A reviewer should inspect the source PDF evidence, `document-ir.md`, `object-inventory.md`, rendered rebuilt pages, and final LaTeX source, then report only concrete issues:
+
+- Missing, duplicated, or reordered content.
+- Raw transcript leftovers or page-boundary artifacts.
+- Objects in `object-inventory.md` that are absent, weakly rebuilt, or undocumented.
+- Tables that should be semantic LaTeX but remain plain text.
+- Formulas that are legible in the source but absent, malformed, or plain text.
+- Captions separated from figures or tables.
+- Citation or bibliography inconsistencies.
+- Style profile mismatches, such as a report rebuilt as a flat article with no hierarchy.
+- Layout defects such as clipping, blank pages, unreadable tables, or severe overfull boxes.
+
+When subagents are permitted, delegate reviewer tasks by area rather than by file ownership, for example one reviewer for structure/content, one for tables/formulas, and one for rendered layout. The main agent integrates findings, edits files, recompiles, and updates notes.
 
 ## Issue Order
 
@@ -85,13 +125,14 @@ Use this priority order:
 3. Undefined commands, broken packages, bad fonts, and encoding problems.
 4. Broken document structure, missing sections, duplicated text, or wrong reading order.
 5. Missing, duplicated, or poorly merged page transcripts.
-6. Raw transcript blocks, page-boundary artifacts, repeated headers, footers, page numbers, and artificial page breaks.
-7. Full-page scanned-image placeholders that should be semantic content.
-8. Table-like plain text, display math left as plain text, missing captions, missing labels, or rough citations.
-9. Tables, formulas, figures, captions, citations, and references.
-10. Major readability issues: clipped content, huge whitespace, unreadable type, bad margins, oversized figures, undersized tables, and poor float placement.
-11. Warnings that matter: severe overfull boxes, unresolved references, and repeated rerun warnings.
-12. Cosmetic polish requested by the user.
+6. Final chapters that disagree with `document-ir.md`, `object-inventory.md`, or `style-profile.md`.
+7. Raw transcript blocks, page-boundary artifacts, repeated headers, footers, page numbers, and artificial page breaks.
+8. Full-page scanned-image placeholders that should be semantic content.
+9. Table-like plain text, display math left as plain text, missing captions, missing labels, or rough citations.
+10. Tables, formulas, figures, captions, citations, and references.
+11. Major readability issues: clipped content, huge whitespace, unreadable type, bad margins, oversized figures, undersized tables, and poor float placement.
+12. Warnings that matter: severe overfull boxes, unresolved references, and repeated rerun warnings.
+13. Cosmetic polish requested by the user.
 
 Do not spend time chasing harmless warnings when semantic defects remain.
 
@@ -132,6 +173,7 @@ Compare the rebuilt PDF with the source PDF for semantic coverage:
 - Table headers, units, important cells, and notes.
 - Formulas, equation numbering, and surrounding explanation.
 - Citations, bibliography entries, appendices, and footnotes.
+- Every major item in `object-inventory.md`.
 
 When content is unclear, improve the best available reconstruction and mark uncertainty. Do not silently invent exact text.
 
@@ -183,6 +225,7 @@ Update `conversion-notes.md` after each meaningful pass with:
 - Files changed.
 - Issues fixed.
 - Polish pass completed.
+- Quality rubric status or reviewer findings addressed.
 - Source pages or sections reviewed.
 - Remaining uncertainties.
 - Any web-sourced or inferred material.
@@ -194,7 +237,7 @@ Update `conversion-state.md` more frequently and more compactly:
 - After each failed compile diagnosis, set `Current phase` to the relevant repair phase and set `Next action` to the next fix.
 - After each successful compile, record the command, output PDF path, and next review action.
 - After each focused refinement pass, mark the completed checkpoint and name the next unresolved category.
-- During polishing, record the latest completed pass: transcript merge, structure, LaTeX idiom, object polish, typography, visual comparison, or final cleanup.
+- During polishing, record the latest completed pass: transcript merge, structure, LaTeX idiom, object polish, typography, reviewer, visual comparison, or final cleanup.
 - Before stopping or delivering, leave `Next action` as either the remaining concrete task or `None; quality review complete`.
 
 Do not leave the state file saying a phase is complete unless the corresponding file, compile output, or review evidence exists.

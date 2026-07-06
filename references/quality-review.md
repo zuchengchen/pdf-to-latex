@@ -8,11 +8,13 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar is
 2. Inspect compile logs for missing files, undefined commands, unresolved references, overfull boxes, and font problems.
 3. Extract text from the compiled PDF when possible and compare it with key source content.
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references.
-5. Update `conversion-notes.md` with verification results and remaining uncertainties.
-6. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
-7. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
-8. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
-9. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
+5. Compare final chapters against `document-ir.md`, `object-inventory.md`, and `style-profile.md`.
+6. Complete the quality rubric from `latex-refinement.md`.
+7. Update `conversion-notes.md` with verification results, rubric status, and remaining uncertainties.
+8. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
+9. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
+10. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
+11. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
 For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
 
@@ -58,6 +60,7 @@ Confirm representative source content appears in the rebuilt PDF:
 - Formula identifiers or surrounding explanatory text.
 - Figure captions.
 - Bibliography entries or citation labels.
+- Representative objects from `object-inventory.md`.
 
 Do not require exact line breaks, pagination, or spacing.
 
@@ -79,6 +82,10 @@ Check:
 - Formulas are legible.
 - Captions and labels are clear.
 - Section hierarchy is obvious.
+- Tables do not overflow the page and are not left as plain text when structure is legible.
+- Math-heavy pages have display math rendered as LaTeX math, not paragraph text.
+- Figures are not oversized, undersized, clipped, or detached from captions.
+- The visual style matches `style-profile.md` well enough for the document type.
 - No major content is duplicated or missing.
 
 Compare against the source PDF for semantic coverage, not pixel identity.
@@ -92,7 +99,9 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 - What was approximated.
 - What came from optional digital text-layer extraction, when used.
 - Page transcript or page manifest status.
+- Document IR, object inventory, and style profile status.
 - Polish passes completed and pages or sections reviewed.
+- Quality rubric results.
 - What came from public web sources, with links or citations when used.
 - Known unresolved issues.
 - Verification commands and results.
@@ -115,6 +124,10 @@ Before delivering a refined project, confirm:
 - User-stated issues have been addressed or explicitly documented as unresolved.
 - No new missing file, undefined command, or unresolved reference issue was introduced.
 - Minimum refinement passes completed or explicitly marked not applicable.
+- `document-ir.md`, `object-inventory.md`, and `style-profile.md` are present when page-level reconstruction was used, or their omission is documented for small/simple documents.
+- Final chapters align with the document IR rather than directly stitched page transcripts.
+- Every major object in `object-inventory.md` is rebuilt, reviewed, or documented as unresolved.
+- Style decisions in `style-profile.md` are reflected in document class, sectioning, packages, and layout.
 - Local OCR engines were not used.
 - Full-page scanned-image placeholders are absent unless the user explicitly requested them.
 - Raw transcript artifacts and obvious page-boundary artifacts are absent from final chapters.
@@ -131,6 +144,7 @@ Before final response:
 - `main.tex` exists and is the project entry point.
 - `conversion-state.md` exists and reflects the latest completed checkpoint.
 - `page-manifest.md` and page transcripts exist when page-level visual transcription was used.
+- `document-ir.md`, `object-inventory.md`, and `style-profile.md` exist when page-level reconstruction was used.
 - Chapter, figure, and table files are referenced correctly.
 - The compiled PDF exists.
 - The latest compile command succeeded.
@@ -140,4 +154,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete the task only when the rebuilt PDF compiles, key semantic content is present, minimum refinement passes have been completed or explicitly marked not applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete the task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX, minimum refinement passes have been completed or explicitly marked not applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

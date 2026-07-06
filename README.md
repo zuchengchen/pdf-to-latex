@@ -37,13 +37,15 @@ Codex should update `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex` in place w
 - Inspects digital, scanned, or mixed PDFs.
 - Splits or renders PDFs into page-level evidence for Codex visual transcription.
 - Uses optional `pdftotext` extraction only for digital PDF text layers.
+- Builds a document IR, object inventory, and style profile before final LaTeX generation.
 - Rebuilds the document as a maintainable XeLaTeX project.
 - For scanned PDFs, uses Codex visual recognition to rebuild semantic content instead of embedding full-page screenshots by default.
 - Automatically runs compile-review-polish loops after the first generated draft.
 - De-pages rough transcripts into normal document structure and idiomatic LaTeX.
+- Uses reviewer checks and a quality rubric to catch missing objects, weak tables, malformed formulas, and layout defects.
 - Maintains `conversion-state.md` so interrupted conversions can resume from the latest checkpoint.
 - Defaults to creating a `latex/` directory next to the source PDF.
-- Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, `transcripts/`, `page-manifest.md`, `conversion-state.md`, and `conversion-notes.md`.
+- Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, `document-ir.md`, `conversion-state.md`, and `conversion-notes.md`.
 - Records uncertain, inferred, approximated, or web-supplemented content.
 - Compiles, reviews, and polishes the output PDF for semantic completeness and readability.
 
@@ -85,7 +87,7 @@ After installing and restarting Codex:
 $pdf-to-latex 把 ./paper.pdf 重排成可编辑 LaTeX 项目，并编译出 PDF
 ```
 
-Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction.
+Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, build the document IR and object inventory, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction.
 It should also maintain `conversion-state.md` so a later Codex session can continue from the latest completed checkpoint.
 
 For an existing generated project:
