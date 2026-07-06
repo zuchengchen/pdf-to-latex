@@ -18,6 +18,8 @@ If Codex asks for details, choose:
 - Skill path inside repo: `.`
 - Skill name: `pdf-to-latex`
 
+If GitHub archive download is rate-limited, ask Codex to install with a normal `git clone` fallback into `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex`.
+
 After installation, restart Codex so the new skill is discovered.
 
 ## What It Does

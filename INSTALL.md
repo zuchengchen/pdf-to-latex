@@ -94,6 +94,14 @@ If a direct install prompt does not infer the repo root automatically, ask Codex
 安装 skill https://github.com/zuchengchen/pdf-to-latex，仓库根目录就是 skill 目录，path 使用 .，名称使用 pdf-to-latex
 ```
 
+If GitHub archive download is rate-limited, ask Codex to use a normal Git clone fallback instead of sparse installer git mode:
+
+```text
+安装 skill https://github.com/zuchengchen/pdf-to-latex；如果安装器下载被 GitHub 限流，请 git clone 到 ${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex
+```
+
+Do not use sparse installer git mode with `--path .` for this repo; it can fetch only top-level files and omit `agents/` and `references/`.
+
 If installation says the destination already exists, remove the existing directory or update it with `git pull`.
 
 If the skill installs but does not appear, restart Codex and confirm that `SKILL.md` exists under `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex/`.
