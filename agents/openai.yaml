@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF to LaTeX"
+  short_description: "Rebuild PDFs as semantic LaTeX projects"
+  default_prompt: "Use $pdf-to-latex to rebuild this PDF as an editable XeLaTeX project and compiled PDF."
