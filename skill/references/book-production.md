@@ -218,6 +218,7 @@ Do not call a book-scale reconstruction publication-grade until:
 - `style-profile.md` records the book profile and chosen class strategy.
 - `document-ir.md` includes front matter, main matter, back matter, numbering policy, and cross-reference policy when present in the source.
 - Generated or reconstructed table of contents, list of figures, and list of tables are consistent with final headings and captions when they are present or requested.
+- Source completeness audit covers visible front matter, main matter, back matter, generated lists, appendices, bibliography, glossary, index, and major book-level cross-references, or documents localized blockers.
 - Major figures, formulas, tables, theorem-like blocks, appendices, bibliography entries, and index/glossary items are rebuilt, reviewed, or explicitly documented as unresolved.
 - LaTeX logs have no unresolved references or citations that affect delivered content.
 - Book-specific refinement passes are complete or marked not applicable with a reason.

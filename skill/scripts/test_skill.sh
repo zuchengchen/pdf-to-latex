@@ -213,6 +213,33 @@ if grep -Fq 'Page 001: pending' "$scaffold_project/page-manifest.md"; then
   exit 1
 fi
 
+for required_text in \
+  'Delivery contract gate complete when applicable' \
+  'Source completeness audit complete when applicable' \
+  'Asset discovery gate complete' \
+  'Midpoint reviewer gate complete when applicable'; do
+  if ! grep -Fq "$required_text" "$scaffold_project/conversion-state.md"; then
+    printf 'Scaffold state missing publication gate checkpoint: %s\n' "$required_text" >&2
+    exit 1
+  fi
+done
+
+for required_text in \
+  '## Delivery Contract' \
+  '## Source Completeness Audit' \
+  '## Asset Discovery' \
+  'Publication-polish acceptance gates:'; do
+  if ! grep -Fq "$required_text" "$scaffold_project/conversion-notes.md"; then
+    printf 'Scaffold notes missing publication gate section: %s\n' "$required_text" >&2
+    exit 1
+  fi
+done
+
+if ! grep -Fq 'Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason' "$scaffold_project/page-manifest.md"; then
+  printf 'Expected page manifest template to document shared route statuses.\n' >&2
+  exit 1
+fi
+
 upgrade_project="$tmp_dir/upgrade-project"
 "$script_dir/init_latex_project.sh" "$source_pdf" "$upgrade_project" light >/dev/null
 for unexpected in \

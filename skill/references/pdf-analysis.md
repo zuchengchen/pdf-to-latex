@@ -8,12 +8,14 @@ Use this reference to understand the source PDF before rebuilding it in LaTeX. T
 - Pre-Scaffold First Pass
 - Durable Analysis Pass
 - Classify The PDF
+- Delivery Contract Inputs
 - Production Spec Inputs
 - Reading Order
 - Codex Visual Transcription Strategy
 - Long Document Batching
 - Profile Upgrade Checklist
 - Page Manifest
+- Source Completeness Audit
 - Object Inventory
 - Style Profile
 - Book Production Signals
@@ -29,12 +31,14 @@ Capture:
 
 - PDF path, page count, page sizes, orientation, and whether pages are digital, scanned, or mixed.
 - Selected task profile: `light`, `standard`, `book`, `math-heavy`, or `book-math`.
+- Selected delivery level and publication-polish acceptance contract when applicable.
 - Logical reading order, section hierarchy, and document metadata.
 - Text layer quality: selectable text, broken encodings, ligature issues, missing whitespace, or damaged extraction.
 - Figures, tables, formulas, captions, footnotes, headers, footers, references, appendices, and book-scale structures.
 - Pages or regions that need visual reasoning or approximation.
 - Page-level route map for digital, scanned, mixed, and damaged-text reconstruction.
 - Object inventory for figures, tables, formulas, citations, references, appendices, front matter, back matter, index/glossary, cross-references, and unresolved visual regions.
+- Source completeness status that reconciles pages, regions, objects, IR blocks, and unresolved omissions before broad drafting.
 - Math inventory and glyph-map needs for math-heavy PDFs, custom encoded symbols, or damaged formula extraction.
 - Style profile for the document type and LaTeX strategy.
 
@@ -52,7 +56,7 @@ pdfinfo source.pdf
 ```
 
 5. Sample the first page's text layer when `pdftotext` is available and the PDF appears selectable; for visually complex, scanned, long, or book-like PDFs, render representative pages to a temporary location when needed before scaffolding.
-6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis. For book-scale or math-heavy work, default to `publication polish` unless the user explicitly requests a lower delivery level.
+6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis. For book-scale or math-heavy work, default to `publication polish` unless the user explicitly requests a lower delivery level. When using `publication polish`, record the acceptance contract after scaffolding before broad work.
 7. For long, scanned, mixed, math-heavy, encoded, or book-scale PDFs, decide whether broad transcription needs explicit user confirmation, Goal mode approval, or a narrower first milestone. Do not commit to full-page transcription until this is settled.
 8. For a new target directory, use `scripts/init_latex_project.sh` or the bundled `assets/templates/` files to create the scaffold with the provisional task profile and delivery level before recording durable analysis.
 
@@ -85,7 +89,8 @@ scripts/render_pdf_pages.sh source.pdf latex 180 --pages 1,3,5-8
 4. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
 5. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, batch assignment, and reconstruction status. Treat this as the evidence and route gate for publication polish.
 6. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, production spec, and target LaTeX strategy discovered so far. For a light task, a concise outline and object list inside `conversion-notes.md` may replace standalone inventory or IR files; record why the omitted files would not improve review or resume. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
-7. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
+7. For `publication polish`, run the source completeness audit before broad reconstruction. Reconcile page routes, object inventory, style profile, and `document-ir.md`; mark each page, region, and major object as `pending`, `in-progress`, `rebuilt`, `reviewed`, `blocked`, or `omitted-with-reason`.
+8. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, source completeness status, and the next reconstruction action.
 
 ## Classify The PDF
 
@@ -103,6 +108,18 @@ For scanned, mixed, or damaged-text pages, use Codex visual reading from rendere
 For encoded math layers, treat the text extraction as evidence for nearby prose and recurring markers only. Use rendered page images and `references/math-polish.md` to identify symbols and rebuild formulas.
 
 Rendered page images are analysis artifacts. Do not copy full-page renders into the LaTeX project as page screenshots unless the user explicitly asks for visual replication. The normal scanned-PDF path is Codex visual transcription followed by semantic LaTeX reconstruction.
+
+## Delivery Contract Inputs
+
+For `publication polish`, record the acceptance contract in `conversion-notes.md` before broad work:
+
+- Semantic fidelity target: what must be preserved from the PDF, including text, math, tables, figures, captions, references, front/back matter, bibliography, glossary, and index when present.
+- Typography/layout target: readable publication-style LaTeX, near-source visual hierarchy, exact pagination, or another explicit target.
+- Approximation policy: what may be inferred, simplified, cropped, recreated, or documented instead of perfectly rebuilt.
+- Blocking policy: which unresolved content requires asking the user before delivery.
+- Verification plan: skeleton compile, batch compiles, source completeness audit, reviewer gates, visual comparison, artifact scans, and clean-room build.
+
+For `clean semantic`, keep a shorter delivery note in `conversion-notes.md` that names the expected compile/review floor and any intentionally skipped publication gates. For `rough draft`, record that the user requested a lower bar and list the checks that will remain incomplete.
 
 ## Production Spec Inputs
 
@@ -215,6 +232,28 @@ Uncertainties:
 ```
 
 When permitted by the current system and user instructions, independent page batches may be delegated to subagents. Give each subagent a bounded batch, the relevant page images, optional digital text-layer excerpts, and the required page transcript format. Subagents should return transcript fragments, object notes, math findings, or review findings only; the main agent must merge fragments, resolve cross-page continuity, update shared state files, and produce the final LaTeX project.
+
+## Source Completeness Audit
+
+Run this audit before large-scale reconstruction for `publication polish`, and whenever a standard project appears likely to miss source material. Its purpose is to prevent silent omissions before final LaTeX is drafted.
+
+Use these statuses consistently in `page-manifest.md`, `object-inventory.md`, `document-ir.md`, and notes:
+
+```text
+pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+```
+
+Audit:
+
+- Every source page or meaningful region has a route, evidence path when needed, batch assignment, and status.
+- Every route has a reconstruction target: text-layer correction, visual transcription, asset crop, semantic table, formula rebuild, bibliography/index handling, or documented omission.
+- Every major figure, table, formula group, citation block, front/back-matter item, appendix, glossary/index item, cross-reference, and unresolved visual region appears in `object-inventory.md` or a documented light-profile replacement.
+- `document-ir.md` contains or references the blocks needed to cover the routed pages and high-value objects.
+- All `blocked` items name the source page, visual evidence, reason, and concrete user-facing question or next action.
+- All `omitted-with-reason` items state why omission is acceptable for the selected delivery level.
+- For math-heavy or encoded PDFs, `math-inventory.md` and `glyph-map.md` contain the high-risk equations and recurring symbol groups discovered so far.
+
+Record the audit result in `conversion-notes.md` and update `conversion-state.md`. Do not start broad final drafting for `publication polish` while pages or major objects are unclassified.
 
 ## Object Inventory
 

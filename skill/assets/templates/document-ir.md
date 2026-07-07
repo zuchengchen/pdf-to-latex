@@ -23,6 +23,13 @@ Style profile:
 
 ## Cross-Page Merges
 
+## Source Completeness
+
+Page and region coverage:
+Object coverage:
+Blocked blocks:
+Omitted-with-reason blocks:
+
 ## Route-Specific Reconstruction
 
 Digital text-layer batches:

@@ -9,7 +9,10 @@ Use this reference when creating the target LaTeX project. The project should be
 - Document Model First
 - Production Spec
 - XeLaTeX Baseline
+- Source Completeness Before Drafting
 - Skeleton Compile Gate
+- Asset Discovery Gate
+- Midpoint Reviewer Gate
 - Structure
 - Text
 - Figures
@@ -72,7 +75,7 @@ Before creating files in an existing project, read `conversion-state.md` and `co
 
 ## Document Model First
 
-Before drafting final LaTeX for standard, book, math-heavy, book-math, or visually complex projects, build or seed `document-ir.md` from transcripts, page-bounded text-layer evidence when used, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
+Before drafting final LaTeX for standard, book, math-heavy, book-math, or visually complex projects, build or seed `document-ir.md` from transcripts, page-bounded text-layer evidence when used, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. For `publication polish`, reconcile the IR with the source completeness audit before large drafting. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
 
 Use this compact shape, or start from `assets/templates/document-ir.md`:
 
@@ -146,6 +149,18 @@ Use `style-profile.md` to choose the document class, packages, and layout. For C
 
 For books, theses, monographs, proceedings, or documents with front/back matter, use `references/book-production.md` before choosing between `article`, `report`, `book`, `ctexbook`, a thesis class, or another class. Do not flatten a book into an article merely because the baseline example uses `article`.
 
+## Source Completeness Before Drafting
+
+For `publication polish`, do not start broad final drafting until the source completeness audit from `references/pdf-analysis.md` is recorded. Confirm:
+
+- Page routes cover all relevant pages or regions.
+- `document-ir.md` has planned blocks for routed content and high-value objects.
+- `object-inventory.md` contains status entries for figures, tables, equations, citations, references, front/back matter, appendices, glossary/index items, cross-references, and unresolved visual regions when present.
+- Math and glyph tracking files exist and are seeded when formulas are numerous or damaged.
+- Omissions and blocked items are explicit, localized, and compatible with the recorded delivery contract.
+
+If the audit reveals gaps, update the manifest, inventory, style profile, IR, notes, and state before writing final chapters. A compiling skeleton is not enough to start publication drafting when source coverage is still unknown.
+
 ## Skeleton Compile Gate
 
 Before drafting most publication-polish content, create and compile a minimal production skeleton:
@@ -157,6 +172,31 @@ Before drafting most publication-polish content, create and compile a minimal pr
 5. Record the command, output PDF, warnings, package fallbacks, and next drafting batch in `conversion-state.md` and `conversion-notes.md`.
 
 The skeleton does not prove content quality; it proves the chosen production architecture can build before the project accumulates many source files.
+
+## Asset Discovery Gate
+
+Run asset discovery before final drafting or before the first large chapter batch:
+
+- Locate genuine figures, diagrams, photos, charts, tables, bibliography data, formula clusters, appendices, index/glossary pages, and other high-risk objects.
+- Decide the handling for each object: semantic LaTeX, cropped image, recreated diagram, bibliography entry, generated list, manual list, blocked item, or omitted-with-reason.
+- Name intended target paths such as `figures/`, `tables/`, `frontmatter/`, `chapters/`, `backmatter/`, or `references.bib`.
+- Check that planned image and bibliography paths are relative to `main.tex`.
+- Record object statuses in `object-inventory.md` and summarize gaps in `conversion-notes.md`.
+
+Discovery may happen before actual cropping or table reconstruction, but it must expose missing or ambiguous assets early enough to adjust the document model.
+
+## Midpoint Reviewer Gate
+
+For `publication polish`, run a plan-level review after the delivery contract, production spec, source completeness audit, skeleton compile, and asset discovery are ready, but before most final content is drafted.
+
+Review:
+
+- Whether the selected document class, matter model, fonts, packages, and bibliography/index/glossary strategy match the source and local toolchain.
+- Whether page routes, object inventory, and document IR together cover the source without obvious missing pages, duplicated regions, or orphaned objects.
+- Whether math-heavy, book-scale, table-heavy, or scanned regions have a credible batch and review plan.
+- Whether blocked items need user input before continuing.
+
+Record findings and fixes in `conversion-notes.md` and update `conversion-state.md`. This gate prevents structural mistakes from becoming expensive after many chapters have been written.
 
 ## Structure
 
@@ -219,11 +259,13 @@ Use `object-inventory.md` to verify that each major figure is either included, r
 
 ## Asset Pass
 
-Run an asset pass before final drafting or before the first large chapter batch:
+After asset discovery, run production work for assets before or during the relevant chapter batch:
 
 - Extract or crop genuine figures, diagrams, photos, charts, and other source visual content into `figures/` or `evidence/crops/` as appropriate.
-- Decide which simple diagrams or tables should be recreated semantically instead of included as images.
-- Confirm each planned figure, table, formula cluster, bibliography block, appendix, index, or glossary object has an `object-inventory.md` status.
+- Rebuild legible tables semantically rather than leaving them as plain text.
+- Recreate simple diagrams as TikZ, tables, or explanatory LaTeX only when that improves editability and can be done reliably.
+- Prepare bibliography data or manual reference blocks according to the production spec.
+- Confirm each planned figure, table, formula cluster, bibliography block, appendix, index, or glossary object has an updated `object-inventory.md` status.
 - Verify image file names, extensions, and paths relative to `main.tex` before drafting many `\includegraphics` references.
 - Record asset gaps and intentional approximations in `conversion-notes.md`.
 
@@ -297,12 +339,14 @@ Always maintain `conversion-notes.md` with:
 
 - Source PDF path and conversion date.
 - Selected task profile and any omitted heavy artifacts.
+- Delivery contract, fidelity target, approximation policy, blocker policy, and expected verification for publication polish.
 - Tools and commands used.
 - PDF type and analysis summary.
+- Source completeness audit status.
 - Production spec and skeleton compile result.
 - Page manifest and page transcript status.
 - Document IR, object inventory, and style profile status.
-- Route-specific reconstruction batches and batch compile results.
+- Asset discovery, route-specific reconstruction batches, and batch compile results.
 - Book production status, including front matter, main matter, back matter, generated lists, cross-reference audit, bibliography, index/glossary, and appendix handling when applicable.
 - Math inventory, glyph map, artifact counts, and math review status when applicable.
 - Inferred, approximated, or web-sourced content.
@@ -314,7 +358,7 @@ Keep notes factual and actionable. They are part of the deliverable.
 
 ## Conversion State
 
-Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when the production spec is recorded, when page evidence is rendered, when the route map is created, when page transcripts or digital correction batches are completed, when the object inventory, style profile, and document IR are seeded or completed, when the skeleton compile gate passes, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch compiles.
+Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when the delivery contract or production spec is recorded, when page evidence is rendered, when the route map is created, when source completeness is audited, when page transcripts or digital correction batches are completed, when the object inventory, style profile, and document IR are seeded or completed, when the skeleton compile gate passes, when asset discovery is complete, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch compiles.
 
 Start from `assets/templates/conversion-state.md` whenever possible; it is the canonical checkpoint order. If writing the state file by hand, keep this compact shape and preserve the same milestone sequence:
 
@@ -329,7 +373,7 @@ Task profile:
 Delivery level:
 
 ## Completed Checkpoints
-Project scaffold, triage, production spec, analysis, evidence, manifest, inventory seed, skeleton compile, route-specific reconstruction, asset pass, content drafting, batch compiles, refinement, reviewer gates, clean-room build, final quality review.
+Project scaffold, triage, delivery contract, production spec, analysis, evidence, manifest, source completeness audit, inventory seed, skeleton compile, asset discovery, midpoint review, route-specific reconstruction, asset production, content drafting, batch compiles, refinement, final reviewer gates, clean-room build, final quality review.
 
 ## Last Successful Command
 

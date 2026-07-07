@@ -10,10 +10,12 @@ Delivery level: {{DELIVERY_LEVEL}}
 ## Completed Checkpoints
 - [x] Project scaffold created
 - [ ] Initial triage complete
+- [ ] Delivery contract gate complete when applicable
 - [ ] Production spec gate complete when applicable
 - [ ] PDF analysis complete
 - [ ] Page evidence rendered or split
 - [ ] Page manifest complete
+- [ ] Source completeness audit complete when applicable
 - [ ] Style profile complete
 - [ ] Object inventory seeded
 - [ ] Book production profile complete when applicable
@@ -21,8 +23,10 @@ Delivery level: {{DELIVERY_LEVEL}}
 - [ ] Document IR complete
 - [ ] Semantic outline complete
 - [ ] Skeleton compile gate complete
+- [ ] Asset discovery gate complete
+- [ ] Midpoint reviewer gate complete when applicable
 - [ ] Route-specific reconstruction complete
-- [ ] Asset pass complete
+- [ ] Asset production pass complete
 - [ ] Batch compile gate complete
 - [ ] Page transcription complete when applicable
 - [ ] Main content drafted
@@ -36,7 +40,7 @@ Delivery level: {{DELIVERY_LEVEL}}
 - [ ] Structure pass complete
 - [ ] LaTeX idiom/object polish pass complete
 - [ ] Reviewer pass complete
-- [ ] Publication reviewer gates complete when applicable
+- [ ] Final publication reviewer gates complete when applicable
 - [ ] Typography/visual review pass complete
 - [ ] Final cleanup pass complete
 - [ ] Clean-room build gate complete

@@ -2,6 +2,8 @@
 
 Source PDF: {{SOURCE_PDF}}
 
+Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+
 ## Figures
 - id:
   source pages:
@@ -47,6 +49,13 @@ Source PDF: {{SOURCE_PDF}}
 - label or visible reference:
   source pages:
   target object:
+  status:
+
+## Source Completeness Audit
+- page or region:
+  required by delivery contract:
+  covered by IR:
+  owned objects:
   status:
 
 ## Unresolved Visual Regions

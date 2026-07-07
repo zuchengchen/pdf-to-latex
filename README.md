@@ -44,6 +44,7 @@ Restart Codex after updating so the new skill instructions are loaded.
 - Creates consistent project scaffolds from bundled templates when starting a new conversion, including book front/back matter directories and math tracking files for the relevant profiles.
 - Rebuilds the document as a maintainable XeLaTeX project rather than scanned page screenshots.
 - Uses rough draft, clean semantic, and publication polish delivery levels so simple tasks can finish without book-scale overhead.
+- Records a publication-polish delivery contract, source completeness audit, asset discovery gate, midpoint reviewer gate, final reviewer gates, and clean-room build requirements for publication-grade work.
 - Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.
 - Maintains `conversion-state.md` and `conversion-notes.md` so interrupted conversions can resume from the latest checkpoint.
 - Uses helper scripts in `skill/scripts/` for scaffolding, profile upgrades, page-bounded text-layer extraction, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.

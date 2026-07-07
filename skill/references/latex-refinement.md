@@ -31,6 +31,7 @@ Refine for:
 - Compile success and stable reruns.
 - Successful skeleton and batch compile gates before final broad polish.
 - Correct document structure and reading order.
+- Reconciliation with the delivery contract, source completeness audit, document IR, and object inventory.
 - Removal of page-level transcript artifacts, page headers, page footers, duplicated headings, and artificial page breaks.
 - Legible typography, margins, headings, lists, and spacing.
 - Clean tables, figures, captions, formulas, citations, and references.
@@ -47,7 +48,7 @@ Use the delivery levels defined in `SKILL.md` as the canonical contract. This se
 
 - **Rough draft**: compile when practical, preserve obvious structure, and document unresolved content. Do not run expensive polish passes unless the user asks.
 - **Clean semantic**: the default for ordinary conversions. Require a successful compile, usable editable LaTeX, no raw page-transcript leftovers, major objects preserved or documented, and the applicable minimum refinement passes.
-- **Publication polish**: use for explicit high-quality requests, book-scale projects, math-heavy or encoded PDFs, and goal objectives that require full quality gates. Require full book/math passes, reviewer checks, visual comparison, and clean final artifact scans when applicable.
+- **Publication polish**: use for explicit high-quality requests, book-scale projects, math-heavy or encoded PDFs, and goal objectives that require full quality gates. Require delivery-contract alignment, source completeness reconciliation, full book/math passes, midpoint and final reviewer checks, visual comparison, and clean final artifact scans when applicable.
 
 ## Inputs
 
@@ -62,6 +63,7 @@ Use whichever inputs are available:
 - Page-bounded text-layer evidence under `evidence/text-layer/` when digital extraction was used.
 - Page transcripts, page fragments, and optional digital text-layer extracts.
 - `document-ir.md`, `object-inventory.md`, `style-profile.md`, and optional `math-inventory.md` or `glyph-map.md`.
+- Delivery contract, source completeness audit, midpoint reviewer findings, and final reviewer findings when present in `conversion-notes.md`.
 - `references/book-production.md` when the project is a book, thesis, monograph, proceedings volume, or has front/back matter.
 - Extracted text from rebuilt PDFs.
 - User-stated target changes.
@@ -79,8 +81,8 @@ When resuming an interrupted project, read `conversion-state.md` first. If it is
 5. Fix one focused category of issues or run the next polish pass below.
 6. Recompile.
 7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`; use `scripts/render_rebuilt_pages.sh PROJECT_DIR main.pdf DPI` when available and suitable. For digital PDFs, compare against page-bounded files under `evidence/text-layer/` when present rather than relying on a single untracked text dump.
-8. Compare against the source PDF, document IR, object inventory, style profile, production spec, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
-9. Run reviewer gates when they can catch a distinct class of issues. For publication polish, treat structure/content, math/object, and build/layout review as separate gates.
+8. Compare against the source PDF, delivery contract, source completeness audit, document IR, object inventory, style profile, production spec, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
+9. Run reviewer gates when they can catch a distinct class of issues. For publication polish, use a midpoint reviewer gate for plan-level gaps before broad drafting and final reviewer gates for structure/content, math/object, and build/layout after polishing.
 10. Update `conversion-notes.md` and `conversion-state.md`.
 11. Repeat until the selected delivery level passes or a true blocker is documented. Broad fixable artifacts are not complete merely because they are listed in notes.
 
@@ -97,7 +99,7 @@ After the first successful compile, run focused polish passes. The first compili
 5. **Object Polish Pass**: refine tables, formulas, figures, captions, labels, references, cross-references, units, and notes. Fix table-like plain text and display math left as ordinary paragraphs when legible.
 6. **Book Production Pass**: when applicable, run the book structure, numbering, cross-reference, back matter, and long-document typography passes from `references/book-production.md`.
 7. **Typography Pass**: tune margins, heading spacing, paragraph flow, figure sizes, table widths, float placement, severe overfull boxes, clipped content, blank pages, and awkward whitespace.
-8. **Reviewer Gates**: review the generated LaTeX and rendered PDF in separate passes: structure/content, math/object, and build/layout. Use subagent reviewers when available and useful, but keep final edits under the main agent's control.
+8. **Final Reviewer Gates**: review the generated LaTeX and rendered PDF in separate passes: structure/content, math/object, and build/layout. Use subagent reviewers when available and useful, but keep final edits under the main agent's control.
 9. **Visual Comparison Pass**: render the rebuilt PDF, compare representative pages against the source PDF for semantic coverage and readability, and revisit pages marked uncertain in `page-manifest.md`, `object-inventory.md`, `math-inventory.md`, or `conversion-notes.md`.
 10. **Clean-Room Build Pass**: for publication polish, rebuild from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex` when available; fix missing assets, absolute paths, stale auxiliary assumptions, or hidden dependencies.
 11. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
@@ -118,7 +120,7 @@ Unless the user explicitly requests a rough draft, complete at least the clean s
 
 For light tasks, mark non-applicable passes as skipped with a reason. Do not deliver while raw transcript blocks, obvious page-boundary artifacts, severe layout defects, unresolved compile problems, or broad math extraction artifacts remain fixable with reasonable effort.
 
-For publication polish, also complete every applicable book, math, reviewer, visual comparison, and clean-room build gate. For a rough draft, record which clean semantic checks were intentionally skipped.
+For publication polish, also complete the delivery contract, source completeness audit, asset discovery, midpoint reviewer, book, math, final reviewer, visual comparison, and clean-room build gates. For a rough draft, record which clean semantic checks were intentionally skipped.
 
 ## Quality Rubric
 
@@ -126,10 +128,12 @@ Before delivery, rate each area as `pass`, `needs work`, or `documented unresolv
 
 ```text
 Structure:
+Delivery contract alignment:
 Book front/main/back matter:
 Book generated lists:
 Book cross-references:
 Transcript cleanup:
+Source completeness audit:
 Document IR alignment:
 Object inventory coverage:
 Style profile consistency:
@@ -152,9 +156,14 @@ Record the rubric in `conversion-notes.md` during the reviewer or final cleanup 
 
 ## Reviewer Gates
 
-Use reviewer gates to catch problems the authoring pass may miss. A reviewer should inspect the source PDF evidence, production spec, `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, rendered rebuilt pages, and final LaTeX source, then report only concrete issues.
+Use reviewer gates to catch problems the authoring pass may miss. A reviewer should inspect the source PDF evidence, delivery contract, production spec, source completeness audit, `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, rendered rebuilt pages when available, and final LaTeX source when it exists, then report only concrete issues.
 
-For publication polish, separate the review into:
+For publication polish, run two kinds of review:
+
+- **Midpoint reviewer gate**: after route maps, production spec, source completeness audit, skeleton compile, and asset discovery, but before most final drafting. Look for missing pages or regions, unowned objects, weak book/math strategy, impossible package/toolchain choices, unresolved blockers that need user input, and mismatches between the delivery contract and planned LaTeX architecture.
+- **Final reviewer gates**: after content drafting and polish. Separate the review into structure/content, math/object, and build/layout findings.
+
+For final reviewer gates, use:
 
 - **Structure/content**: reading order, missing or duplicated content, front/main/back matter, generated lists, appendices, bibliography, glossary, index, and document IR alignment.
 - **Math/object**: formulas, theorem-like material, tables, figures, captions, labels, cross-references, citations, glyph-map decisions, and object inventory coverage.
@@ -163,6 +172,7 @@ For publication polish, separate the review into:
 Report findings such as:
 
 - Missing, duplicated, or reordered content.
+- Page routes or source completeness statuses that remain `pending` or unowned for source material required by the delivery contract.
 - Book front matter, main matter, or back matter flattened, missing, duplicated, or placed in the wrong order.
 - Table of contents, list of figures, list of tables, appendix, bibliography, glossary, or index content that is absent, stale, or disconnected from final structure.
 - Raw transcript leftovers or page-boundary artifacts.
@@ -186,18 +196,19 @@ Use this priority order:
 1. Hard compile failures.
 2. Missing included files, images, or bibliography assets.
 3. Undefined commands, broken packages, bad fonts, and encoding problems.
-4. Broken document structure, missing sections, duplicated text, or wrong reading order.
-5. Missing, duplicated, or poorly merged page transcripts.
-6. Final chapters that disagree with `document-ir.md`, `object-inventory.md`, or `style-profile.md`.
-7. Book-scale structure flattened into an article, missing front/back matter, stale generated lists, broken appendix structure, or unresolved index/glossary handling.
-8. Raw transcript blocks, page-boundary artifacts, repeated headers, footers, page numbers, and artificial page breaks.
-9. Full-page scanned-image placeholders that should be semantic content.
-10. Math extraction artifacts in final source, including `\pdfglyph`, `extracteddisplay`, raw encoded symbols, placeholder math comments, and legible formulas left as transcript text.
-11. Table-like plain text, display math left as plain text, missing captions, missing labels, or rough citations.
-12. Tables, formulas, figures, captions, citations, and references.
-13. Major readability issues: clipped content, huge whitespace, unreadable type, bad margins, oversized figures, undersized tables, and poor float placement.
-14. Warnings that matter: severe overfull boxes, unresolved references, and repeated rerun warnings.
-15. Cosmetic polish requested by the user.
+4. Delivery contract or source completeness gaps that affect required content.
+5. Broken document structure, missing sections, duplicated text, or wrong reading order.
+6. Missing, duplicated, or poorly merged page transcripts.
+7. Final chapters that disagree with `document-ir.md`, `object-inventory.md`, or `style-profile.md`.
+8. Book-scale structure flattened into an article, missing front/back matter, stale generated lists, broken appendix structure, or unresolved index/glossary handling.
+9. Raw transcript blocks, page-boundary artifacts, repeated headers, footers, page numbers, and artificial page breaks.
+10. Full-page scanned-image placeholders that should be semantic content.
+11. Math extraction artifacts in final source, including `\pdfglyph`, `extracteddisplay`, raw encoded symbols, placeholder math comments, and legible formulas left as transcript text.
+12. Table-like plain text, display math left as plain text, missing captions, missing labels, or rough citations.
+13. Tables, formulas, figures, captions, citations, and references.
+14. Major readability issues: clipped content, huge whitespace, unreadable type, bad margins, oversized figures, undersized tables, and poor float placement.
+15. Warnings that matter: severe overfull boxes, unresolved references, and repeated rerun warnings.
+16. Cosmetic polish requested by the user.
 
 Do not spend time chasing harmless warnings when semantic defects remain.
 
@@ -240,6 +251,7 @@ Compare the rebuilt PDF with the source PDF for semantic coverage:
 - Formulas, equation numbering, and surrounding explanation.
 - Citations, bibliography entries, appendices, and footnotes.
 - Every major item in `object-inventory.md`.
+- Every page, region, or object required by the source completeness audit and delivery contract.
 - Every high-risk formula or glyph group in `math-inventory.md` and `glyph-map.md` when they exist.
 
 When content is unclear, improve the best available reconstruction and mark uncertainty. Do not silently invent exact text.

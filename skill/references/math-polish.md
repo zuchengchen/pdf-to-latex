@@ -45,7 +45,7 @@ Display equations:
   source page:
   surrounding text:
   current source file:
-  status: pending | rebuilt | compiled | visually reviewed | blocked
+  status: pending | in-progress | rebuilt | compiled | visually reviewed | blocked | omitted-with-reason
   notes:
 
 Inline math and symbol hotspots:

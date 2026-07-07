@@ -6,6 +6,7 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 
 - Required Checks
 - Minimum Done By Profile
+- Publication-Polish Acceptance Gates
 - Compile
 - Text Checks
 - Math Artifact Checks
@@ -22,17 +23,18 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 2. Inspect compile logs for missing files, undefined commands, unresolved references, overfull boxes, and font problems.
 3. Extract text from the compiled PDF when possible and compare it with key source content, including page-bounded files under `evidence/text-layer/` when digital text-layer evidence was used.
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references. Store durable render artifacts under `evidence/rebuilt-pages/` when they help review or resume.
-5. Compare final chapters against `document-ir.md`, `object-inventory.md`, and `style-profile.md` when present. For light-profile tasks, compare against the recorded concise outline or simplification notes.
-6. For book-scale projects, apply `references/book-production.md` quality gates for front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index/glossary when present, and cross-references.
-7. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
-8. Complete the quality rubric from `latex-refinement.md`.
-9. For publication polish, complete structure/content, math/object, and build/layout reviewer gates.
-10. For publication polish, run a clean-room build gate from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex` when available.
-11. Update `conversion-notes.md` with verification results, rubric status, clean-room build result, and remaining uncertainties.
-12. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
-13. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
-14. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
-15. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
+5. Compare final chapters against the delivery contract, source completeness audit, `document-ir.md`, `object-inventory.md`, and `style-profile.md` when present. For light-profile tasks, compare against the recorded concise outline or simplification notes.
+6. For publication polish, confirm the delivery contract, production spec, source completeness audit, asset discovery, skeleton compile, batch compile, midpoint reviewer, final reviewer, visual comparison, and clean-room build gates are passed or blocked with concrete user-facing reasons.
+7. For book-scale projects, apply `references/book-production.md` quality gates for front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index/glossary when present, and cross-references.
+8. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
+9. Complete the quality rubric from `latex-refinement.md`.
+10. For publication polish, complete structure/content, math/object, and build/layout final reviewer gates.
+11. For publication polish, run a clean-room build gate from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex` when available.
+12. Update `conversion-notes.md` with verification results, rubric status, clean-room build result, and remaining uncertainties.
+13. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
+14. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
+15. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
+16. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
 For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable. For an explicit rough draft, record skipped clean-semantic checks and do not mark quality review complete.
 
@@ -49,6 +51,38 @@ book-math    book and math-heavy checks together
 ```
 
 For clean semantic delivery, the matching row is the minimum bar. For publication polish, also complete all applicable reviewer, visual comparison, book, math, clean-room build, and final cleanup gates below. For rough draft delivery, explicitly list which row items remain unfinished.
+
+## Publication-Polish Acceptance Gates
+
+Treat these gates as required for `publication polish` unless a true blocker is documented and surfaced to the user:
+
+```text
+Delivery contract: pass | blocked
+Production spec: pass | blocked
+Source completeness audit: pass | blocked
+Skeleton compile: pass | blocked
+Asset discovery: pass | blocked
+Batch compile history: pass | blocked
+Midpoint reviewer: pass | blocked
+Final structure/content reviewer: pass | blocked
+Final math/object reviewer: pass | blocked | not applicable
+Final build/layout reviewer: pass | blocked
+Visual comparison: pass | blocked
+Artifact scan: pass | blocked | not applicable
+Clean-room build: pass | blocked
+Final notes/state: pass | blocked
+```
+
+Use `not applicable` only when the source lacks that category, for example no math-heavy content or no book-specific apparatus. Do not use `not applicable` for unreadable or skipped content that the source visibly contains; mark it `blocked` or `omitted-with-reason` according to the delivery contract.
+
+Quantified floor:
+
+- Latest XeLaTeX build succeeds and produces the expected PDF.
+- `scripts/check_latex_artifacts.sh .` returns clean when math artifacts or placeholders were possible.
+- Final source has no broad `pending`, `in-progress`, or unowned page/object statuses for content required by the delivery contract.
+- LaTeX logs have no unresolved references, citations, missing files, undefined commands, or rerun warnings that affect delivered content.
+- Representative rendered pages are nonblank and readable; high-risk pages from the source completeness audit are included in visual review.
+- Publication-polish clean-room build succeeds, or the final answer names a true blocker and does not claim publication polish complete.
 
 ## Compile
 
@@ -190,13 +224,14 @@ Record the command, result, clean build path if useful, and any warnings in `con
 - What came from optional digital text-layer extraction, when used.
 - Batch plan and completed page or chapter ranges for long documents.
 - Page transcript or page manifest status.
+- Delivery contract, source completeness audit, asset discovery, and midpoint reviewer status for publication polish.
 - Document IR, object inventory, and style profile status.
 - Book production status, generated-list checks, cross-reference audit, appendix/bibliography handling, and index/glossary status when applicable.
 - Task profile and any intentionally omitted heavy artifacts.
 - Any profile upgrade such as `standard` to `book`, `math-heavy`, or `book-math`.
 - Math inventory, glyph map, artifact counts, and formula-heavy pages reviewed when applicable.
 - Polish passes completed and pages or sections reviewed.
-- Production spec, skeleton compile, batch compile, reviewer gate, and clean-room build status.
+- Production spec, skeleton compile, batch compile, midpoint reviewer, final reviewer, and clean-room build status.
 - Quality rubric results.
 - What came from public web sources, with links or citations when used.
 - Known unresolved issues.
@@ -217,10 +252,11 @@ If the notes contain unresolved critical gaps, report them clearly in the final 
 Before delivering a refined project, confirm the checks required by the selected delivery level:
 
 - The latest compile succeeds.
-- For publication polish, the skeleton compile, batch compile, reviewer, and clean-room build gates have passed or true blockers are documented.
+- For publication polish, the delivery contract, source completeness audit, asset discovery, skeleton compile, batch compile, midpoint reviewer, final reviewer, and clean-room build gates have passed or true blockers are documented.
 - User-stated issues have been addressed or explicitly documented as unresolved.
 - No new missing file, undefined command, or unresolved reference issue was introduced.
 - Minimum refinement passes completed or explicitly marked not applicable.
+- Final source is reconciled with the source completeness audit; required page and object statuses are not left broadly `pending`, `in-progress`, or unowned.
 - `document-ir.md`, `object-inventory.md`, and `style-profile.md` are present when page-level reconstruction was used, or their omission is documented for small/simple documents.
 - Final chapters align with the document IR rather than directly stitched page transcripts.
 - Every major object in `object-inventory.md` is rebuilt, reviewed, or documented as unresolved.
@@ -236,6 +272,7 @@ Before delivering a refined project, confirm the checks required by the selected
 - Major tables, formulas, figures, captions, citations, and references use semantic LaTeX where legible.
 - Severe overfull boxes, clipping, blank pages, huge whitespace, and bad float placement have been reviewed and fixed when reasonable.
 - Representative rendered pages are readable and nonblank.
+- High-risk pages or objects from the source completeness audit have been visually reviewed or documented as blocked.
 - The project rebuilds from a clean copy or clean working tree state for publication polish.
 - Key semantic content from the source PDF remains present after refinement.
 - `conversion-notes.md` lists the refinement passes, commands, fixes, and remaining issues.
@@ -256,10 +293,11 @@ Before final response:
 - The compiled PDF exists.
 - The latest compile command succeeded.
 - Publication-polish clean-room build succeeded or a true blocker is documented.
+- Publication-polish acceptance gates are recorded in `conversion-notes.md`.
 - Text extraction or manual inspection confirms key content.
 - Temporary files outside the target project are cleaned up where practical.
 - The final answer names the LaTeX project path, compiled PDF path, verification performed, and remaining uncertainties.
 
 ## Completion Standard
 
-Complete a clean semantic or publication-polish task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete publication polish only when the production spec, skeleton compile, reviewer gates, visual comparison, and clean-room build gate have passed or true blockers are documented. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete a clean semantic or publication-polish task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete publication polish only when the delivery contract, production spec, source completeness audit, skeleton compile, asset discovery, batch compile record, midpoint reviewer, final reviewer gates, visual comparison, artifact scans, and clean-room build gate have passed or true blockers are documented. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
