@@ -148,16 +148,19 @@ copy_template() {
   printf 'Created %s\n' "$destination"
 }
 
-mkdir -p \
-  "$target_dir/chapters" \
-  "$target_dir/figures" \
-  "$target_dir/tables" \
-  "$target_dir/transcripts" \
-  "$target_dir/evidence/source-pages" \
-  "$target_dir/evidence/rebuilt-pages" \
-  "$target_dir/evidence/crops" \
-  "$target_dir/evidence/text-layer" \
-  "$target_dir/logs"
+mkdir -p "$target_dir/logs"
+
+if [[ "$new_profile" != light ]]; then
+  mkdir -p \
+    "$target_dir/chapters" \
+    "$target_dir/figures" \
+    "$target_dir/tables" \
+    "$target_dir/transcripts" \
+    "$target_dir/evidence/source-pages" \
+    "$target_dir/evidence/rebuilt-pages" \
+    "$target_dir/evidence/crops" \
+    "$target_dir/evidence/text-layer"
+fi
 
 copy_template conversion-state.md "$target_dir/conversion-state.md"
 copy_template conversion-notes.md "$target_dir/conversion-notes.md"

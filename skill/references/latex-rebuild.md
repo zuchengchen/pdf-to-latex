@@ -57,19 +57,9 @@ latex/
 └── conversion-notes.md
 ```
 
-This layout is profile-dependent. Use the lightest set that can support review and resume:
+This layout is profile-dependent. Use the task profile matrix in `SKILL.md` as the canonical required-file contract, and use this reference only for rebuild-specific layout choices. Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Keep page-bounded `pdftotext` evidence under `evidence/text-layer/` when digital extraction is used; prefer `scripts/extract_text_pages.sh` for repeatable page-bounded extraction. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
 
-```text
-light        main.tex, conversion-state.md, conversion-notes.md
-standard     light files plus page-manifest.md, object-inventory.md, style-profile.md, document-ir.md
-book         standard files plus frontmatter/ and backmatter/ when useful
-math-heavy   standard files plus math-inventory.md and glyph-map.md
-book-math    book files plus math-inventory.md and glyph-map.md
-```
-
-Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Keep page-bounded `pdftotext` evidence under `evidence/text-layer/` when digital extraction is used; prefer `scripts/extract_text_pages.sh` for repeatable page-bounded extraction. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
-
-For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` or the files in `assets/templates/` to create the scaffold. Use exact task profile values: `light`, `standard`, `book`, `math-heavy`, or `book-math`, and delivery levels such as `"clean semantic"`, `"rough draft"`, or `"publication polish"`. The helper creates directories and initial state files without overwriting existing files; it aborts on non-PDF-looking sources and unrelated non-empty target directories. For book profiles it creates `frontmatter/` and `backmatter/`; for math profiles it creates math tracking files. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
+For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` or the files in `assets/templates/` to create the scaffold. Use the exact task profile and delivery level values from `SKILL.md`. The helper creates initial state files without overwriting existing files; it aborts on non-PDF-looking sources and unrelated non-empty target directories. For `light`, it creates only core files plus `logs/`; for heavier profiles it creates working directories such as `chapters/`, `figures/`, `tables/`, `transcripts/`, and `evidence/`; for book profiles it creates `frontmatter/` and `backmatter/`; for math profiles it creates math tracking files. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
 
 If later analysis requires a heavier profile, prefer `scripts/upgrade_latex_project.sh TARGET_DIR NEW_PROFILE`. It creates missing profile files from templates without replacing existing work; after running it, update profile history, the current phase, and the next action in `conversion-state.md` and `conversion-notes.md`.
 
@@ -284,7 +274,7 @@ Keep notes factual and actionable. They are part of the deliverable.
 
 Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when page evidence is rendered, when page transcripts are completed, when the object inventory, style profile, and document IR are completed, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch is completed.
 
-Use this shape, or start from `assets/templates/conversion-state.md`:
+Start from `assets/templates/conversion-state.md` whenever possible; it is the canonical checkpoint order. If writing the state file by hand, keep this compact shape and preserve the same milestone sequence:
 
 ```text
 # Conversion State
@@ -297,32 +287,7 @@ Task profile:
 Delivery level:
 
 ## Completed Checkpoints
-- [ ] Initial triage complete
-- [ ] PDF analysis complete
-- [ ] Page evidence rendered or split
-- [ ] Page manifest complete
-- [ ] Page transcription complete
-- [ ] Object inventory complete
-- [ ] Math inventory/glyph map complete when applicable
-- [ ] Style profile complete
-- [ ] Book production profile complete when applicable
-- [ ] Document IR complete
-- [ ] Semantic outline complete
-- [x] Project scaffold created
-- [ ] Main content drafted
-- [ ] Figures/assets handled
-- [ ] Tables/formulas handled
-- [ ] Book front/back matter and cross-reference audit complete when applicable
-- [ ] Math artifact cleanup complete when applicable
-- [ ] First compile attempted
-- [ ] First successful compile
-- [ ] Transcript merge pass complete
-- [ ] Structure pass complete
-- [ ] LaTeX idiom/object polish pass complete
-- [ ] Reviewer pass complete
-- [ ] Typography/visual review pass complete
-- [ ] Final cleanup pass complete
-- [ ] Quality review complete
+Project scaffold, triage, analysis, evidence, manifest, transcription, inventories/profile/IR, content drafting, compile, refinement, final quality review.
 
 ## Last Successful Command
 

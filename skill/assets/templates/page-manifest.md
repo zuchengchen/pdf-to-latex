@@ -9,7 +9,8 @@ Batch plan:
 Profile upgrades:
 
 ## Page Routes
-- Page 001: pending | evidence: evidence/source-pages/page-001.png | text layer: unknown | batch: 001 | status: pending
+
+No page routes recorded yet. Replace this line with one route per real source page or region after triage or rendering.
 
 ## Transcript Template
 

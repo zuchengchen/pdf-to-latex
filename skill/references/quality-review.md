@@ -35,7 +35,7 @@ For normal PDF-to-LaTeX work, perform the minimum refinement passes after the fi
 
 ## Minimum Done By Profile
 
-Use the selected profile to avoid both under-reviewing complex work and overloading simple work:
+Use the selected profile to avoid both under-reviewing complex work and overloading simple work. Use `SKILL.md` for the canonical profile file requirements; this table only defines the review floor:
 
 ```text
 light        compiles when practical, main content is editable, notes record skipped heavy checks and unresolved gaps

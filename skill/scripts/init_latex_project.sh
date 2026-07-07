@@ -111,16 +111,19 @@ if [[ -d "$target_dir" ]] && directory_has_entries "$target_dir" && ! directory_
   exit 1
 fi
 
-mkdir -p \
-  "$target_dir/chapters" \
-  "$target_dir/figures" \
-  "$target_dir/tables" \
-  "$target_dir/transcripts" \
-  "$target_dir/evidence/source-pages" \
-  "$target_dir/evidence/rebuilt-pages" \
-  "$target_dir/evidence/crops" \
-  "$target_dir/evidence/text-layer" \
-  "$target_dir/logs"
+mkdir -p "$target_dir/logs"
+
+if [[ "$task_profile" != light ]]; then
+  mkdir -p \
+    "$target_dir/chapters" \
+    "$target_dir/figures" \
+    "$target_dir/tables" \
+    "$target_dir/transcripts" \
+    "$target_dir/evidence/source-pages" \
+    "$target_dir/evidence/rebuilt-pages" \
+    "$target_dir/evidence/crops" \
+    "$target_dir/evidence/text-layer"
+fi
 
 if [[ "$task_profile" == book || "$task_profile" == book-math ]]; then
   mkdir -p "$target_dir/frontmatter" "$target_dir/backmatter"

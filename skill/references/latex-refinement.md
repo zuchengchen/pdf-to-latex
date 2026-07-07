@@ -41,7 +41,7 @@ Refine for:
 
 ## Delivery Levels
 
-Use the delivery level recorded in `conversion-state.md` and `conversion-notes.md` as the stop target:
+Use the delivery levels defined in `SKILL.md` as the canonical contract. This section only describes refinement stop targets for the level recorded in `conversion-state.md` and `conversion-notes.md`:
 
 - **Rough draft**: compile when practical, preserve obvious structure, and document unresolved content. Do not run expensive polish passes unless the user asks.
 - **Clean semantic**: the default for ordinary conversions. Require a successful compile, usable editable LaTeX, no raw page-transcript leftovers, major objects preserved or documented, and the applicable minimum refinement passes.

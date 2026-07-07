@@ -8,18 +8,18 @@ Task profile: {{TASK_PROFILE}}
 Delivery level: {{DELIVERY_LEVEL}}
 
 ## Completed Checkpoints
-- [ ] PDF analysis complete
+- [x] Project scaffold created
 - [ ] Initial triage complete
+- [ ] PDF analysis complete
 - [ ] Page evidence rendered or split
 - [ ] Page manifest complete
 - [ ] Page transcription complete
 - [ ] Object inventory complete
-- [ ] Math inventory/glyph map complete when applicable
 - [ ] Style profile complete
 - [ ] Book production profile complete when applicable
+- [ ] Math inventory/glyph map complete when applicable
 - [ ] Document IR complete
 - [ ] Semantic outline complete
-- [x] Project scaffold created
 - [ ] Main content drafted
 - [ ] Figures/assets handled
 - [ ] Tables/formulas handled

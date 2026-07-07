@@ -208,8 +208,34 @@ for expected in \
   fi
 done
 
+if grep -Fq 'Page 001: pending' "$scaffold_project/page-manifest.md"; then
+  printf 'Expected page manifest template to avoid a fake Page 001 route.\n' >&2
+  exit 1
+fi
+
 upgrade_project="$tmp_dir/upgrade-project"
 "$script_dir/init_latex_project.sh" "$source_pdf" "$upgrade_project" light >/dev/null
+for unexpected in \
+  page-manifest.md \
+  object-inventory.md \
+  style-profile.md \
+  document-ir.md \
+  math-inventory.md \
+  glyph-map.md \
+  chapters \
+  figures \
+  tables \
+  transcripts \
+  evidence; do
+  if [[ -e "$upgrade_project/$unexpected" ]]; then
+    printf 'Light scaffold should not create heavy path by default: %s\n' "$unexpected" >&2
+    exit 1
+  fi
+done
+if [[ ! -d "$upgrade_project/logs" ]]; then
+  printf 'Light scaffold should still create logs directory.\n' >&2
+  exit 1
+fi
 printf 'user-authored IR\n' >"$upgrade_project/document-ir.md"
 "$script_dir/upgrade_latex_project.sh" "$upgrade_project" book-math >/dev/null
 
