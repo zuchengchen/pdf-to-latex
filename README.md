@@ -27,10 +27,10 @@ After installation, restart Codex so the new skill is discovered.
 On a machine where this skill is already installed, ask Codex:
 
 ```text
-更新 skill https://github.com/zuchengchen/pdf-to-latex.git，path 使用 skill
+更新 skill https://github.com/zuchengchen/pdf-to-latex.git，path 使用 skill，名称使用 pdf-to-latex，直接覆盖已安装目录，不要创建备份
 ```
 
-Restart Codex after updating so the new skill instructions are loaded.
+This skill's update policy is direct replacement of the installed `pdf-to-latex` skill directory. Do not create `.backup.*` directories during update. Restart Codex after updating so the new skill instructions are loaded.
 
 ## What It Does
 

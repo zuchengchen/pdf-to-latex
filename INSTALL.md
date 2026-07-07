@@ -72,20 +72,19 @@ $pdf-to-latex 把这个 PDF 重排成 LaTeX 项目
 Recommended Codex prompt:
 
 ```text
-更新 skill https://github.com/zuchengchen/pdf-to-latex.git，path 使用 skill
+更新 skill https://github.com/zuchengchen/pdf-to-latex.git，path 使用 skill，名称使用 pdf-to-latex，直接覆盖已安装目录，不要创建备份
 ```
+
+Update policy: replace the installed `pdf-to-latex` skill directory directly. Do not create `.backup.*` directories during update.
 
 Manual update:
 
 ```bash
 skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex"
-backup="${skill_dir}.backup.$(date +%Y%m%d%H%M%S)"
 tmp_dir="$(mktemp -d)"
 
 git clone https://github.com/zuchengchen/pdf-to-latex.git "$tmp_dir/pdf-to-latex"
-if [[ -d "$skill_dir" ]]; then
-  mv "$skill_dir" "$backup"
-fi
+rm -rf "$skill_dir"
 cp -R "$tmp_dir/pdf-to-latex/skill" "$skill_dir"
 ```
 
