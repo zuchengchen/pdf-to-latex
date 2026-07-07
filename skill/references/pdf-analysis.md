@@ -41,13 +41,14 @@ Record findings in the target `latex/conversion-notes.md` as work proceeds. Also
 1. Locate the PDF and decide the output directory.
 2. If the output directory already exists, inspect `conversion-state.md`, `conversion-notes.md`, `main.tex`, existing rendered pages, extracted text, logs, and compiled PDFs before re-running analysis.
 3. Check available local tools for PDF inspection and rendering, for example `pdfinfo`, `pdfseparate`, `pdftotext`, `pdftoppm`, `mutool draw`, or `pdfimages`. Do not use local OCR tools.
-4. Inspect metadata and page count when tools are available:
+4. For a new target directory, use `scripts/init_latex_project.sh` or the bundled `assets/templates/` files to create the standard scaffold before recording analysis. Choose `light`, `standard`, `book`, `math-heavy`, or `book-math` according to the task profile.
+5. Inspect metadata and page count when tools are available:
 
 ```bash
 pdfinfo source.pdf
 ```
 
-5. For digital PDFs, optionally extract text-layer evidence:
+6. For digital PDFs, optionally extract text-layer evidence:
 
 ```bash
 pdftotext -layout source.pdf -
@@ -55,7 +56,7 @@ pdftotext -layout source.pdf -
 
 Use this only as draft evidence for selectable text, not as final LaTeX and not as OCR.
 
-6. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short and scanned PDFs.
+7. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short and scanned PDFs. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style.
 
 ```bash
 mkdir -p latex/evidence/source-pages
@@ -63,10 +64,10 @@ pdfseparate source.pdf latex/evidence/source-pages/page-%03d.pdf
 pdftoppm -png -r 160 source.pdf latex/evidence/source-pages/page
 ```
 
-7. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
-8. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, and transcription status.
-9. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, record why any inventory or IR file is omitted. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
-10. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
+8. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
+9. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, and transcription status.
+10. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, record why any inventory or IR file is omitted. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
+11. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
 
@@ -116,7 +117,7 @@ Do not create a compileable draft by embedding each scanned page as `\includegra
 
 ## Page Manifest
 
-Create `page-manifest.md` before large-scale transcription. Keep it compact and update it as pages are assigned, transcribed, merged, or revisited.
+Create `page-manifest.md` before large-scale transcription. Keep it compact and update it as pages are assigned, transcribed, merged, or revisited. For new projects, start from `assets/templates/page-manifest.md` or `scripts/init_latex_project.sh`.
 
 Use this shape:
 

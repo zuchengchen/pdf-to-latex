@@ -35,11 +35,23 @@ if command -v rg >/dev/null 2>&1; then
   if rg -n "$pattern" "${paths[@]}"; then
     printf 'Artifact scan found blocking matches.\n' >&2
     exit 1
+  else
+    status=$?
+    if [[ $status -ne 1 ]]; then
+      printf 'Artifact scan failed while searching final source paths.\n' >&2
+      exit "$status"
+    fi
   fi
 else
   if grep -RInE "$pattern" "${paths[@]}"; then
     printf 'Artifact scan found blocking matches.\n' >&2
     exit 1
+  else
+    status=$?
+    if [[ $status -ne 1 ]]; then
+      printf 'Artifact scan failed while searching final source paths.\n' >&2
+      exit "$status"
+    fi
   fi
 fi
 

@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf 'Usage: %s SOURCE_PDF [TARGET_DIR] [TASK_PROFILE]\n' "$0" >&2
+  printf 'Creates a resumable LaTeX conversion scaffold from bundled templates.\n' >&2
+  printf 'TASK_PROFILE may be light, standard, book, math-heavy, or book-math.\n' >&2
+}
+
+if [[ $# -lt 1 || $# -gt 3 ]]; then
+  usage
+  exit 2
+fi
+
+source_pdf=$1
+target_dir=${2:-latex}
+task_profile=${3:-standard}
+
+case "$task_profile" in
+  light|standard|book|math-heavy|book-math) ;;
+  *)
+    printf 'Unsupported task profile: %s\n' "$task_profile" >&2
+    usage
+    exit 2
+    ;;
+esac
+
+if [[ ! -f "$source_pdf" ]]; then
+  printf 'Source PDF not found: %s\n' "$source_pdf" >&2
+  exit 1
+fi
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+skill_dir=$(cd -- "$script_dir/.." && pwd)
+template_dir="$skill_dir/assets/templates"
+
+if [[ ! -d "$template_dir" ]]; then
+  printf 'Template directory not found: %s\n' "$template_dir" >&2
+  exit 1
+fi
+
+mkdir -p \
+  "$target_dir/chapters" \
+  "$target_dir/figures" \
+  "$target_dir/tables" \
+  "$target_dir/transcripts" \
+  "$target_dir/evidence/source-pages" \
+  "$target_dir/evidence/rebuilt-pages" \
+  "$target_dir/evidence/crops" \
+  "$target_dir/logs"
+
+escape_sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'
+}
+
+source_pdf_value=$(escape_sed_replacement "$source_pdf")
+target_dir_value=$(escape_sed_replacement "$target_dir")
+task_profile_value=$(escape_sed_replacement "$task_profile")
+date_value=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+copy_template() {
+  local template_name=$1
+  local destination=$2
+
+  if [[ -e "$destination" ]]; then
+    printf 'Keeping existing file: %s\n' "$destination"
+    return
+  fi
+
+  sed \
+    -e "s|{{SOURCE_PDF}}|$source_pdf_value|g" \
+    -e "s|{{TARGET_DIR}}|$target_dir_value|g" \
+    -e "s|{{TASK_PROFILE}}|$task_profile_value|g" \
+    -e "s|{{DATE_UTC}}|$date_value|g" \
+    "$template_dir/$template_name" >"$destination"
+  printf 'Created %s\n' "$destination"
+}
+
+copy_template main.tex "$target_dir/main.tex"
+copy_template conversion-state.md "$target_dir/conversion-state.md"
+copy_template conversion-notes.md "$target_dir/conversion-notes.md"
+
+if [[ "$task_profile" != light ]]; then
+  copy_template page-manifest.md "$target_dir/page-manifest.md"
+  copy_template object-inventory.md "$target_dir/object-inventory.md"
+  copy_template style-profile.md "$target_dir/style-profile.md"
+  copy_template document-ir.md "$target_dir/document-ir.md"
+fi
+
+if [[ "$task_profile" == math-heavy || "$task_profile" == book-math ]]; then
+  copy_template math-inventory.md "$target_dir/math-inventory.md"
+  copy_template glyph-map.md "$target_dir/glyph-map.md"
+fi
+
+printf 'Initialized LaTeX conversion scaffold in %s\n' "$target_dir"

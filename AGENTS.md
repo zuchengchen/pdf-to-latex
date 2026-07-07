@@ -10,6 +10,8 @@ Inside `skill/`, `SKILL.md` is the trigger and workflow entry point. Detailed pr
 
 - `python /home/czc/.codex/skills/.system/skill-creator/scripts/quick_validate.py skill` validates skill metadata and required files.
 - `bash -n skill/scripts/*.sh` checks helper scripts for shell syntax errors.
+- `skill/scripts/test_skill.sh` runs metadata validation when available, shell syntax checks, artifact-scan smoke tests, and scaffold-generation smoke tests.
+- `skill/scripts/init_latex_project.sh source.pdf latex standard` creates a resumable conversion scaffold from bundled templates.
 - `skill/scripts/render_pdf_pages.sh source.pdf latex 180` renders durable page evidence for a sample PDF.
 - `skill/scripts/latex_healthcheck.sh latex main.tex` compiles a generated XeLaTeX project and summarizes log findings.
 - `skill/scripts/check_latex_artifacts.sh latex` scans final LaTeX source for extraction artifacts.
@@ -24,7 +26,7 @@ Shell scripts should use Bash with `set -euo pipefail`, quote variables, validat
 
 ## Testing Guidelines
 
-Run `quick_validate.py skill` after any change to `skill/SKILL.md`, `skill/agents/`, or the skill directory layout. Run `bash -n skill/scripts/*.sh` after script edits. For workflow changes, test helper scripts against a small sample PDF or generated LaTeX project when practical, and record any manual verification in the PR.
+Run `quick_validate.py skill` after any change to `skill/SKILL.md`, `skill/agents/`, or the skill directory layout. Run `bash -n skill/scripts/*.sh` after script edits, or run `skill/scripts/test_skill.sh` for the combined local smoke suite. For workflow changes, test helper scripts against a small sample PDF or generated LaTeX project when practical, and record any manual verification in the PR.
 
 ## Commit & Pull Request Guidelines
 

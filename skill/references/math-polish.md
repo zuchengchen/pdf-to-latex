@@ -90,6 +90,12 @@ Before and after each math polish batch, scan final source files:
 rg -n '\\pdfglyph|extracteddisplay|TODO math|unresolved glyph|raw glyph|MATH_PLACEHOLDER' main.tex chapters/ tables/ 2>/dev/null
 ```
 
+When the bundled helper is available, prefer:
+
+```bash
+path/to/pdf-to-latex/scripts/check_latex_artifacts.sh .
+```
+
 Record counts in `math-inventory.md` and `conversion-notes.md`. If the count is nonzero, keep the project in math polish or blocked-review status; do not mark quality review complete by default.
 
 ## Cleanup Workflow

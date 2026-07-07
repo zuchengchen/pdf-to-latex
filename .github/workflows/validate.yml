@@ -1,0 +1,22 @@
+name: Validate skill
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Validate skill metadata
+        run: bash skill/scripts/test_skill.sh --metadata-only
+      - name: Check shell syntax
+        run: bash -n skill/scripts/*.sh
+      - name: Run helper smoke tests
+        run: bash skill/scripts/test_skill.sh --skip-metadata

@@ -24,7 +24,7 @@ Before creating a goal:
 4. Continue a matching active goal instead of creating a duplicate.
 5. Ask the user if an active goal conflicts with the requested PDF conversion.
 
-If runtime policy requires the user to explicitly authorize goal creation, ask one short yes/no confirmation and proceed after confirmation. Otherwise create the goal directly.
+Only call goal tools when they are available in the current runtime and policy allows them. If runtime policy requires the user to explicitly authorize goal creation, ask one short yes/no confirmation and proceed after confirmation. If goal tools are unavailable or policy forbids goal creation, continue with the same resumable conversion workflow through `conversion-state.md` and `conversion-notes.md`; do not treat the task as a rough draft merely because goal mode is unavailable.
 
 ## Objective Template
 

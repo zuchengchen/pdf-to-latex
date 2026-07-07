@@ -4,7 +4,7 @@
 
 The installable skill lives in [`skill/`](skill/). The repository root contains human-facing docs and development notes only.
 
-This is a workflow skill, not a bundled PDF-to-LaTeX converter. It does include small helper scripts for repeatable page rendering, LaTeX compile health checks, and artifact scans. It does not require local OCR engines or cloud OCR APIs.
+This is a workflow skill, not a bundled PDF-to-LaTeX converter. It does include reusable templates and small helper scripts for project scaffolding, repeatable page rendering, LaTeX compile health checks, and artifact scans. It does not require local OCR engines or cloud OCR APIs.
 
 ## Quick Install
 
@@ -41,15 +41,19 @@ Restart Codex after updating so the new skill instructions are loaded.
 - Builds document IR, object inventory, and style profile when the selected profile needs them.
 - Detects academic/technical book, textbook, monograph, proceedings, thesis, dissertation, and long manual structures.
 - Tracks math-heavy reconstruction with `math-inventory.md` and `glyph-map.md` when formulas or encoded symbols need focused cleanup.
+- Creates consistent project scaffolds from bundled templates when starting a new conversion.
 - Rebuilds the document as a maintainable XeLaTeX project rather than scanned page screenshots.
 - Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.
 - Maintains `conversion-state.md` and `conversion-notes.md` so interrupted conversions can resume from the latest checkpoint.
-- Uses helper scripts in `skill/scripts/` for rendering pages, checking LaTeX health, and scanning final source for extraction artifacts.
+- Uses helper scripts in `skill/scripts/` for scaffolding, rendering pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.
 
 ## Repository Structure
 
 ```text
 pdf-to-latex/
+├── .github/
+│   └── workflows/
+│       └── validate.yml
 ├── README.md
 ├── INSTALL.md
 ├── dev-goals/
@@ -58,6 +62,9 @@ pdf-to-latex/
     ├── SKILL.md
     ├── agents/
     │   └── openai.yaml
+    ├── assets/
+    │   └── templates/
+    │       └── ...
     ├── references/
     │   ├── book-production.md
     │   ├── goal-mode.md
@@ -68,8 +75,10 @@ pdf-to-latex/
     │   └── quality-review.md
     └── scripts/
         ├── check_latex_artifacts.sh
+        ├── init_latex_project.sh
         ├── latex_healthcheck.sh
-        └── render_pdf_pages.sh
+        ├── render_pdf_pages.sh
+        └── test_skill.sh
 ```
 
 `skill/SKILL.md` is the trigger and workflow entry point. Detailed procedures live in `skill/references/` so Codex can load only the guidance it needs.
@@ -85,6 +94,24 @@ Useful local tools for actual PDF-to-LaTeX work include:
 - Optional renderer alternatives such as `mutool draw`
 
 The skill is written so Codex uses visual recognition for scanned pages. Do not use local OCR engines such as `tesseract` or `ocrmypdf`. Rendered page images are analysis inputs, not the default LaTeX output.
+
+## Known Limitations
+
+- This skill guides Codex through reconstruction; it is not a one-command converter and does not bundle a PDF-to-LaTeX engine.
+- Long, scanned, damaged-text, or math-heavy PDFs may need multiple resumable passes before the result is clean.
+- Scanned pages are meant to be visually transcribed into semantic LaTeX. Full-page screenshots are not the normal final output.
+- Pixel-perfect reproduction is outside the default goal. The normal target is editable, readable, semantically faithful XeLaTeX.
+- Public web lookup may be used only for metadata, citations, public source context, or standard formulas, and should be documented separately from PDF-derived content.
+
+## Development Validation
+
+Run the full local smoke suite after changing the skill:
+
+```bash
+skill/scripts/test_skill.sh
+```
+
+The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, and verifies scaffold generation. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
 
 ## Usage Examples
 

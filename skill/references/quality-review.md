@@ -52,7 +52,7 @@ Run from inside the `latex/` directory unless paths are configured otherwise.
 If the skill helper script is available and fits the project layout, it may be used as a wrapper:
 
 ```bash
-path/to/pdf-to-latex/scripts/latex_healthcheck.sh .
+path/to/pdf-to-latex/scripts/latex_healthcheck.sh . main.tex
 ```
 
 Use the actual installed skill path.
@@ -104,6 +104,12 @@ Also confirm:
 - Every major display equation in the inventory is rebuilt, compiled, and visually reviewed, or is listed as blocked with a concrete user-facing question.
 - Placeholder display wrappers have been converted to standard math environments.
 - Equation numbers, labels, and references remain consistent where visible.
+
+When available, use the bundled helper for the final artifact gate:
+
+```bash
+path/to/pdf-to-latex/scripts/check_latex_artifacts.sh .
+```
 
 ## Visual Review
 
