@@ -11,7 +11,7 @@ Use this reference after Codex has generated a LaTeX project from a PDF, or when
 - Polish Passes
 - Minimum Refinement
 - Quality Rubric
-- Reviewer Pass
+- Reviewer Gates
 - Issue Order
 - Compile Fixes
 - Layout And Readability
@@ -29,6 +29,7 @@ Turn the generated LaTeX project into a clean, compiled, readable result that pr
 Refine for:
 
 - Compile success and stable reruns.
+- Successful skeleton and batch compile gates before final broad polish.
 - Correct document structure and reading order.
 - Removal of page-level transcript artifacts, page headers, page footers, duplicated headings, and artificial page breaks.
 - Legible typography, margins, headings, lists, and spacing.
@@ -37,6 +38,7 @@ Refine for:
 - Publication-quality math cleanup when formulas are visible: no unresolved glyph placeholder macros, no placeholder display-math wrappers, and no legible formulas left as transcript text.
 - Replacement of any full-page scanned-image placeholders with semantic text, math, tables, and real figure assets unless the user explicitly requested visual replication.
 - Reduced overfull boxes, missing files, unresolved references, and obvious layout defects.
+- Clean-room rebuild before publication-polish delivery.
 - Clear notes for approximations, uncertain content, and unresolved issues.
 
 ## Delivery Levels
@@ -77,8 +79,8 @@ When resuming an interrupted project, read `conversion-state.md` first. If it is
 5. Fix one focused category of issues or run the next polish pass below.
 6. Recompile.
 7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`; use `scripts/render_rebuilt_pages.sh PROJECT_DIR main.pdf DPI` when available and suitable. For digital PDFs, compare against page-bounded files under `evidence/text-layer/` when present rather than relying on a single untracked text dump.
-8. Compare against the source PDF, document IR, object inventory, style profile, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
-9. Run reviewer checks when they can catch a distinct class of issues.
+8. Compare against the source PDF, document IR, object inventory, style profile, production spec, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
+9. Run reviewer gates when they can catch a distinct class of issues. For publication polish, treat structure/content, math/object, and build/layout review as separate gates.
 10. Update `conversion-notes.md` and `conversion-state.md`.
 11. Repeat until the selected delivery level passes or a true blocker is documented. Broad fixable artifacts are not complete merely because they are listed in notes.
 
@@ -95,9 +97,10 @@ After the first successful compile, run focused polish passes. The first compili
 5. **Object Polish Pass**: refine tables, formulas, figures, captions, labels, references, cross-references, units, and notes. Fix table-like plain text and display math left as ordinary paragraphs when legible.
 6. **Book Production Pass**: when applicable, run the book structure, numbering, cross-reference, back matter, and long-document typography passes from `references/book-production.md`.
 7. **Typography Pass**: tune margins, heading spacing, paragraph flow, figure sizes, table widths, float placement, severe overfull boxes, clipped content, blank pages, and awkward whitespace.
-8. **Reviewer Pass**: review the generated LaTeX and rendered PDF against `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, source pages, and the quality rubric below. Use a subagent reviewer when available and useful, but keep final edits under the main agent's control.
+8. **Reviewer Gates**: review the generated LaTeX and rendered PDF in separate passes: structure/content, math/object, and build/layout. Use subagent reviewers when available and useful, but keep final edits under the main agent's control.
 9. **Visual Comparison Pass**: render the rebuilt PDF, compare representative pages against the source PDF for semantic coverage and readability, and revisit pages marked uncertain in `page-manifest.md`, `object-inventory.md`, `math-inventory.md`, or `conversion-notes.md`.
-10. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
+10. **Clean-Room Build Pass**: for publication polish, rebuild from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex` when available; fix missing assets, absolute paths, stale auxiliary assumptions, or hidden dependencies.
+11. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
 
 For light-profile documents, complete only the applicable passes and document skipped heavy artifacts. For long documents, complete at least the minimum refinement below and sample high-risk pages: title or first page, one normal body page, one table-heavy page, one formula-heavy page, references or appendices, and every page marked uncertain. Keep the batch plan in `page-manifest.md` current during refinement so incomplete or reworked page ranges remain resumable.
 
@@ -110,12 +113,12 @@ Unless the user explicitly requests a rough draft, complete at least the clean s
 - One LaTeX idiom or object polish pass for the roughest formulas, tables, figures, and references.
 - For book-scale documents, one book production pass covering front/back matter, numbering, generated lists, appendices, bibliography, index/glossary when present, and cross-references.
 - For math-heavy or encoded PDFs, one complete math publication pass with clean artifact scans of final source.
-- One reviewer, typography, and visual review pass over rendered output.
+- One reviewer, typography, visual review, and build reproducibility pass over rendered output.
 - One final notes and state update naming completed passes and remaining issues.
 
 For light tasks, mark non-applicable passes as skipped with a reason. Do not deliver while raw transcript blocks, obvious page-boundary artifacts, severe layout defects, unresolved compile problems, or broad math extraction artifacts remain fixable with reasonable effort.
 
-For publication polish, also complete every applicable book, math, reviewer, and visual comparison gate. For a rough draft, record which clean semantic checks were intentionally skipped.
+For publication polish, also complete every applicable book, math, reviewer, visual comparison, and clean-room build gate. For a rough draft, record which clean semantic checks were intentionally skipped.
 
 ## Quality Rubric
 
@@ -130,6 +133,7 @@ Transcript cleanup:
 Document IR alignment:
 Object inventory coverage:
 Style profile consistency:
+Production spec consistency:
 Math quality:
 Glyph artifact cleanup:
 Display math environment quality:
@@ -140,14 +144,23 @@ Citation and reference quality:
 Appendix, bibliography, index, and glossary quality:
 Typography and layout:
 Visual QA:
+Clean-room build:
 Notes and state:
 ```
 
 Record the rubric in `conversion-notes.md` during the reviewer or final cleanup pass.
 
-## Reviewer Pass
+## Reviewer Gates
 
-Use the reviewer pass to catch problems the authoring pass may miss. A reviewer should inspect the source PDF evidence, `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, rendered rebuilt pages, and final LaTeX source, then report only concrete issues:
+Use reviewer gates to catch problems the authoring pass may miss. A reviewer should inspect the source PDF evidence, production spec, `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, rendered rebuilt pages, and final LaTeX source, then report only concrete issues.
+
+For publication polish, separate the review into:
+
+- **Structure/content**: reading order, missing or duplicated content, front/main/back matter, generated lists, appendices, bibliography, glossary, index, and document IR alignment.
+- **Math/object**: formulas, theorem-like material, tables, figures, captions, labels, cross-references, citations, glyph-map decisions, and object inventory coverage.
+- **Build/layout**: compile logs, missing assets, undefined references or citations, severe overfull boxes, clipping, blank pages, float placement, rendered readability, and clean-room build status.
+
+Report findings such as:
 
 - Missing, duplicated, or reordered content.
 - Book front matter, main matter, or back matter flattened, missing, duplicated, or placed in the wrong order.
@@ -164,7 +177,7 @@ Use the reviewer pass to catch problems the authoring pass may miss. A reviewer 
 - Style profile mismatches, such as a report rebuilt as a flat article with no hierarchy.
 - Layout defects such as clipping, blank pages, unreadable tables, or severe overfull boxes.
 
-When subagents are permitted, delegate reviewer tasks by area rather than by file ownership, for example one reviewer for structure/content, one for tables/formulas, and one for rendered layout. Subagents should return findings only. The main agent integrates findings, edits source files, recompiles, and updates shared notes and state files.
+When subagents are permitted, delegate reviewer tasks by gate rather than by file ownership. Subagents should return findings only. The main agent integrates findings, edits source files, recompiles, and updates shared notes and state files.
 
 ## Issue Order
 
@@ -299,6 +312,7 @@ Update `conversion-state.md` more frequently and more compactly:
 - After each successful compile, record the command, output PDF path, and next review action.
 - After each focused refinement pass, mark the completed checkpoint and name the next unresolved category.
 - During polishing, record the latest completed pass: transcript merge, structure, LaTeX idiom, object polish, typography, reviewer, visual comparison, or final cleanup.
+- During publication polish, record each reviewer gate separately and record the clean-room build command and result.
 - During long-document work, record completed page or chapter batches and the next batch range.
 - During book-scale polishing, record book production pass progress, generated-list status, cross-reference audit status, appendix/bibliography status, and index/glossary status when present.
 - During math-heavy polishing, record math publication pass progress, latest artifact counts, and the next unresolved formula or glyph batch.
@@ -312,6 +326,7 @@ Stop and ask when:
 
 - Refinement would overwrite user edits outside the target LaTeX project.
 - Required verification tools are missing and the user asked for verified output.
+- The clean-room build gate fails and the failure depends on missing assets, unavailable packages, or hidden local state the agent cannot resolve safely.
 - The user requests pixel-perfect replication but the existing project is semantic and would need a different strategy.
 - A remaining issue depends on information that is not visible, extractable, or reasonably inferable.
 - Formula symbols remain unreadable after higher-resolution visual review and available context, and the user has not approved leaving them unresolved.

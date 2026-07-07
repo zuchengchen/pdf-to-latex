@@ -10,16 +10,21 @@ Delivery level: {{DELIVERY_LEVEL}}
 ## Completed Checkpoints
 - [x] Project scaffold created
 - [ ] Initial triage complete
+- [ ] Production spec gate complete when applicable
 - [ ] PDF analysis complete
 - [ ] Page evidence rendered or split
 - [ ] Page manifest complete
-- [ ] Page transcription complete
-- [ ] Object inventory complete
 - [ ] Style profile complete
+- [ ] Object inventory seeded
 - [ ] Book production profile complete when applicable
 - [ ] Math inventory/glyph map complete when applicable
 - [ ] Document IR complete
 - [ ] Semantic outline complete
+- [ ] Skeleton compile gate complete
+- [ ] Route-specific reconstruction complete
+- [ ] Asset pass complete
+- [ ] Batch compile gate complete
+- [ ] Page transcription complete when applicable
 - [ ] Main content drafted
 - [ ] Figures/assets handled
 - [ ] Tables/formulas handled
@@ -31,8 +36,10 @@ Delivery level: {{DELIVERY_LEVEL}}
 - [ ] Structure pass complete
 - [ ] LaTeX idiom/object polish pass complete
 - [ ] Reviewer pass complete
+- [ ] Publication reviewer gates complete when applicable
 - [ ] Typography/visual review pass complete
 - [ ] Final cleanup pass complete
+- [ ] Clean-room build gate complete
 - [ ] Quality review complete
 
 ## Last Successful Command

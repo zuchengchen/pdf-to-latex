@@ -8,6 +8,7 @@ Use this reference to understand the source PDF before rebuilding it in LaTeX. T
 - Pre-Scaffold First Pass
 - Durable Analysis Pass
 - Classify The PDF
+- Production Spec Inputs
 - Reading Order
 - Codex Visual Transcription Strategy
 - Long Document Batching
@@ -51,7 +52,7 @@ pdfinfo source.pdf
 ```
 
 5. Sample the first page's text layer when `pdftotext` is available and the PDF appears selectable; for visually complex, scanned, long, or book-like PDFs, render representative pages to a temporary location when needed before scaffolding.
-6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis.
+6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis. For book-scale or math-heavy work, default to `publication polish` unless the user explicitly requests a lower delivery level.
 7. For long, scanned, mixed, math-heavy, encoded, or book-scale PDFs, decide whether broad transcription needs explicit user confirmation, Goal mode approval, or a narrower first milestone. Do not commit to full-page transcription until this is settled.
 8. For a new target directory, use `scripts/init_latex_project.sh` or the bundled `assets/templates/` files to create the scaffold with the provisional task profile and delivery level before recording durable analysis.
 
@@ -61,7 +62,7 @@ Keep this pass short. Its job is to choose a safe target, task profile, and deli
 
 After the scaffold exists, record durable findings in `conversion-notes.md` and update `conversion-state.md`.
 
-1. Add a feasibility note for long, scanned, mixed, math-heavy, encoded, or book-scale PDFs. Include page count, estimated scanned or visually complex pages, selected delivery level, first milestone, batch size, and whether Goal mode was explicitly approved or the state-file workflow will be used.
+1. Add a feasibility note for long, scanned, mixed, math-heavy, encoded, or book-scale PDFs. Include page count, estimated scanned or visually complex pages, selected delivery level, first milestone, batch size, initial production-spec assumptions, and whether Goal mode was explicitly approved or the state-file workflow will be used.
 2. For digital PDFs, optionally extract page-bounded text-layer evidence under the project:
 
 ```bash
@@ -82,8 +83,8 @@ scripts/render_pdf_pages.sh source.pdf latex 180 --pages 1,3,5-8
 ```
 
 4. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
-5. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, batch assignment, and transcription status.
-6. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, a concise outline and object list inside `conversion-notes.md` may replace standalone inventory or IR files; record why the omitted files would not improve review or resume. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
+5. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, batch assignment, and reconstruction status. Treat this as the evidence and route gate for publication polish.
+6. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, production spec, and target LaTeX strategy discovered so far. For a light task, a concise outline and object list inside `conversion-notes.md` may replace standalone inventory or IR files; record why the omitted files would not improve review or resume. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
 7. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
@@ -102,6 +103,21 @@ For scanned, mixed, or damaged-text pages, use Codex visual reading from rendere
 For encoded math layers, treat the text extraction as evidence for nearby prose and recurring markers only. Use rendered page images and `references/math-polish.md` to identify symbols and rebuild formulas.
 
 Rendered page images are analysis artifacts. Do not copy full-page renders into the LaTeX project as page screenshots unless the user explicitly asks for visual replication. The normal scanned-PDF path is Codex visual transcription followed by semantic LaTeX reconstruction.
+
+## Production Spec Inputs
+
+For `publication polish`, gather enough evidence before broad transcription to define the production target:
+
+- Document class family: `article`, `report`, `book`, `ctexbook`, thesis class, proceedings structure, or another justified choice.
+- Page geometry, one-sided or two-sided intent, margins, heading depth, and float strategy.
+- Font and language needs, including CJK or multilingual support.
+- Math strategy: numbering, theorem-like environments, symbol cleanup, and encoded glyph handling.
+- Figure, table, diagram, and crop strategy.
+- Citation, bibliography, appendix, index, glossary, and generated-list strategy.
+- Toolchain assumptions such as XeLaTeX, BibTeX or biblatex, makeindex or glossary tooling, and fallback choices.
+- Non-goals such as exact pagination, full-page screenshot replication, or pixel-perfect tracing.
+
+Record these decisions in `style-profile.md` and `conversion-notes.md`. If later evidence invalidates them, update the production spec before continuing final drafting.
 
 ## Reading Order
 
@@ -140,7 +156,8 @@ For long PDFs, make batching explicit before large transcription or reconstructi
 - Record a feasibility note before broad transcription: total pages, estimated scanned or complex pages, target delivery level, proposed first milestone, and whether Goal mode was approved or a user-approved first milestone will be used instead.
 - Use 5-10 pages per batch for scanned, mixed, damaged-text, table-heavy, or formula-heavy pages.
 - Use 20-50 pages per batch for mostly digital prose after page-bounded text-layer evidence exists.
-- Record each batch in `page-manifest.md` with page range, route, assigned evidence paths, transcript status, and unresolved objects.
+- For mostly digital prose, a batch may be a text-layer correction and object review batch rather than a visual transcript batch.
+- Record each batch in `page-manifest.md` with page range, route, assigned evidence paths, transcript or correction status, and unresolved objects.
 - Update `conversion-state.md` after every completed batch with the latest completed pages and the next concrete batch.
 - For books, batch by structural boundary when possible: front matter, each chapter or chapter section, appendices, bibliography, and index/glossary.
 

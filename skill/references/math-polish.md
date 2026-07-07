@@ -108,8 +108,9 @@ Record counts in `math-inventory.md` and `conversion-notes.md`. If the count is 
 6. Preserve equation numbers, tags, labels, and surrounding references. Add labels when the source refers to an equation and no stable label exists yet.
 7. Recompile after each chapter or focused batch. Fix syntax errors immediately before continuing.
 8. Render representative formula-heavy pages from the rebuilt PDF and visually compare them with source pages.
-9. Update `math-inventory.md`, `glyph-map.md`, `conversion-notes.md`, and `conversion-state.md`.
-10. Repeat until artifact scans are clean and the reviewed formulas are readable.
+9. For publication polish, rerun the artifact scan and include the cleaned math in the clean-room build gate before delivery.
+10. Update `math-inventory.md`, `glyph-map.md`, `conversion-notes.md`, and `conversion-state.md`.
+11. Repeat until artifact scans are clean and the reviewed formulas are readable.
 
 Use subagents for independent chapter or page-batch math review when the environment permits it. Subagents should return glyph candidates, formula findings, or local transcript corrections only. The main agent owns the shared `glyph-map.md`, source edits, merges, compilation, state updates, and conflict resolution.
 
@@ -150,5 +151,6 @@ For near-publication delivery, require all of the following:
 - `math-inventory.md` shows every major display equation as rebuilt, compiled, and reviewed, or explicitly blocked with a user-facing question.
 - `glyph-map.md` records recurring glyph decisions and confidence.
 - Representative formula-heavy pages have been visually compared against the source PDF.
+- Math-heavy chapters or batches compile after cleanup, and the final clean-room build gate passes for publication polish.
 - Equation numbering, labels, and references are preserved where visible and meaningful.
 - Remaining uncertainty is small, localized, and clearly documented; broad counts such as hundreds of glyph markers or placeholder display blocks are not acceptable final quality.

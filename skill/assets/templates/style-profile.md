@@ -5,6 +5,7 @@ Task profile: {{TASK_PROFILE}}
 
 Document profile:
 Document class:
+Page geometry:
 Language and font needs:
 Sectioning depth:
 Bibliography strategy:
@@ -15,6 +16,14 @@ Book production strategy:
 Layout notes:
 Packages likely needed:
 Packages to avoid unless necessary:
+Toolchain assumptions:
+Non-goals:
+
+## Production Spec Gate
+Status: pending
+Skeleton compile required: yes | no
+Clean-room build required: yes | no
+Reviewer gates required: yes | no
 
 Book production: yes | no | partial
 Book type:

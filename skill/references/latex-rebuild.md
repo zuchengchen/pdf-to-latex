@@ -7,12 +7,15 @@ Use this reference when creating the target LaTeX project. The project should be
 - Reconstruction Principles
 - Project Layout
 - Document Model First
+- Production Spec
 - XeLaTeX Baseline
+- Skeleton Compile Gate
 - Structure
 - Text
 - Figures
 - Tables
 - Formulas
+- Asset Pass
 - Citations And References
 - Conversion Notes
 - Conversion State
@@ -69,7 +72,7 @@ Before creating files in an existing project, read `conversion-state.md` and `co
 
 ## Document Model First
 
-Before drafting final LaTeX for standard, book, math-heavy, book-math, or visually complex projects, build `document-ir.md` from transcripts, page-bounded text-layer evidence when used, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
+Before drafting final LaTeX for standard, book, math-heavy, book-math, or visually complex projects, build or seed `document-ir.md` from transcripts, page-bounded text-layer evidence when used, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
 
 Use this compact shape, or start from `assets/templates/document-ir.md`:
 
@@ -95,6 +98,19 @@ Style decisions:
 ```
 
 Generate `main.tex` and `chapters/*.tex` from this document model. The IR should make page order, section hierarchy, object placement, and unresolved uncertainties explicit before final source is written. For a light task, a concise outline inside `conversion-notes.md` may replace a standalone IR when the source is short and structurally simple; compare final LaTeX against that outline during quality review.
+
+## Production Spec
+
+For publication polish, write the production spec before filling most final source:
+
+- Document class and matter model.
+- Page geometry, one-sided or two-sided policy, and sectioning depth.
+- Font, language, Unicode, CJK, and package assumptions.
+- Figure, table, math, theorem-like, citation, bibliography, index, glossary, and generated-list strategy.
+- Asset boundaries: extracted figures, cropped regions, recreated diagrams, semantic tables, and objects intentionally approximated.
+- Non-goals, especially exact pagination or pixel-level tracing unless the user asks for it.
+
+Keep this spec in `style-profile.md` and summarize it in `conversion-notes.md`. If the spec changes, update it before continuing broad edits so later reviewers know which target the project is trying to satisfy.
 
 ## XeLaTeX Baseline
 
@@ -129,6 +145,18 @@ Use XeLaTeX by default. Start with a simple, portable preamble and add packages 
 Use `style-profile.md` to choose the document class, packages, and layout. For CJK or multilingual content, add appropriate XeLaTeX packages such as `xeCJK` when available in the local TeX installation. Use `\IfFontExistsTF` or a simpler default when a preferred font may be missing. If a package is missing, choose a simpler fallback or ask before installing system packages.
 
 For books, theses, monographs, proceedings, or documents with front/back matter, use `references/book-production.md` before choosing between `article`, `report`, `book`, `ctexbook`, a thesis class, or another class. Do not flatten a book into an article merely because the baseline example uses `article`.
+
+## Skeleton Compile Gate
+
+Before drafting most publication-polish content, create and compile a minimal production skeleton:
+
+1. Choose the document class, page geometry, fonts, packages, macros, theorem environments, bibliography/index/glossary hooks, and file structure from `style-profile.md`.
+2. Create `main.tex` and any required empty or lightly seeded `frontmatter/`, `chapters/`, or `backmatter/` inputs.
+3. Compile with XeLaTeX or `scripts/latex_healthcheck.sh TARGET_DIR main.tex`.
+4. Fix class, package, font, missing-file, bibliography/index/glossary, and macro errors before filling large content.
+5. Record the command, output PDF, warnings, package fallbacks, and next drafting batch in `conversion-state.md` and `conversion-notes.md`.
+
+The skeleton does not prove content quality; it proves the chosen production architecture can build before the project accumulates many source files.
 
 ## Structure
 
@@ -188,6 +216,18 @@ If a figure is recreated as text, TikZ, or a table, note that choice in `convers
 Only include images that are actual figures, diagrams, photos, charts, or other source visual content. Do not include full-page rendered scans as figure assets merely to preserve page appearance or make compilation easy.
 
 Use `object-inventory.md` to verify that each major figure is either included, recreated, documented as unreadable, or intentionally omitted.
+
+## Asset Pass
+
+Run an asset pass before final drafting or before the first large chapter batch:
+
+- Extract or crop genuine figures, diagrams, photos, charts, and other source visual content into `figures/` or `evidence/crops/` as appropriate.
+- Decide which simple diagrams or tables should be recreated semantically instead of included as images.
+- Confirm each planned figure, table, formula cluster, bibliography block, appendix, index, or glossary object has an `object-inventory.md` status.
+- Verify image file names, extensions, and paths relative to `main.tex` before drafting many `\includegraphics` references.
+- Record asset gaps and intentional approximations in `conversion-notes.md`.
+
+Do not wait until final typography polish to discover that figures, tables, or bibliography assets are missing.
 
 ## Tables
 
@@ -259,8 +299,10 @@ Always maintain `conversion-notes.md` with:
 - Selected task profile and any omitted heavy artifacts.
 - Tools and commands used.
 - PDF type and analysis summary.
+- Production spec and skeleton compile result.
 - Page manifest and page transcript status.
 - Document IR, object inventory, and style profile status.
+- Route-specific reconstruction batches and batch compile results.
 - Book production status, including front matter, main matter, back matter, generated lists, cross-reference audit, bibliography, index/glossary, and appendix handling when applicable.
 - Math inventory, glyph map, artifact counts, and math review status when applicable.
 - Inferred, approximated, or web-sourced content.
@@ -272,7 +314,7 @@ Keep notes factual and actionable. They are part of the deliverable.
 
 ## Conversion State
 
-Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when page evidence is rendered, when page transcripts are completed, when the object inventory, style profile, and document IR are completed, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch is completed.
+Always maintain `conversion-state.md` as the compact resume file. Update it when the scaffold is created, when the production spec is recorded, when page evidence is rendered, when the route map is created, when page transcripts or digital correction batches are completed, when the object inventory, style profile, and document IR are seeded or completed, when the skeleton compile gate passes, when content files are added, when assets are extracted or cropped, and when a chapter, table, figure, formula, or reference batch compiles.
 
 Start from `assets/templates/conversion-state.md` whenever possible; it is the canonical checkpoint order. If writing the state file by hand, keep this compact shape and preserve the same milestone sequence:
 
@@ -287,7 +329,7 @@ Task profile:
 Delivery level:
 
 ## Completed Checkpoints
-Project scaffold, triage, analysis, evidence, manifest, transcription, inventories/profile/IR, content drafting, compile, refinement, final quality review.
+Project scaffold, triage, production spec, analysis, evidence, manifest, inventory seed, skeleton compile, route-specific reconstruction, asset pass, content drafting, batch compiles, refinement, reviewer gates, clean-room build, final quality review.
 
 ## Last Successful Command
 

@@ -79,6 +79,7 @@ pdf-to-latex/
         ├── extract_text_pages.sh
         ├── init_latex_project.sh
         ├── latex_healthcheck.sh
+        ├── publication_gate.sh
         ├── render_pdf_pages.sh
         ├── render_rebuilt_pages.sh
         ├── test_skill.sh
@@ -115,7 +116,7 @@ Run the full local smoke suite after changing the skill:
 skill/scripts/test_skill.sh
 ```
 
-The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, verifies scaffold and profile-upgrade guardrails, and runs real PDF rendering, text-layer extraction, and compile smoke tests when local TeX and PDF tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
+The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, verifies scaffold and profile-upgrade guardrails, and runs real PDF rendering, text-layer extraction, compile, and publication-gate smoke tests when local TeX and PDF tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
 
 ## Usage Examples
 

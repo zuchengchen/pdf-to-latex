@@ -370,6 +370,11 @@ if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 |
     fi
     "$script_dir/render_rebuilt_pages.sh" "$real_project" main.pdf 80 --from 1 --to 1 --force >/dev/null
     "$script_dir/check_latex_artifacts.sh" "$real_project" >/dev/null
+    "$script_dir/publication_gate.sh" "$real_project" main.tex --render-dpi 80 --pages 1 >/dev/null
+    if [[ ! -s "$real_project/logs/publication_gate_summary.txt" ]]; then
+      printf 'Expected publication gate to write a summary file.\n' >&2
+      exit 1
+    fi
 
     nested_project="$tmp_dir/nested-project"
     mkdir -p "$nested_project/src"

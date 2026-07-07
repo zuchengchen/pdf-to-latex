@@ -23,9 +23,20 @@ Style profile:
 
 ## Cross-Page Merges
 
+## Route-Specific Reconstruction
+
+Digital text-layer batches:
+Visual transcription batches:
+Encoded math batches:
+Damaged or uncertain regions:
+
 ## Objects
 
+## Asset Plan
+
 ## Math Inventory
+
+## Build Skeleton
 
 ## Unresolved Blocks
 

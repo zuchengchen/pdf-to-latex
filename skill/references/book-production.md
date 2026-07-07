@@ -85,7 +85,7 @@ Use this IR to decide file boundaries. For long books, prefer stable files such 
 
 ## LaTeX Strategy
 
-Choose the class and packages from the document profile, not from a desire to mimic every page:
+Choose the class and packages from the production spec and document profile, not from a desire to mimic every page:
 
 - Use `book` for ordinary books and monographs when no stronger class is needed.
 - Use `report` for thesis-like or technical report structures that do not need true book front/back matter.
@@ -115,6 +115,8 @@ For book-class projects, use normal matter switches where appropriate:
 ```
 
 Do not emit commands such as `\printindex`, `\printglossary`, or `\printbibliography` unless the corresponding package, data, and compilation path are present or a documented fallback exists.
+
+For publication polish, test the book skeleton before drafting most content. The skeleton should include matter switches, representative chapter inputs, generated list commands when supported, bibliography/index/glossary hooks when used, theorem or equation numbering policy when needed, and any class-specific packages. Compile this skeleton before broad reconstruction so class and generated-list failures are caught early.
 
 ## Front Matter
 
@@ -205,6 +207,7 @@ For book-scale documents, add these passes to the normal refinement loop:
 3. **Cross-Reference Pass**: fix labels, references, citations, generated lists, and source page-reference wording.
 4. **Back Matter Pass**: reconcile appendices, bibliography, glossary, and index against the source PDF and inventories.
 5. **Long-Document Typography Pass**: review chapter openings, page breaks, large floats, long tables, running heads when used, and severe overfull boxes.
+6. **Clean Book Build Pass**: for publication polish, rebuild from a clean copy or clean working tree state and confirm generated lists, bibliography, index/glossary hooks, and cross-references still build without stale auxiliary files.
 
 For long books, sample every structural area rather than only early pages: front matter, an early chapter, a middle chapter, a formula-heavy page, a table-heavy page, appendices, bibliography, and index/glossary pages when present.
 
@@ -218,5 +221,6 @@ Do not call a book-scale reconstruction publication-grade until:
 - Major figures, formulas, tables, theorem-like blocks, appendices, bibliography entries, and index/glossary items are rebuilt, reviewed, or explicitly documented as unresolved.
 - LaTeX logs have no unresolved references or citations that affect delivered content.
 - Book-specific refinement passes are complete or marked not applicable with a reason.
+- The skeleton and clean build gates pass for publication-polish book projects.
 - The rendered PDF is readable across sampled front matter, normal chapters, dense object pages, appendices, bibliography, and index/glossary pages.
 - The final source remains maintainable: book structure is semantic, labels are meaningful, and long content is split into files when that helps future editing.
