@@ -48,6 +48,7 @@ Codex should update `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex` in place w
 - Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, `document-ir.md`, `conversion-state.md`, and `conversion-notes.md`.
 - Records uncertain, inferred, approximated, or web-supplemented content.
 - Compiles, reviews, and polishes the output PDF for semantic completeness and readability.
+- Uses goal-backed execution for full conversion requests when the Codex runtime permits it.
 
 ## Repository Structure
 
@@ -59,6 +60,7 @@ pdf-to-latex/
 ├── references/
 │   ├── latex-rebuild.md
 │   ├── latex-refinement.md
+│   ├── goal-mode.md
 │   ├── pdf-analysis.md
 │   └── quality-review.md
 ├── INSTALL.md
@@ -87,8 +89,16 @@ After installing and restarting Codex:
 $pdf-to-latex 把 ./paper.pdf 重排成可编辑 LaTeX 项目，并编译出 PDF
 ```
 
-Codex should create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, build the document IR and object inventory, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction.
+For a full conversion request, Codex should start or continue goal-backed execution when the runtime permits it, then create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, build the document IR and object inventory, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction.
 It should also maintain `conversion-state.md` so a later Codex session can continue from the latest completed checkpoint.
+
+For a long document, a natural invocation is:
+
+```text
+$pdf-to-latex 把 "Quantum Field Theory for the Gifted Amateur.pdf" 转成latex
+```
+
+If the local Codex runtime requires explicit confirmation before creating a goal, Codex should ask for that confirmation and then continue goal-backed execution after approval.
 
 For an existing generated project:
 

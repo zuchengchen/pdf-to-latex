@@ -17,6 +17,7 @@ Codex performs the conversion work directly with local tools, visual reasoning, 
 - Read `references/latex-rebuild.md` before creating or editing the LaTeX project.
 - Read `references/latex-refinement.md` before polishing generated LaTeX, fixing compile or layout issues, or comparing the rebuilt PDF against the source.
 - Read `references/quality-review.md` before compiling, reviewing, or delivering the result.
+- Read `references/goal-mode.md` before creating or continuing a goal-backed PDF-to-LaTeX conversion.
 
 ## Default Output Contract
 
@@ -35,6 +36,7 @@ latex/
 ├── object-inventory.md
 ├── style-profile.md
 ├── document-ir.md
+├── goal-objective.md
 ├── conversion-state.md
 └── conversion-notes.md
 ```
@@ -56,6 +58,14 @@ Blockers or uncertainties:
 ```
 
 Use `conversion-notes.md` for richer evidence, decisions, commands, and unresolved details; use `conversion-state.md` for fast restart.
+
+## Goal-Backed Execution
+
+Treat a full conversion request such as `$pdf-to-latex 把 "paper.pdf" 转成latex` as intended for goal-backed execution because PDF-to-LaTeX conversion is usually long-running and resumable. Before starting substantial work, read `references/goal-mode.md` and create or continue a concrete goal when the runtime goal tools and current policy allow it.
+
+If goal creation is allowed, the goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, and stopping only when the quality checks pass or a true blocker is documented.
+
+If the current Codex runtime requires an explicit user mention of goal mode before `create_goal` can be called, ask for the shortest confirmation possible, for example: `这个转换任务很长。我可以用 Goal 模式持续执行直到质量检查通过吗？回复 y/Y 确认。` Do not silently downgrade a full conversion into a one-turn rough draft unless the user explicitly asks for a rough draft or no goal mode.
 
 ## Automatic Conversion And Refinement Workflow
 

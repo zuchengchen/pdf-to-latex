@@ -24,7 +24,7 @@ Use a heavy workflow-skill design, not a converter application. Keep `SKILL.md` 
 
 The skill should trigger broadly when the user asks Codex to convert, rebuild, re-typeset, or recreate a PDF as a LaTeX project and compiled PDF. It should cover both digital/selectable-text PDFs and scanned or visual-only PDFs.
 
-The skill should prioritize semantic rebuilding rather than pixel-level replication. It should preserve document structure, headings, body text, formulas, tables, figures, captions, references, and readable layout. It should build a document model, object inventory, and style profile before final LaTeX generation. It should refine the output beyond the first compiling draft so final chapters do not look like raw page transcripts. It may approximate or rewrite uncertain content when needed, but must clearly mark guesses and uncertainties.
+The skill should prioritize semantic rebuilding rather than pixel-level replication. It should preserve document structure, headings, body text, formulas, tables, figures, captions, references, and readable layout. It should build a document model, object inventory, and style profile before final LaTeX generation. Full conversion requests should prefer goal-backed execution when the Codex runtime permits it. It should refine the output beyond the first compiling draft so final chapters do not look like raw page transcripts. It may approximate or rewrite uncertain content when needed, but must clearly mark guesses and uncertainties.
 
 For scanned documents, use Codex visual reasoning and page-level visual transcription rather than local OCR. Do not use local OCR tools such as `tesseract` or `ocrmypdf`; `pdftotext` may be used only as optional text-layer evidence for digital PDFs. Public web lookup is allowed to supplement references, paper metadata, public versions, or source context, but sourced additions must be labeled separately from PDF-derived content.
 
@@ -38,9 +38,10 @@ Create or update these core skill files in `/home/czc/projects/working/pdf-to-la
 - `agents/openai.yaml`
 - `references/pdf-analysis.md`
 - `references/latex-rebuild.md`
+- `references/goal-mode.md`
 - `references/quality-review.md`
 
-The skill body and references should be written in English and aimed primarily at Codex agents, not human end users. It should include practical workflows for PDF inspection, rendered page review, Codex visual transcription, document IR modeling, object inventory tracking, style profiling, semantic LaTeX reconstruction, XeLaTeX project organization, formula/table/figure/reference handling, web supplementation, uncertainty notes, compilation, reviewer checks, multi-pass polishing, and quality review.
+The skill body and references should be written in English and aimed primarily at Codex agents, not human end users. It should include practical workflows for PDF inspection, rendered page review, goal-backed execution, Codex visual transcription, document IR modeling, object inventory tracking, style profiling, semantic LaTeX reconstruction, XeLaTeX project organization, formula/table/figure/reference handling, web supplementation, uncertainty notes, compilation, reviewer checks, multi-pass polishing, and quality review.
 
 Use `skill-creator` guidance. It is acceptable to use the official `init_skill.py` helper to create a template, then reorganize the result so the current directory is the skill root. Keep the final contents focused; avoid unnecessary README/install/changelog clutter unless a small auxiliary file is clearly useful.
 
