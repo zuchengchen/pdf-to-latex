@@ -20,7 +20,7 @@ Codex performs the conversion work directly with local tools, visual reasoning, 
 - Read `references/math-polish.md` when the document is math-heavy, the text layer has custom encoded symbols, or final source contains math placeholders such as `\pdfglyph` or `extracteddisplay`.
 - Read `references/quality-review.md` before final delivery or a formal quality review, not for every routine compile.
 - Read `references/goal-mode.md` before creating or continuing a goal-backed PDF-to-LaTeX conversion.
-- Use `scripts/init_latex_project.sh`, `scripts/render_pdf_pages.sh`, `scripts/render_rebuilt_pages.sh`, `scripts/check_latex_artifacts.sh`, and `scripts/latex_healthcheck.sh` when they fit the local environment; they are helpers, not a replacement for semantic reconstruction. Use `assets/templates/` as the standard scaffold source when creating state, notes, manifest, inventory, IR, math, or glyph tracking files. The helper scripts are intentionally conservative: scaffold only from PDF-looking sources, refuse unrelated non-empty targets, and refuse to replace rendered page evidence unless `--force` is explicit. Use page-selection flags such as `--pages 1,3,5-8` or `--from 10 --to 20` for large PDFs.
+- Use `scripts/init_latex_project.sh`, `scripts/upgrade_latex_project.sh`, `scripts/render_pdf_pages.sh`, `scripts/extract_text_pages.sh`, `scripts/render_rebuilt_pages.sh`, `scripts/check_latex_artifacts.sh`, and `scripts/latex_healthcheck.sh` when they fit the local environment; they are helpers, not a replacement for semantic reconstruction. Use `assets/templates/` as the standard scaffold source when creating state, notes, manifest, inventory, IR, math, glyph, or goal tracking files. The helper scripts are intentionally conservative: scaffold only from PDF-looking sources, refuse unrelated non-empty targets, preserve existing project files, and refuse to replace rendered or extracted page evidence unless `--force` is explicit. Use page-selection flags such as `--pages 1,3,5-8` or `--from 10 --to 20` for large PDFs.
 
 ## Task Profiles
 
@@ -34,6 +34,19 @@ Choose the lightest profile that can satisfy the user request.
 
 Use these exact lowercase profile values when invoking helper scripts. Record the chosen profile, any later profile upgrade, and any simplifications in `conversion-notes.md`.
 
+Profile file expectations:
+
+```text
+Profile      Required tracking files
+light        main.tex, conversion-state.md, conversion-notes.md
+standard     light files plus page-manifest.md, object-inventory.md, style-profile.md, document-ir.md
+book         standard files plus frontmatter/ and backmatter/ when useful
+math-heavy   standard files plus math-inventory.md and glyph-map.md
+book-math    book files plus math-inventory.md and glyph-map.md
+```
+
+`goal-objective.md` is optional and belongs only to goal-backed work. If a project starts as `standard` and later needs a heavier profile, run `scripts/upgrade_latex_project.sh TARGET_DIR NEW_PROFILE`, or add the missing template files manually without overwriting existing work, then update `conversion-state.md` and `conversion-notes.md`.
+
 ## Delivery Levels
 
 Choose the delivery level before major reconstruction and record it in `conversion-state.md` and `conversion-notes.md`.
@@ -44,14 +57,16 @@ Choose the delivery level before major reconstruction and record it in `conversi
 
 ## Initial Triage
 
-Before creating a new scaffold, read `references/pdf-analysis.md` and do its First Pass triage so the helper receives the right profile and delivery level:
+Before creating a new scaffold, read `references/pdf-analysis.md` and do only enough pre-scaffold triage for the helper to receive the right profile, delivery level, and safe target path:
 
 1. Confirm the source file is a PDF and the target directory is safe to use.
 2. Check page count and metadata with `pdfinfo` when available.
 3. For selectable PDFs, sample the text layer with page-bounded extraction such as `pdftotext -f 1 -l 1 -layout SOURCE_PDF -`.
 4. For scanned, mixed, long, or visually complex PDFs, render only representative pages first when practical: page 1, an early body page, a middle page, a final page, and any obvious table/formula/reference pages. Use `scripts/render_pdf_pages.sh SOURCE_PDF TARGET_DIR DPI --pages LIST` after the target scaffold exists, or temporary render paths for pre-scaffold inspection.
 5. Choose a provisional task profile from `light`, `standard`, `book`, `math-heavy`, or `book-math`, plus a delivery level.
-6. For long, scanned, mixed, math-heavy, or book-scale PDFs, record a feasibility note before broad transcription: page count, estimated scanned or visually complex pages, planned batch size, first milestone, recommended delivery level, and whether Goal mode or user confirmation is needed.
+6. For long, scanned, mixed, math-heavy, or book-scale PDFs, decide whether a full conversion needs explicit user confirmation, Goal mode approval, or a narrower first milestone before broad transcription.
+
+After the scaffold exists, immediately write the durable triage and feasibility note into `conversion-notes.md` and update `conversion-state.md`. Include page count, estimated scanned or visually complex pages, planned batch size, first milestone, recommended delivery level, profile decision, and whether Goal mode was explicitly approved or state-file resumability will be used instead.
 
 If the profile is uncertain, start with `standard` rather than guessing a heavier specialized profile. After deeper analysis, upgrade the project by adding missing tracking files, book directories, or math inventories from `assets/templates/`, then update `conversion-state.md` and `conversion-notes.md`.
 
@@ -59,7 +74,7 @@ If the profile is uncertain, start with `standard` rather than guessing a heavie
 
 For a conversion task, create a `latex/` directory next to the source PDF unless the user gives another location. Do not silently overwrite an unrelated existing `latex/` directory. When the directory contains a resumable project, continue it; otherwise ask the user or choose a clearly named alternative after approval.
 
-Default project layout:
+Maximum project layout:
 
 ```text
 latex/
@@ -80,12 +95,12 @@ latex/
 ├── glyph-map.md
 ├── style-profile.md
 ├── document-ir.md
-├── goal-objective.md
+├── goal-objective.md      # only for goal-backed work
 ├── conversion-state.md
 └── conversion-notes.md
 ```
 
-Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep `evidence/source-pages/` for rendered source pages when visual transcription or later comparison is needed; use `evidence/rebuilt-pages/` for rendered output checks, `evidence/crops/` for figure or region crops, and `evidence/text-layer/` for page-bounded `pdftotext` evidence from digital PDFs. Keep page-level transcripts, object inventory, style profile, and document IR when they are useful for review, resume, or subagent integration. Keep `math-inventory.md` and `glyph-map.md` for math-heavy documents or any project with encoded glyph or display-math artifacts. For book-scale projects, use maintainable `frontmatter/`, `chapters/`, and `backmatter/` source boundaries when they help future editing.
+This is profile-dependent, not a promise that every file always exists. Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep `evidence/source-pages/` for rendered source pages when visual transcription or later comparison is needed; use `evidence/rebuilt-pages/` for rendered output checks, `evidence/crops/` for figure or region crops, and `evidence/text-layer/` for page-bounded `pdftotext` evidence from digital PDFs. Keep page-level transcripts, object inventory, style profile, and document IR when they are useful for review, resume, or subagent integration. Keep `math-inventory.md` and `glyph-map.md` for math-heavy documents or any project with encoded glyph or display-math artifacts. For book-scale projects, use maintainable `frontmatter/`, `chapters/`, and `backmatter/` source boundaries when they help future editing.
 
 When creating a new project, use `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` with one of the exact task profile values above and a delivery level such as `"clean semantic"`, or copy from `assets/templates/` when that avoids hand-written scaffold drift. If omitted, the helper records `clean semantic`. Do not overwrite existing user files; helper scripts must preserve existing files unless the user explicitly asks to regenerate them. If rendered source pages already exist, use `scripts/render_pdf_pages.sh SOURCE_PDF TARGET_DIR DPI --force` only after deciding that replacing previous page evidence is intentional.
 
@@ -109,20 +124,20 @@ Use `conversion-notes.md` for richer evidence, decisions, commands, and unresolv
 
 ## Goal-Backed Execution
 
-Treat a complex full conversion request such as `$pdf-to-latex 把 "book.pdf" 转成latex` as intended for goal-backed execution because PDF-to-LaTeX conversion can be long-running and resumable. Before starting substantial work on long, scanned, mixed, math-heavy, or book-scale PDFs, read `references/goal-mode.md` and create or continue a concrete goal only when goal tools are available and the current runtime policy allows it. Do not force Goal mode for short light-profile conversions, one-off repairs, compile fixes, or user-requested rough drafts.
+Treat a complex full conversion request such as `$pdf-to-latex 把 "book.pdf" 转成latex` as likely to benefit from goal-backed execution because PDF-to-LaTeX conversion can be long-running and resumable. Before starting substantial work on long, scanned, mixed, math-heavy, or book-scale PDFs, read `references/goal-mode.md`. Create or continue a concrete goal only when goal tools are available, current runtime policy allows it, and the user explicitly asked for Goal mode or approved it after a short confirmation. Do not force Goal mode for short light-profile conversions, one-off repairs, compile fixes, or user-requested rough drafts.
 
-If goal creation is allowed, the goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, clearing blocking math extraction artifacts when present, and stopping only when the quality checks pass or a true blocker is documented.
+If goal creation is allowed and approved, the goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, clearing blocking math extraction artifacts when present, and stopping only when the quality checks pass or a true blocker is documented.
 
-If the current Codex runtime requires an explicit user mention of goal mode before `create_goal` can be called, ask for the shortest confirmation possible, for example: `这个转换任务很长。我可以用 Goal 模式持续执行直到质量检查通过吗？回复 y/Y 确认。` If goal tools are unavailable or policy forbids goal creation, continue with the same resumable workflow using `conversion-state.md` and `conversion-notes.md`. Do not silently downgrade a full conversion into a one-turn rough draft unless the user explicitly asks for a rough draft or no goal mode.
+Ask for the shortest confirmation possible before calling a goal tool, for example: `这个转换任务很长。我可以用 Goal 模式持续执行直到质量检查通过吗？回复 y/Y 确认。` If the user does not approve Goal mode, goal tools are unavailable, or policy forbids goal creation, continue with the same resumable workflow using `conversion-state.md` and `conversion-notes.md`. Do not silently downgrade a full conversion into a one-turn rough draft unless the user explicitly asks for a rough draft or no goal mode.
 
 ## Automatic Conversion And Refinement Workflow
 
 1. Confirm the source PDF path and target output location. If the target exists, first inspect it for `conversion-state.md`, `conversion-notes.md`, `main.tex`, LaTeX logs, and compiled PDFs.
 2. When a resumable project is found, continue from `conversion-state.md`'s `Next action`. If the state file is missing but project artifacts exist, infer the current phase from available files and logs, create `conversion-state.md`, and resume without overwriting work.
-3. For a new target directory, read `references/pdf-analysis.md`, run the Initial Triage above, then create the scaffold with `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` or the matching files in `assets/templates/`.
+3. For a new target directory, read `references/pdf-analysis.md`, run the pre-scaffold Initial Triage above, then create the scaffold with `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` or the matching files in `assets/templates/`. Immediately write durable triage notes and update `conversion-state.md`.
 4. Continue the PDF analysis from `references/pdf-analysis.md`: inspect the PDF type, page count, text layer, images, tables, formulas, references, book-scale structures, and any scanned pages. Classify pages or regions as digital, scanned, mixed, encoded-math, or damaged-text, confirm or upgrade the task profile, then update the state file after analysis. If the PDF is book-scale, also read `references/book-production.md`.
 5. Split or render the source into stable page-level evidence under `evidence/source-pages/`. Prefer per-page images for Codex visual transcription; keep single-page PDFs only when they help asset extraction or page-specific inspection. Use zero-padded page names such as `page-001.png`. For large PDFs, render representative pages first, confirm the profile, then render needed batches with `scripts/render_pdf_pages.sh SOURCE_PDF TARGET_DIR DPI --pages 1,3,5-8` or `--from START --to END`.
-6. Create `page-manifest.md` with the page or region route map when the selected profile needs page-level tracking. For digital pages only, store optional text-layer evidence under `evidence/text-layer/` with page-bounded names such as `page-001.txt`; never use local OCR engines.
+6. Create `page-manifest.md` with the page or region route map when the selected profile needs page-level tracking. For digital pages only, store optional text-layer evidence under `evidence/text-layer/` with page-bounded names such as `page-001.txt`; prefer `scripts/extract_text_pages.sh SOURCE_PDF TARGET_DIR --pages LIST` when it fits. Never use local OCR engines.
 7. Use Codex visual recognition to transcribe each page or page batch into semantic LaTeX fragments under `transcripts/` or equivalent notes. For long documents, default to small resumable batches: 5-10 visually transcribed pages per batch for scanned or complex pages, and 20-50 pages per batch for mostly digital prose after text-layer evidence is available. Update `page-manifest.md` and `conversion-state.md` after each batch. Use subagents for independent page batches only when the current environment and user instructions permit parallel agent work, and keep subagents on bounded transcript or review outputs rather than shared project-state edits.
 8. Build `object-inventory.md`, `style-profile.md`, and `document-ir.md` before writing final LaTeX when the selected profile needs them. For light-profile tasks, a concise outline and object list inside `conversion-notes.md` may replace standalone files; record that simplification before drafting. Track document type, section hierarchy, body blocks, figures, tables, formulas, citations, appendices, cross-page merges, style decisions, and unresolved objects. For book-scale PDFs, track front matter, main matter, back matter, table of contents, lists of figures/tables, bibliography, index/glossary when present, and cross-reference policy using `references/book-production.md`. For math-heavy or damaged-text PDFs, also create `math-inventory.md` and `glyph-map.md` using `references/math-polish.md`. Record the IR or light-outline checkpoint and next action.
 9. Populate the LaTeX project with XeLaTeX as the default engine using `references/latex-rebuild.md`. Generate final chapters from the document IR rather than directly stitching page fragments, and update the state file with created files and active gaps.

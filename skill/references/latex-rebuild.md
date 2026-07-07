@@ -30,7 +30,7 @@ Use this reference when creating the target LaTeX project. The project should be
 
 ## Project Layout
 
-Default layout:
+Maximum layout:
 
 ```text
 latex/
@@ -57,9 +57,21 @@ latex/
 └── conversion-notes.md
 ```
 
-Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Keep page-bounded `pdftotext` evidence under `evidence/text-layer/` when digital extraction is used. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
+This layout is profile-dependent. Use the lightest set that can support review and resume:
+
+```text
+light        main.tex, conversion-state.md, conversion-notes.md
+standard     light files plus page-manifest.md, object-inventory.md, style-profile.md, document-ir.md
+book         standard files plus frontmatter/ and backmatter/ when useful
+math-heavy   standard files plus math-inventory.md and glyph-map.md
+book-math    book files plus math-inventory.md and glyph-map.md
+```
+
+Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Keep page-bounded `pdftotext` evidence under `evidence/text-layer/` when digital extraction is used; prefer `scripts/extract_text_pages.sh` for repeatable page-bounded extraction. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
 
 For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` or the files in `assets/templates/` to create the scaffold. Use exact task profile values: `light`, `standard`, `book`, `math-heavy`, or `book-math`, and delivery levels such as `"clean semantic"`, `"rough draft"`, or `"publication polish"`. The helper creates directories and initial state files without overwriting existing files; it aborts on non-PDF-looking sources and unrelated non-empty target directories. For book profiles it creates `frontmatter/` and `backmatter/`; for math profiles it creates math tracking files. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
+
+If later analysis requires a heavier profile, prefer `scripts/upgrade_latex_project.sh TARGET_DIR NEW_PROFILE`. It creates missing profile files from templates without replacing existing work; after running it, update profile history, the current phase, and the next action in `conversion-state.md` and `conversion-notes.md`.
 
 For book-scale documents, read `references/book-production.md`. Add `frontmatter/`, `chapters/`, or `backmatter/` when those boundaries make the project easier to edit, and record the decision in `style-profile.md` and `conversion-notes.md`.
 

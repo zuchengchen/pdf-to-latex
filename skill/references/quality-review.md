@@ -5,6 +5,7 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 ## Contents
 
 - Required Checks
+- Minimum Done By Profile
 - Compile
 - Text Checks
 - Math Artifact Checks
@@ -31,6 +32,20 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 13. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
 For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable. For an explicit rough draft, record skipped clean-semantic checks and do not mark quality review complete.
+
+## Minimum Done By Profile
+
+Use the selected profile to avoid both under-reviewing complex work and overloading simple work:
+
+```text
+light        compiles when practical, main content is editable, notes record skipped heavy checks and unresolved gaps
+standard     light checks plus page route or outline, object/style/IR reconciliation, compile, representative text/visual review
+book         standard checks plus book front/main/back matter, generated-list strategy, numbering, cross-reference and back-matter review
+math-heavy   standard checks plus math-inventory/glyph-map reconciliation, clean artifact scan, representative formula visual review
+book-math    book and math-heavy checks together
+```
+
+For clean semantic delivery, the matching row is the minimum bar. For publication polish, also complete all applicable reviewer, visual comparison, book, math, and final cleanup gates below. For rough draft delivery, explicitly list which row items remain unfinished.
 
 ## Compile
 

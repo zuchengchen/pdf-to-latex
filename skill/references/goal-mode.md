@@ -10,7 +10,7 @@ Use goal-backed execution for complex full conversion requests such as:
 $pdf-to-latex 把 "Quantum Field Theory for the Gifted Amateur.pdf" 转成latex
 ```
 
-This is the default intent for long, scanned, mixed, math-heavy, encoded, book-scale, or publication-polish PDF rebuilding because the work may require page rendering, visual transcription, document modeling, LaTeX generation, math publication polish, compilation, polishing, and quality review over multiple continuations.
+This is the recommended mode for long, scanned, mixed, math-heavy, encoded, book-scale, or publication-polish PDF rebuilding because the work may require page rendering, visual transcription, document modeling, LaTeX generation, math publication polish, compilation, polishing, and quality review over multiple continuations.
 
 Do not force goal mode for short light-profile conversions, narrow requests such as explaining this skill, reviewing an existing LaTeX snippet, fixing one compile error, or producing a rough draft when the user explicitly asks for one. If a quick initial pass shows a small, mostly digital, structurally simple PDF that can reasonably be handled in one turn, proceed with the resumable state-file workflow instead of asking for Goal mode.
 
@@ -23,8 +23,9 @@ Before creating a goal:
 3. Check the active goal state when goal tools are available.
 4. Continue a matching active goal instead of creating a duplicate.
 5. Ask the user if an active goal conflicts with the requested PDF conversion.
+6. Confirm that the user explicitly requested Goal mode or approved it after a short confirmation.
 
-Only call goal tools when they are available in the current runtime and policy allows them. If runtime policy requires the user to explicitly authorize goal creation, ask one short yes/no confirmation and proceed after confirmation. If goal tools are unavailable or policy forbids goal creation, continue with the same resumable conversion workflow through `conversion-state.md` and `conversion-notes.md`; do not treat the task as a rough draft merely because goal mode is unavailable.
+Only call goal tools when they are available in the current runtime, policy allows them, and the user explicitly requested or approved Goal mode. If approval is missing, ask one short yes/no confirmation and proceed only after confirmation. If the user does not approve, goal tools are unavailable, or policy forbids goal creation, continue with the same resumable conversion workflow through `conversion-state.md` and `conversion-notes.md`; do not treat the task as a rough draft merely because goal mode is unavailable.
 
 ## Objective Template
 
@@ -38,7 +39,7 @@ Do not include a token budget unless the user explicitly requested one.
 
 ## Goal State Files
 
-Create `goal-objective.md` in the target LaTeX directory when useful for restart clarity. Keep it concise:
+Create `goal-objective.md` in the target LaTeX directory when useful for restart clarity. Start from `assets/templates/goal-objective.md` when available, or keep it concise:
 
 ```text
 # Goal Objective

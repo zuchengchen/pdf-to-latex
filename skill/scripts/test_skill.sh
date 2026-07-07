@@ -208,6 +208,46 @@ for expected in \
   fi
 done
 
+upgrade_project="$tmp_dir/upgrade-project"
+"$script_dir/init_latex_project.sh" "$source_pdf" "$upgrade_project" light >/dev/null
+printf 'user-authored IR\n' >"$upgrade_project/document-ir.md"
+"$script_dir/upgrade_latex_project.sh" "$upgrade_project" book-math >/dev/null
+
+for expected in \
+  page-manifest.md \
+  object-inventory.md \
+  style-profile.md \
+  document-ir.md \
+  math-inventory.md \
+  glyph-map.md \
+  frontmatter \
+  backmatter; do
+  if [[ ! -e "$upgrade_project/$expected" ]]; then
+    printf 'Profile upgrade smoke test missing expected path: %s\n' "$expected" >&2
+    exit 1
+  fi
+done
+
+if [[ $(cat "$upgrade_project/document-ir.md") != 'user-authored IR' ]]; then
+  printf 'Expected profile upgrade to preserve existing files.\n' >&2
+  exit 1
+fi
+
+if "$script_dir/upgrade_latex_project.sh" "$upgrade_project" camera-ready >/dev/null 2>&1; then
+  printf 'Expected profile upgrade to reject unsupported profiles.\n' >&2
+  exit 1
+fi
+
+delivery_upgrade_project="$tmp_dir/delivery-upgrade-project"
+mkdir -p "$delivery_upgrade_project"
+printf '\\documentclass{article}\\begin{document}Upgrade\\end{document}\\n' >"$delivery_upgrade_project/main.tex"
+printf 'Source PDF: %s\nDelivery level: polish\n' "$source_pdf" >"$delivery_upgrade_project/conversion-state.md"
+"$script_dir/upgrade_latex_project.sh" "$delivery_upgrade_project" standard >/dev/null
+if ! grep -Fq 'Delivery level: publication polish' "$delivery_upgrade_project/conversion-notes.md"; then
+  printf 'Expected profile upgrade to normalize inferred delivery level.\n' >&2
+  exit 1
+fi
+
 if ! grep -Fq 'Current phase: scaffold created' "$scaffold_project/conversion-state.md"; then
   printf 'Expected scaffold state to record scaffold created phase.\n' >&2
   exit 1
@@ -260,6 +300,22 @@ if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 |
     if [[ ! -f "$sample_project/evidence/source-pages/page-001.png" ]]; then
       printf 'Expected selected source page rendering to create page-001.png.\n' >&2
       exit 1
+    fi
+    if command -v pdftotext >/dev/null 2>&1; then
+      "$script_dir/extract_text_pages.sh" "$real_source_dir/source.pdf" "$sample_project" --pages 1 >/dev/null
+      if [[ ! -f "$sample_project/evidence/text-layer/page-001.txt" ]]; then
+        printf 'Expected selected text extraction to create page-001.txt.\n' >&2
+        exit 1
+      fi
+      if ! grep -Fq 'Real PDF smoke test.' "$sample_project/evidence/text-layer/page-001.txt"; then
+        printf 'Expected extracted page text to contain sample PDF text.\n' >&2
+        exit 1
+      fi
+      if "$script_dir/extract_text_pages.sh" "$real_source_dir/source.pdf" "$sample_project" --pages 1 >/dev/null 2>&1; then
+        printf 'Expected text extraction to refuse overwriting selected evidence without --force.\n' >&2
+        exit 1
+      fi
+      "$script_dir/extract_text_pages.sh" "$real_source_dir/source.pdf" "$sample_project" --pages 1 --force >/dev/null
     fi
     if "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$sample_project" 80 --pages 1 >/dev/null 2>&1; then
       printf 'Expected selected page rendering to refuse overwriting without --force.\n' >&2

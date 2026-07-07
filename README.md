@@ -46,7 +46,7 @@ Restart Codex after updating so the new skill instructions are loaded.
 - Uses rough draft, clean semantic, and publication polish delivery levels so simple tasks can finish without book-scale overhead.
 - Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.
 - Maintains `conversion-state.md` and `conversion-notes.md` so interrupted conversions can resume from the latest checkpoint.
-- Uses helper scripts in `skill/scripts/` for scaffolding, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.
+- Uses helper scripts in `skill/scripts/` for scaffolding, profile upgrades, page-bounded text-layer extraction, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.
 
 ## Repository Structure
 
@@ -76,11 +76,13 @@ pdf-to-latex/
     │   └── quality-review.md
     └── scripts/
         ├── check_latex_artifacts.sh
+        ├── extract_text_pages.sh
         ├── init_latex_project.sh
         ├── latex_healthcheck.sh
         ├── render_pdf_pages.sh
         ├── render_rebuilt_pages.sh
-        └── test_skill.sh
+        ├── test_skill.sh
+        └── upgrade_latex_project.sh
 ```
 
 `skill/SKILL.md` is the trigger and workflow entry point. Detailed procedures live in `skill/references/` so Codex can load only the guidance it needs.
@@ -113,7 +115,7 @@ Run the full local smoke suite after changing the skill:
 skill/scripts/test_skill.sh
 ```
 
-The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, verifies scaffold guardrails, and runs a real PDF render/compile smoke test when local TeX and PDF rendering tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
+The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, verifies scaffold and profile-upgrade guardrails, and runs real PDF rendering, text-layer extraction, and compile smoke tests when local TeX and PDF tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
 
 ## Usage Examples
 
