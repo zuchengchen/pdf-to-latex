@@ -41,7 +41,7 @@ Refine for:
 
 ## Delivery Levels
 
-Use the delivery level recorded in `conversion-notes.md` as the stop target:
+Use the delivery level recorded in `conversion-state.md` and `conversion-notes.md` as the stop target:
 
 - **Rough draft**: compile when practical, preserve obvious structure, and document unresolved content. Do not run expensive polish passes unless the user asks.
 - **Clean semantic**: the default for ordinary conversions. Require a successful compile, usable editable LaTeX, no raw page-transcript leftovers, major objects preserved or documented, and the applicable minimum refinement passes.
@@ -164,7 +164,7 @@ Use the reviewer pass to catch problems the authoring pass may miss. A reviewer 
 - Style profile mismatches, such as a report rebuilt as a flat article with no hierarchy.
 - Layout defects such as clipping, blank pages, unreadable tables, or severe overfull boxes.
 
-When subagents are permitted, delegate reviewer tasks by area rather than by file ownership, for example one reviewer for structure/content, one for tables/formulas, and one for rendered layout. The main agent integrates findings, edits files, recompiles, and updates notes.
+When subagents are permitted, delegate reviewer tasks by area rather than by file ownership, for example one reviewer for structure/content, one for tables/formulas, and one for rendered layout. Subagents should return findings only. The main agent integrates findings, edits source files, recompiles, and updates shared notes and state files.
 
 ## Issue Order
 

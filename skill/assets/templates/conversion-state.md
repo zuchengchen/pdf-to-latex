@@ -5,7 +5,7 @@ Target directory: {{TARGET_DIR}}
 Last updated: {{DATE_UTC}}
 Current phase: scaffold created
 Task profile: {{TASK_PROFILE}}
-Delivery level:
+Delivery level: {{DELIVERY_LEVEL}}
 
 ## Completed Checkpoints
 - [ ] PDF analysis complete
@@ -36,7 +36,7 @@ Delivery level:
 - [ ] Quality review complete
 
 ## Last Successful Command
-scripts/init_latex_project.sh {{SOURCE_PDF}} {{TARGET_DIR}} {{TASK_PROFILE}}
+scripts/init_latex_project.sh {{SOURCE_PDF}} {{TARGET_DIR}} {{TASK_PROFILE}} "{{DELIVERY_LEVEL}}"
 
 ## Active Files
 

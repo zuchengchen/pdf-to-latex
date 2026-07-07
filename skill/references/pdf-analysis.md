@@ -48,9 +48,11 @@ Record findings in the target `latex/conversion-notes.md` as work proceeds. Also
 pdfinfo source.pdf
 ```
 
-5. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. If the quick evidence is inconclusive, start with `standard` and upgrade later after deeper analysis.
-6. For a new target directory, use `scripts/init_latex_project.sh` or the bundled `assets/templates/` files to create the scaffold with the provisional task profile before recording durable analysis.
-7. For digital PDFs, optionally extract page-bounded text-layer evidence under the project:
+5. Sample the first page's text layer when `pdftotext` is available and the PDF appears selectable; for visually complex, scanned, long, or book-like PDFs, render representative pages to a temporary location when needed before scaffolding.
+6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis.
+7. For long, scanned, mixed, math-heavy, encoded, or book-scale PDFs, record a feasibility note before broad transcription. Include page count, estimated scanned or visually complex pages, selected delivery level, first milestone, batch size, and whether Goal mode or user confirmation is needed. When the work is likely to exceed a short one-turn conversion, confirm Goal mode or a narrower first milestone before committing to full-page transcription.
+8. For a new target directory, use `scripts/init_latex_project.sh` or the bundled `assets/templates/` files to create the scaffold with the provisional task profile and delivery level before recording durable analysis.
+9. For digital PDFs, optionally extract page-bounded text-layer evidence under the project:
 
 ```bash
 mkdir -p latex/evidence/text-layer
@@ -59,7 +61,7 @@ pdftotext -f 1 -l 1 -layout source.pdf latex/evidence/text-layer/page-001.txt
 
 Use this only as draft evidence for selectable text, not as final LaTeX and not as OCR. Prefer page-bounded files such as `page-001.txt` over one giant text dump because they align with rendered page evidence and `page-manifest.md`.
 
-8. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short PDFs and for scanned PDFs only when the page count is practical. For long PDFs, render representative pages first, confirm or upgrade the profile and transcription plan, then render page batches as needed. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style. The helper supports full renders, `--pages 1,3,5-8`, and `--from START --to END`; it refuses to overwrite existing selected evidence unless `--force` is provided.
+10. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short PDFs and for scanned PDFs only when the page count is practical. For long PDFs, render representative pages first, confirm or upgrade the profile and transcription plan, then render page batches as needed. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style. The helper supports full renders, `--pages 1,3,5-8`, and `--from START --to END`; it refuses to overwrite existing selected evidence unless `--force` is provided.
 
 ```bash
 mkdir -p latex/evidence/source-pages
@@ -68,10 +70,10 @@ pdftoppm -png -r 160 source.pdf latex/evidence/source-pages/page
 scripts/render_pdf_pages.sh source.pdf latex 180 --pages 1,3,5-8
 ```
 
-9. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
-10. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, batch assignment, and transcription status.
-11. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, a concise outline and object list inside `conversion-notes.md` may replace standalone inventory or IR files; record why the omitted files would not improve review or resume. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
-12. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
+11. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
+12. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, batch assignment, and transcription status.
+13. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, a concise outline and object list inside `conversion-notes.md` may replace standalone inventory or IR files; record why the omitted files would not improve review or resume. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
+14. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
 
@@ -124,13 +126,14 @@ Do not create a compileable draft by embedding each scanned page as `\includegra
 For long PDFs, make batching explicit before large transcription or reconstruction:
 
 - Start with representative analysis pages: first page, one early body page, one middle body page, one final page, plus known table-heavy, formula-heavy, bibliography, appendix, index, or glossary pages when detected.
+- Record a feasibility note before broad transcription: total pages, estimated scanned or complex pages, target delivery level, proposed first milestone, and whether Goal mode or user confirmation is needed.
 - Use 5-10 pages per batch for scanned, mixed, damaged-text, table-heavy, or formula-heavy pages.
 - Use 20-50 pages per batch for mostly digital prose after page-bounded text-layer evidence exists.
 - Record each batch in `page-manifest.md` with page range, route, assigned evidence paths, transcript status, and unresolved objects.
 - Update `conversion-state.md` after every completed batch with the latest completed pages and the next concrete batch.
 - For books, batch by structural boundary when possible: front matter, each chapter or chapter section, appendices, bibliography, and index/glossary.
 
-Do not commit to full-page transcription for a very long scanned PDF without a resumable batch plan and a current state file.
+Do not commit to full-page transcription for a very long scanned PDF without a resumable batch plan, a current state file, and either Goal-mode confirmation or a user-approved first milestone.
 
 ## Page Manifest
 
@@ -170,7 +173,7 @@ Continuity:
 Uncertainties:
 ```
 
-When permitted by the current system and user instructions, independent page batches may be delegated to subagents. Give each subagent a bounded batch, the relevant page images, optional digital text-layer excerpts, and the required page transcript format. The main agent must merge fragments, resolve cross-page continuity, and produce the final LaTeX project.
+When permitted by the current system and user instructions, independent page batches may be delegated to subagents. Give each subagent a bounded batch, the relevant page images, optional digital text-layer excerpts, and the required page transcript format. Subagents should return transcript fragments, object notes, math findings, or review findings only; the main agent must merge fragments, resolve cross-page continuity, update shared state files, and produce the final LaTeX project.
 
 ## Object Inventory
 

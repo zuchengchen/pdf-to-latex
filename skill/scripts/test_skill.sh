@@ -161,6 +161,18 @@ if "$script_dir/init_latex_project.sh" "$source_pdf" "$unrelated_project" standa
   exit 1
 fi
 
+logs_only_project="$tmp_dir/logs-only"
+mkdir -p "$logs_only_project/logs"
+if "$script_dir/init_latex_project.sh" "$source_pdf" "$logs_only_project" standard >/dev/null 2>&1; then
+  printf 'Expected scaffold initialization to reject a logs-only target directory.\n' >&2
+  exit 1
+fi
+
+if "$script_dir/init_latex_project.sh" "$source_pdf" "$tmp_dir/bad-delivery" standard "camera ready" >/dev/null 2>&1; then
+  printf 'Expected scaffold initialization to reject an unsupported delivery level.\n' >&2
+  exit 1
+fi
+
 resumable_project="$tmp_dir/resumable"
 mkdir -p "$resumable_project"
 printf 'existing main\n' >"$resumable_project/main.tex"
@@ -171,7 +183,7 @@ if [[ $(cat "$resumable_project/main.tex") != 'existing main' ]]; then
   exit 1
 fi
 
-"$script_dir/init_latex_project.sh" "$source_pdf" "$scaffold_project" book-math >/dev/null
+"$script_dir/init_latex_project.sh" "$source_pdf" "$scaffold_project" book-math "publication polish" >/dev/null
 
 for expected in \
   main.tex \
@@ -211,6 +223,16 @@ if ! grep -Fq -- '- [ ] Initial triage complete' "$scaffold_project/conversion-s
   exit 1
 fi
 
+if ! grep -Fq 'Delivery level: publication polish' "$scaffold_project/conversion-state.md"; then
+  printf 'Expected scaffold state to record the requested delivery level.\n' >&2
+  exit 1
+fi
+
+if ! grep -Fq 'Delivery level: publication polish' "$scaffold_project/conversion-notes.md"; then
+  printf 'Expected scaffold notes to record the requested delivery level.\n' >&2
+  exit 1
+fi
+
 if ! grep -Fq 'scripts/init_latex_project.sh' "$scaffold_project/conversion-state.md"; then
   printf 'Expected scaffold state to record initialization command.\n' >&2
   exit 1
@@ -230,6 +252,10 @@ if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 |
   if (cd "$real_source_dir" && xelatex -interaction=nonstopmode -halt-on-error source.tex >/dev/null 2>&1); then
     sample_project="$tmp_dir/sample-project"
     "$script_dir/init_latex_project.sh" "$real_source_dir/source.pdf" "$sample_project" standard >/dev/null
+    if ! grep -Fq 'Delivery level: clean semantic' "$sample_project/conversion-state.md"; then
+      printf 'Expected default delivery level to be clean semantic.\n' >&2
+      exit 1
+    fi
     "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$sample_project" 80 --pages 1 >/dev/null
     if [[ ! -f "$sample_project/evidence/source-pages/page-001.png" ]]; then
       printf 'Expected selected source page rendering to create page-001.png.\n' >&2

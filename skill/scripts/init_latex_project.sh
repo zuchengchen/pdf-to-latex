@@ -2,12 +2,13 @@
 set -euo pipefail
 
 usage() {
-  printf 'Usage: %s SOURCE_PDF [TARGET_DIR] [TASK_PROFILE]\n' "$0" >&2
+  printf 'Usage: %s SOURCE_PDF [TARGET_DIR] [TASK_PROFILE] [DELIVERY_LEVEL]\n' "$0" >&2
   printf 'Creates a resumable LaTeX conversion scaffold from bundled templates.\n' >&2
   printf 'TASK_PROFILE may be light, standard, book, math-heavy, or book-math.\n' >&2
+  printf 'DELIVERY_LEVEL may be "rough draft", "clean semantic", or "publication polish"; default is "clean semantic".\n' >&2
 }
 
-if [[ $# -lt 1 || $# -gt 3 ]]; then
+if [[ $# -lt 1 || $# -gt 4 ]]; then
   usage
   exit 2
 fi
@@ -15,11 +16,29 @@ fi
 source_pdf=$1
 target_dir=${2:-latex}
 task_profile=${3:-standard}
+delivery_level=${4:-"clean semantic"}
 
 case "$task_profile" in
   light|standard|book|math-heavy|book-math) ;;
   *)
     printf 'Unsupported task profile: %s\n' "$task_profile" >&2
+    usage
+    exit 2
+    ;;
+esac
+
+case "$delivery_level" in
+  "rough draft"|rough|rough-draft)
+    delivery_level="rough draft"
+    ;;
+  "clean semantic"|clean|clean-semantic)
+    delivery_level="clean semantic"
+    ;;
+  "publication polish"|publication|publication-polish|polish)
+    delivery_level="publication polish"
+    ;;
+  *)
+    printf 'Unsupported delivery level: %s\n' "$delivery_level" >&2
     usage
     exit 2
     ;;
@@ -73,8 +92,8 @@ directory_has_project_markers() {
   local dir=$1
   local marker
 
-  for marker in conversion-state.md conversion-notes.md main.tex logs evidence/source-pages; do
-    if [[ -e "$dir/$marker" ]]; then
+  for marker in conversion-state.md conversion-notes.md main.tex; do
+    if [[ -f "$dir/$marker" ]]; then
       return 0
     fi
   done
@@ -114,6 +133,7 @@ escape_sed_replacement() {
 source_pdf_value=$(escape_sed_replacement "$source_pdf")
 target_dir_value=$(escape_sed_replacement "$target_dir")
 task_profile_value=$(escape_sed_replacement "$task_profile")
+delivery_level_value=$(escape_sed_replacement "$delivery_level")
 date_value=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 copy_template() {
@@ -129,6 +149,7 @@ copy_template() {
     -e "s|{{SOURCE_PDF}}|$source_pdf_value|g" \
     -e "s|{{TARGET_DIR}}|$target_dir_value|g" \
     -e "s|{{TASK_PROFILE}}|$task_profile_value|g" \
+    -e "s|{{DELIVERY_LEVEL}}|$delivery_level_value|g" \
     -e "s|{{DATE_UTC}}|$date_value|g" \
     "$template_dir/$template_name" >"$destination"
   printf 'Created %s\n' "$destination"

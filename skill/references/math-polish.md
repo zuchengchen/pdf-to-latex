@@ -111,7 +111,7 @@ Record counts in `math-inventory.md` and `conversion-notes.md`. If the count is 
 9. Update `math-inventory.md`, `glyph-map.md`, `conversion-notes.md`, and `conversion-state.md`.
 10. Repeat until artifact scans are clean and the reviewed formulas are readable.
 
-Use subagents for independent chapter or page-batch math review when the environment permits it. The main agent owns the shared `glyph-map.md`, merges replacements, compiles, and resolves conflicts.
+Use subagents for independent chapter or page-batch math review when the environment permits it. Subagents should return glyph candidates, formula findings, or local transcript corrections only. The main agent owns the shared `glyph-map.md`, source edits, merges, compilation, state updates, and conflict resolution.
 
 ## Visual Identification
 
