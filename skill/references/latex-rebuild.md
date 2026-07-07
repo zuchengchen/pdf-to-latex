@@ -56,7 +56,7 @@ latex/
 └── conversion-notes.md
 ```
 
-Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
+Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
 
 For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or the files in `assets/templates/` to create the standard scaffold. The helper creates directories and initial state files without overwriting existing files; it aborts on non-PDF-looking sources and non-empty target directories that do not look like resumable conversion projects. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
 
@@ -66,7 +66,7 @@ Before creating files in an existing project, read `conversion-state.md` and `co
 
 ## Document Model First
 
-Before drafting final LaTeX, build `document-ir.md` from transcripts, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
+Before drafting final LaTeX for standard, book, math-heavy, or visually complex projects, build `document-ir.md` from transcripts, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
 
 Use this compact shape, or start from `assets/templates/document-ir.md`:
 
@@ -91,7 +91,7 @@ Unresolved blocks:
 Style decisions:
 ```
 
-Generate `main.tex` and `chapters/*.tex` from this document model. The IR should make page order, section hierarchy, object placement, and unresolved uncertainties explicit before final source is written. For a light task, a concise outline inside `conversion-notes.md` may replace a standalone IR when the source is short and structurally simple.
+Generate `main.tex` and `chapters/*.tex` from this document model. The IR should make page order, section hierarchy, object placement, and unresolved uncertainties explicit before final source is written. For a light task, a concise outline inside `conversion-notes.md` may replace a standalone IR when the source is short and structurally simple; compare final LaTeX against that outline during quality review.
 
 ## XeLaTeX Baseline
 
@@ -293,7 +293,7 @@ Task profile:
 - [ ] Book production profile complete when applicable
 - [ ] Document IR complete
 - [ ] Semantic outline complete
-- [ ] Project scaffold created
+- [x] Project scaffold created
 - [ ] Main content drafted
 - [ ] Figures/assets handled
 - [ ] Tables/formulas handled

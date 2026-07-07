@@ -36,16 +36,17 @@ Restart Codex after updating so the new skill instructions are loaded.
 
 - Chooses a light, standard, or book/math-heavy workflow profile to avoid overloading simple tasks.
 - Inspects digital, scanned, mixed, encoded, and damaged-text PDFs.
-- Renders durable page evidence under `latex/evidence/source-pages/` for visual transcription and later resume.
+- Renders durable page evidence under `latex/evidence/source-pages/` for visual transcription and later resume, with page-list and page-range batching for long PDFs.
 - Uses optional `pdftotext` extraction only for digital PDF text-layer evidence.
 - Builds document IR, object inventory, and style profile when the selected profile needs them.
 - Detects academic/technical book, textbook, monograph, proceedings, thesis, dissertation, and long manual structures.
 - Tracks math-heavy reconstruction with `math-inventory.md` and `glyph-map.md` when formulas or encoded symbols need focused cleanup.
 - Creates consistent project scaffolds from bundled templates when starting a new conversion.
 - Rebuilds the document as a maintainable XeLaTeX project rather than scanned page screenshots.
+- Uses rough draft, clean semantic, and publication polish delivery levels so simple tasks can finish without book-scale overhead.
 - Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.
 - Maintains `conversion-state.md` and `conversion-notes.md` so interrupted conversions can resume from the latest checkpoint.
-- Uses helper scripts in `skill/scripts/` for scaffolding, rendering pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.
+- Uses helper scripts in `skill/scripts/` for scaffolding, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.
 
 ## Repository Structure
 
@@ -78,6 +79,7 @@ pdf-to-latex/
         ├── init_latex_project.sh
         ├── latex_healthcheck.sh
         ├── render_pdf_pages.sh
+        ├── render_rebuilt_pages.sh
         └── test_skill.sh
 ```
 

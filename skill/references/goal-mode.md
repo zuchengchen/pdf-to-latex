@@ -4,15 +4,15 @@ Use this reference when a PDF-to-LaTeX conversion should run as a goal-backed ta
 
 ## When To Use Goal Mode
 
-Use goal-backed execution for full conversion requests such as:
+Use goal-backed execution for complex full conversion requests such as:
 
 ```text
 $pdf-to-latex 把 "Quantum Field Theory for the Gifted Amateur.pdf" 转成latex
 ```
 
-This is the default intent for complete PDF rebuilding because the work may require page rendering, visual transcription, document modeling, LaTeX generation, math publication polish, compilation, polishing, and quality review over multiple continuations.
+This is the default intent for long, scanned, mixed, math-heavy, encoded, book-scale, or publication-polish PDF rebuilding because the work may require page rendering, visual transcription, document modeling, LaTeX generation, math publication polish, compilation, polishing, and quality review over multiple continuations.
 
-Do not force goal mode for narrow requests such as explaining this skill, reviewing an existing LaTeX snippet, fixing one compile error, or producing a rough draft when the user explicitly asks for one.
+Do not force goal mode for short light-profile conversions, narrow requests such as explaining this skill, reviewing an existing LaTeX snippet, fixing one compile error, or producing a rough draft when the user explicitly asks for one. If a quick initial pass shows a small, mostly digital, structurally simple PDF that can reasonably be handled in one turn, proceed with the resumable state-file workflow instead of asking for Goal mode.
 
 ## Goal Startup
 
@@ -31,7 +31,7 @@ Only call goal tools when they are available in the current runtime and policy a
 Use a concrete objective like this, filling in paths:
 
 ```text
-Use $pdf-to-latex to rebuild SOURCE_PDF into an editable XeLaTeX project under TARGET_DIR. Continue from TARGET_DIR/conversion-state.md on every turn when it exists. Complete only when the task profile is recorded, durable page evidence exists under TARGET_DIR/evidence/source-pages when visual transcription or comparison is needed, page-manifest.md and page transcripts exist when the selected profile requires them, object-inventory.md, style-profile.md, and document-ir.md exist or their light-profile omission is documented, book-production checks are completed when the document is a book, thesis, monograph, proceedings volume, or has front/back matter, math-inventory.md and glyph-map.md exist when the document is math-heavy or encoded, main.tex and chapter files are generated from document-ir.md or a documented light-profile outline, the project compiles successfully with XeLaTeX, minimum refinement passes and reviewer checks are completed, math artifact scans of final source are clean when applicable, quality-review.md checks pass or true blockers are documented, conversion-notes.md records verification, and conversion-state.md says Next action: None; quality review complete.
+Use $pdf-to-latex to rebuild SOURCE_PDF into an editable XeLaTeX project under TARGET_DIR at DELIVERY_LEVEL. Continue from TARGET_DIR/conversion-state.md on every turn when it exists. Complete only when the task profile and delivery level are recorded, durable page evidence exists under TARGET_DIR/evidence/source-pages when visual transcription or comparison is needed, page-manifest.md and page transcripts exist when the selected profile requires them, object-inventory.md, style-profile.md, and document-ir.md exist or their light-profile omission is documented, book-production checks are completed when the document is a book, thesis, monograph, proceedings volume, or has front/back matter, math-inventory.md and glyph-map.md exist when the document is math-heavy or encoded, main.tex and chapter files are generated from document-ir.md or a documented light-profile outline, the project compiles successfully with XeLaTeX, minimum refinement passes and reviewer checks are completed according to DELIVERY_LEVEL, math artifact scans of final source are clean when applicable, quality-review.md checks pass or true blockers are documented, conversion-notes.md records verification, and conversion-state.md says Next action: None; quality review complete.
 ```
 
 Do not include a token budget unless the user explicitly requested one.
@@ -59,6 +59,7 @@ The goal is complete only when:
 
 - `conversion-state.md` exists and is consistent with the filesystem.
 - The selected task profile is recorded in `conversion-state.md` or `conversion-notes.md`.
+- The selected delivery level is recorded, and any rough-draft shortcuts or light-profile omissions are explicitly documented.
 - Durable evidence exists under `evidence/source-pages/` when page-level visual transcription or later comparison was needed.
 - `page-manifest.md` exists when page-level transcription was used and the selected profile requires it.
 - `object-inventory.md`, `style-profile.md`, and `document-ir.md` exist when page-level reconstruction was used, or their omission is justified for a light-profile task.

@@ -1,6 +1,6 @@
 # Quality Review Reference
 
-Use this reference before delivering a rebuilt LaTeX project. The quality bar is semantic completeness, readability, and near-publication math quality when formulas are visible and readable, not pixel-level matching.
+Use this reference before delivering a rebuilt LaTeX project. The quality bar follows the recorded delivery level: rough draft, clean semantic, or publication polish. The normal target is semantic completeness and readability, with near-publication math quality when formulas are visible, readable, and the selected profile requires it; the target is not pixel-level matching.
 
 ## Contents
 
@@ -30,7 +30,7 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar is
 12. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
 13. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
-For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
+For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable. For an explicit rough draft, record skipped clean-semantic checks and do not mark quality review complete.
 
 ## Compile
 
@@ -118,6 +118,7 @@ Render pages or inspect the PDF directly:
 ```bash
 mkdir -p evidence/rebuilt-pages
 pdftoppm -png -r 140 rebuilt.pdf evidence/rebuilt-pages/page
+path/to/pdf-to-latex/scripts/render_rebuilt_pages.sh . main.pdf 140
 ```
 
 Check:
@@ -172,7 +173,7 @@ If the notes contain unresolved critical gaps, report them clearly in the final 
 
 ## Refinement Acceptance
 
-Before delivering a refined project, confirm:
+Before delivering a refined project, confirm the checks required by the selected delivery level:
 
 - The latest compile succeeds.
 - User-stated issues have been addressed or explicitly documented as unresolved.
@@ -196,6 +197,8 @@ Before delivering a refined project, confirm:
 - Key semantic content from the source PDF remains present after refinement.
 - `conversion-notes.md` lists the refinement passes, commands, fixes, and remaining issues.
 
+For a rough draft, explicitly list which clean-semantic or publication-polish checks remain. For publication polish, do not downgrade unresolved book or math quality gates into notes-only issues unless they are true blockers or the user approved the unresolved item.
+
 ## Delivery Checklist
 
 Before final response:
@@ -214,4 +217,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete the task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete a clean semantic or publication-polish task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

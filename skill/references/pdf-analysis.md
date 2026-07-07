@@ -56,17 +56,18 @@ pdftotext -layout source.pdf -
 
 Use this only as draft evidence for selectable text, not as final LaTeX and not as OCR.
 
-7. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short and scanned PDFs. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style. The helper refuses to overwrite existing `page-*.png` or `page-*.pdf` evidence unless `--force` is provided; use that flag only when replacing prior evidence is intentional.
+7. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short PDFs and for scanned PDFs only when the page count is practical. For long PDFs, render representative pages first, choose the profile and transcription plan, then render page batches as needed. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style. The helper supports full renders, `--pages 1,3,5-8`, and `--from START --to END`; it refuses to overwrite existing selected evidence unless `--force` is provided.
 
 ```bash
 mkdir -p latex/evidence/source-pages
 pdfseparate source.pdf latex/evidence/source-pages/page-%03d.pdf
 pdftoppm -png -r 160 source.pdf latex/evidence/source-pages/page
+scripts/render_pdf_pages.sh source.pdf latex 180 --pages 1,3,5-8
 ```
 
 8. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
 9. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, and transcription status.
-10. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, record why any inventory or IR file is omitted. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
+10. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, a concise outline and object list inside `conversion-notes.md` may replace standalone inventory or IR files; record why the omitted files would not improve review or resume. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
 11. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
@@ -117,7 +118,7 @@ Do not create a compileable draft by embedding each scanned page as `\includegra
 
 ## Page Manifest
 
-Create `page-manifest.md` before large-scale transcription. Keep it compact and update it as pages are assigned, transcribed, merged, or revisited. For new projects, start from `assets/templates/page-manifest.md` or `scripts/init_latex_project.sh`.
+Create `page-manifest.md` before large-scale transcription. Keep it compact and update it as pages are rendered, sampled, assigned, transcribed, merged, or revisited. For new projects, start from `assets/templates/page-manifest.md` or `scripts/init_latex_project.sh`. For long PDFs, include a rendering plan so future batches do not duplicate existing page evidence.
 
 Use this shape:
 
@@ -129,6 +130,7 @@ Rendered pages: evidence/source-pages/
 Single-page PDFs:
 Digital text-layer extracts:
 Task profile:
+Rendering plan:
 
 ## Page Routes
 - Page 001: digital | evidence: evidence/source-pages/page-001.png | text layer: available | status: pending
@@ -300,6 +302,7 @@ Text layer:
 Scanned or visual-only regions:
 Page/region route map:
 Page evidence:
+Rendered batches:
 Optional digital text-layer extracts:
 Object inventory:
 Style profile:

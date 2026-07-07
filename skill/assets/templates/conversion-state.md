@@ -3,7 +3,7 @@
 Source PDF: {{SOURCE_PDF}}
 Target directory: {{TARGET_DIR}}
 Last updated: {{DATE_UTC}}
-Current phase: initialized
+Current phase: scaffold created
 Task profile: {{TASK_PROFILE}}
 
 ## Completed Checkpoints
@@ -17,7 +17,7 @@ Task profile: {{TASK_PROFILE}}
 - [ ] Book production profile complete when applicable
 - [ ] Document IR complete
 - [ ] Semantic outline complete
-- [ ] Project scaffold created
+- [x] Project scaffold created
 - [ ] Main content drafted
 - [ ] Figures/assets handled
 - [ ] Tables/formulas handled
@@ -34,6 +34,7 @@ Task profile: {{TASK_PROFILE}}
 - [ ] Quality review complete
 
 ## Last Successful Command
+scripts/init_latex_project.sh {{SOURCE_PDF}} {{TARGET_DIR}} {{TASK_PROFILE}}
 
 ## Active Files
 

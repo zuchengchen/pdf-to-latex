@@ -5,6 +5,7 @@ Use this reference after Codex has generated a LaTeX project from a PDF, or when
 ## Contents
 
 - Refinement Goal
+- Delivery Levels
 - Inputs
 - Refinement Loop
 - Polish Passes
@@ -38,6 +39,14 @@ Refine for:
 - Reduced overfull boxes, missing files, unresolved references, and obvious layout defects.
 - Clear notes for approximations, uncertain content, and unresolved issues.
 
+## Delivery Levels
+
+Use the delivery level recorded in `conversion-notes.md` as the stop target:
+
+- **Rough draft**: compile when practical, preserve obvious structure, and document unresolved content. Do not run expensive polish passes unless the user asks.
+- **Clean semantic**: the default for ordinary conversions. Require a successful compile, usable editable LaTeX, no raw page-transcript leftovers, major objects preserved or documented, and the applicable minimum refinement passes.
+- **Publication polish**: use for explicit high-quality requests, book-scale projects, math-heavy or encoded PDFs, and goal objectives that require full quality gates. Require full book/math passes, reviewer checks, visual comparison, and clean final artifact scans when applicable.
+
 ## Inputs
 
 Use whichever inputs are available:
@@ -66,11 +75,11 @@ When resuming an interrupted project, read `conversion-state.md` first. If it is
 4. Record the failure summary and intended fix in `conversion-state.md`.
 5. Fix one focused category of issues or run the next polish pass below.
 6. Recompile.
-7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`.
+7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`; use `scripts/render_rebuilt_pages.sh PROJECT_DIR main.pdf DPI` when available and suitable.
 8. Compare against the source PDF, document IR, object inventory, style profile, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
 9. Run reviewer checks when they can catch a distinct class of issues.
 10. Update `conversion-notes.md` and `conversion-state.md`.
-11. Repeat until the quality review passes or a true blocker is documented. Broad fixable artifacts are not complete merely because they are listed in notes.
+11. Repeat until the selected delivery level passes or a true blocker is documented. Broad fixable artifacts are not complete merely because they are listed in notes.
 
 Keep changes small enough that a failed compile can be traced to the last batch.
 
@@ -93,7 +102,7 @@ For light-profile documents, complete only the applicable passes and document sk
 
 ## Minimum Refinement
 
-Unless the user explicitly requests a rough draft, complete at least:
+Unless the user explicitly requests a rough draft, complete at least the clean semantic checks:
 
 - One compile-fix pass after the first failed or successful compile.
 - One transcript merge and structure pass.
@@ -104,6 +113,8 @@ Unless the user explicitly requests a rough draft, complete at least:
 - One final notes and state update naming completed passes and remaining issues.
 
 For light tasks, mark non-applicable passes as skipped with a reason. Do not deliver while raw transcript blocks, obvious page-boundary artifacts, severe layout defects, unresolved compile problems, or broad math extraction artifacts remain fixable with reasonable effort.
+
+For publication polish, also complete every applicable book, math, reviewer, and visual comparison gate. For a rough draft, record which clean semantic checks were intentionally skipped.
 
 ## Quality Rubric
 

@@ -193,6 +193,21 @@ for expected in \
   fi
 done
 
+if ! grep -Fq 'Current phase: scaffold created' "$scaffold_project/conversion-state.md"; then
+  printf 'Expected scaffold state to record scaffold created phase.\n' >&2
+  exit 1
+fi
+
+if ! grep -Fq -- '- [x] Project scaffold created' "$scaffold_project/conversion-state.md"; then
+  printf 'Expected scaffold state to mark project scaffold checkpoint complete.\n' >&2
+  exit 1
+fi
+
+if ! grep -Fq 'scripts/init_latex_project.sh' "$scaffold_project/conversion-state.md"; then
+  printf 'Expected scaffold state to record initialization command.\n' >&2
+  exit 1
+fi
+
 if "$script_dir/render_pdf_pages.sh" "$source_pdf" "$tmp_dir/render-dpi-zero" 0 >/dev/null 2>&1; then
   printf 'Expected page rendering to reject zero DPI.\n' >&2
   exit 1
@@ -205,6 +220,19 @@ if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 |
   printf '\\documentclass{article}\\begin{document}Real PDF smoke test.\\end{document}\\n' >"$real_source_dir/source.tex"
 
   if (cd "$real_source_dir" && xelatex -interaction=nonstopmode -halt-on-error source.tex >/dev/null 2>&1); then
+    sample_project="$tmp_dir/sample-project"
+    "$script_dir/init_latex_project.sh" "$real_source_dir/source.pdf" "$sample_project" standard >/dev/null
+    "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$sample_project" 80 --pages 1 >/dev/null
+    if [[ ! -f "$sample_project/evidence/source-pages/page-001.png" ]]; then
+      printf 'Expected selected source page rendering to create page-001.png.\n' >&2
+      exit 1
+    fi
+    if "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$sample_project" 80 --pages 1 >/dev/null 2>&1; then
+      printf 'Expected selected page rendering to refuse overwriting without --force.\n' >&2
+      exit 1
+    fi
+    "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$sample_project" 80 --pages 1 --force >/dev/null
+
     "$script_dir/init_latex_project.sh" "$real_source_dir/source.pdf" "$real_project" standard >/dev/null
     "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$real_project" 80 >/dev/null
 
@@ -215,6 +243,16 @@ if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 |
 
     "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$real_project" 80 --force >/dev/null
     "$script_dir/latex_healthcheck.sh" "$real_project" main.tex >/dev/null
+    "$script_dir/render_rebuilt_pages.sh" "$real_project" main.pdf 80 >/dev/null
+    if [[ ! -f "$real_project/evidence/rebuilt-pages/page-001.png" ]]; then
+      printf 'Expected rebuilt page rendering to create page-001.png.\n' >&2
+      exit 1
+    fi
+    if "$script_dir/render_rebuilt_pages.sh" "$real_project" main.pdf 80 --from 1 --to 1 >/dev/null 2>&1; then
+      printf 'Expected rebuilt page rendering to refuse overwriting selected evidence without --force.\n' >&2
+      exit 1
+    fi
+    "$script_dir/render_rebuilt_pages.sh" "$real_project" main.pdf 80 --from 1 --to 1 --force >/dev/null
     "$script_dir/check_latex_artifacts.sh" "$real_project" >/dev/null
 
     nested_project="$tmp_dir/nested-project"
