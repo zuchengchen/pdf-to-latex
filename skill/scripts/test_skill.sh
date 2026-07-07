@@ -66,15 +66,62 @@ cleanup() {
 }
 trap cleanup EXIT
 
+create_minimal_pdf() {
+  local destination=$1
+
+  printf '%s\n' \
+    '%PDF-1.4' \
+    '1 0 obj' \
+    '<< /Type /Catalog /Pages 2 0 R >>' \
+    'endobj' \
+    '2 0 obj' \
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>' \
+    'endobj' \
+    '3 0 obj' \
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 72 72] /Resources << >> /Contents 4 0 R >>' \
+    'endobj' \
+    '4 0 obj' \
+    '<< /Length 0 >>' \
+    'stream' \
+    '' \
+    'endstream' \
+    'endobj' \
+    'xref' \
+    '0 5' \
+    '0000000000 65535 f ' \
+    '0000000009 00000 n ' \
+    '0000000058 00000 n ' \
+    '0000000115 00000 n ' \
+    '0000000217 00000 n ' \
+    'trailer' \
+    '<< /Size 5 /Root 1 0 R >>' \
+    'startxref' \
+    '266' \
+    '%%EOF' >"$destination"
+}
+
 clean_project="$tmp_dir/clean"
 dirty_project="$tmp_dir/dirty"
 empty_project="$tmp_dir/empty"
-mkdir -p "$clean_project/chapters" "$dirty_project/chapters" "$empty_project"
+nonstandard_project="$tmp_dir/nonstandard"
+false_positive_project="$tmp_dir/false-positive"
+mkdir -p \
+  "$clean_project/chapters" \
+  "$dirty_project/chapters" \
+  "$empty_project" \
+  "$nonstandard_project/sections" \
+  "$false_positive_project/chapters"
 
 printf '\\documentclass{article}\\begin{document}Clean\\end{document}\\n' >"$clean_project/main.tex"
 printf 'This source contains no blocking extraction artifacts.\\n' >"$clean_project/chapters/content.tex"
 
 printf '\\documentclass{article}\\begin{document}\\pdfglyph{bad}\\end{document}\\n' >"$dirty_project/main.tex"
+
+printf '\\documentclass{article}\\begin{document}\\input{sections/content}\\end{document}\\n' >"$nonstandard_project/main.tex"
+printf 'Formula artifact: \\pdfglyph{bad}.\\n' >"$nonstandard_project/sections/content.tex"
+
+printf '\\documentclass{article}\\begin{document}\\input{chapters/content}\\end{document}\\n' >"$false_positive_project/main.tex"
+printf 'This chapter explains that this is not a raw glyph placeholder.\\n' >"$false_positive_project/chapters/content.tex"
 
 "$script_dir/check_latex_artifacts.sh" "$clean_project" >/dev/null
 
@@ -83,11 +130,47 @@ if "$script_dir/check_latex_artifacts.sh" "$dirty_project" >/dev/null 2>&1; then
   exit 1
 fi
 
-"$script_dir/check_latex_artifacts.sh" "$empty_project" >/dev/null
+if "$script_dir/check_latex_artifacts.sh" "$nonstandard_project" >/dev/null 2>&1; then
+  printf 'Expected artifact scan to fail for nonstandard included source.\n' >&2
+  exit 1
+fi
+
+"$script_dir/check_latex_artifacts.sh" "$false_positive_project" >/dev/null
+
+if "$script_dir/check_latex_artifacts.sh" "$empty_project" >/dev/null 2>&1; then
+  printf 'Expected artifact scan to fail when no source files exist.\n' >&2
+  exit 1
+fi
 
 source_pdf="$tmp_dir/source.pdf"
 scaffold_project="$tmp_dir/scaffold"
-printf 'placeholder pdf bytes for scaffold smoke test\n' >"$source_pdf"
+not_pdf="$tmp_dir/not-a-pdf.pdf"
+create_minimal_pdf "$source_pdf"
+printf 'placeholder pdf bytes for scaffold smoke test\n' >"$not_pdf"
+
+if "$script_dir/init_latex_project.sh" "$not_pdf" "$tmp_dir/not-pdf-scaffold" standard >/dev/null 2>&1; then
+  printf 'Expected scaffold initialization to reject a non-PDF source file.\n' >&2
+  exit 1
+fi
+
+unrelated_project="$tmp_dir/unrelated"
+mkdir -p "$unrelated_project"
+printf 'user notes\n' >"$unrelated_project/notes.txt"
+if "$script_dir/init_latex_project.sh" "$source_pdf" "$unrelated_project" standard >/dev/null 2>&1; then
+  printf 'Expected scaffold initialization to reject a non-empty unrelated target directory.\n' >&2
+  exit 1
+fi
+
+resumable_project="$tmp_dir/resumable"
+mkdir -p "$resumable_project"
+printf 'existing main\n' >"$resumable_project/main.tex"
+printf '# Existing State\n' >"$resumable_project/conversion-state.md"
+"$script_dir/init_latex_project.sh" "$source_pdf" "$resumable_project" standard >/dev/null
+if [[ $(cat "$resumable_project/main.tex") != 'existing main' ]]; then
+  printf 'Expected scaffold initialization to preserve existing resumable project files.\n' >&2
+  exit 1
+fi
+
 "$script_dir/init_latex_project.sh" "$source_pdf" "$scaffold_project" book-math >/dev/null
 
 for expected in \
@@ -109,5 +192,44 @@ for expected in \
     exit 1
   fi
 done
+
+if "$script_dir/render_pdf_pages.sh" "$source_pdf" "$tmp_dir/render-dpi-zero" 0 >/dev/null 2>&1; then
+  printf 'Expected page rendering to reject zero DPI.\n' >&2
+  exit 1
+fi
+
+if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 || command -v mutool >/dev/null 2>&1; }; then
+  real_source_dir="$tmp_dir/real-source"
+  real_project="$tmp_dir/real-project"
+  mkdir -p "$real_source_dir"
+  printf '\\documentclass{article}\\begin{document}Real PDF smoke test.\\end{document}\\n' >"$real_source_dir/source.tex"
+
+  if (cd "$real_source_dir" && xelatex -interaction=nonstopmode -halt-on-error source.tex >/dev/null 2>&1); then
+    "$script_dir/init_latex_project.sh" "$real_source_dir/source.pdf" "$real_project" standard >/dev/null
+    "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$real_project" 80 >/dev/null
+
+    if "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$real_project" 80 >/dev/null 2>&1; then
+      printf 'Expected page rendering to refuse overwriting existing evidence without --force.\n' >&2
+      exit 1
+    fi
+
+    "$script_dir/render_pdf_pages.sh" "$real_source_dir/source.pdf" "$real_project" 80 --force >/dev/null
+    "$script_dir/latex_healthcheck.sh" "$real_project" main.tex >/dev/null
+    "$script_dir/check_latex_artifacts.sh" "$real_project" >/dev/null
+
+    nested_project="$tmp_dir/nested-project"
+    mkdir -p "$nested_project/src"
+    printf '\\documentclass{article}\\begin{document}Nested main.\\end{document}\\n' >"$nested_project/src/main.tex"
+    "$script_dir/latex_healthcheck.sh" "$nested_project" src/main.tex >/dev/null
+    if [[ ! -f "$nested_project/main.pdf" ]]; then
+      printf 'Expected nested main healthcheck to find the generated root-level PDF.\n' >&2
+      exit 1
+    fi
+  else
+    printf 'Skipping real PDF smoke tests because xelatex failed to generate a sample PDF.\n' >&2
+  fi
+else
+  printf 'Skipping real PDF smoke tests because xelatex and a PDF renderer are not both available.\n' >&2
+fi
 
 printf 'Skill helper smoke tests passed.\n'

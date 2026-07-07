@@ -56,7 +56,7 @@ pdftotext -layout source.pdf -
 
 Use this only as draft evidence for selectable text, not as final LaTeX and not as OCR.
 
-7. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short and scanned PDFs. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style.
+7. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short and scanned PDFs. Prefer `scripts/render_pdf_pages.sh` when available because it keeps logs and normalizes image names to `page-001.png` style. The helper refuses to overwrite existing `page-*.png` or `page-*.pdf` evidence unless `--force` is provided; use that flag only when replacing prior evidence is intentional.
 
 ```bash
 mkdir -p latex/evidence/source-pages

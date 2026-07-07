@@ -90,7 +90,7 @@ Before and after each math polish batch, scan final source files:
 rg -n '\\pdfglyph|extracteddisplay|TODO math|unresolved glyph|raw glyph|MATH_PLACEHOLDER' main.tex chapters/ tables/ 2>/dev/null
 ```
 
-When the bundled helper is available, prefer:
+When the bundled helper is available, prefer it because it scans project LaTeX and bibliography source while excluding transcript, evidence, and log directories:
 
 ```bash
 path/to/pdf-to-latex/scripts/check_latex_artifacts.sh .

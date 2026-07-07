@@ -105,7 +105,7 @@ Also confirm:
 - Placeholder display wrappers have been converted to standard math environments.
 - Equation numbers, labels, and references remain consistent where visible.
 
-When available, use the bundled helper for the final artifact gate:
+When available, use the bundled helper for the final artifact gate. It scans project LaTeX and bibliography source while excluding transcript, evidence, and log directories:
 
 ```bash
 path/to/pdf-to-latex/scripts/check_latex_artifacts.sh .

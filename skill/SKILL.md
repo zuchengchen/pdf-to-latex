@@ -20,7 +20,7 @@ Codex performs the conversion work directly with local tools, visual reasoning, 
 - Read `references/math-polish.md` when the document is math-heavy, the text layer has custom encoded symbols, or final source contains math placeholders such as `\pdfglyph` or `extracteddisplay`.
 - Read `references/quality-review.md` before final delivery or a formal quality review, not for every routine compile.
 - Read `references/goal-mode.md` before creating or continuing a goal-backed PDF-to-LaTeX conversion.
-- Use `scripts/init_latex_project.sh`, `scripts/render_pdf_pages.sh`, `scripts/check_latex_artifacts.sh`, and `scripts/latex_healthcheck.sh` when they fit the local environment; they are helpers, not a replacement for semantic reconstruction. Use `assets/templates/` as the standard scaffold source when creating state, notes, manifest, inventory, IR, math, or glyph tracking files.
+- Use `scripts/init_latex_project.sh`, `scripts/render_pdf_pages.sh`, `scripts/check_latex_artifacts.sh`, and `scripts/latex_healthcheck.sh` when they fit the local environment; they are helpers, not a replacement for semantic reconstruction. Use `assets/templates/` as the standard scaffold source when creating state, notes, manifest, inventory, IR, math, or glyph tracking files. The helper scripts are intentionally conservative: scaffold only from PDF-looking sources, refuse unrelated non-empty targets, and refuse to replace rendered page evidence unless `--force` is explicit.
 
 ## Task Profiles
 
@@ -63,7 +63,7 @@ latex/
 
 Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep `evidence/source-pages/` for rendered source pages when visual transcription or later comparison is needed; use `evidence/rebuilt-pages/` for rendered output checks and `evidence/crops/` for figure or region crops. Keep page-level transcripts, object inventory, style profile, and document IR when they are useful for review, resume, or subagent integration. Keep `math-inventory.md` and `glyph-map.md` for math-heavy documents or any project with encoded glyph or display-math artifacts. For book-scale projects, `references/book-production.md` may add maintainable `frontmatter/`, `chapters/`, and `backmatter/` source boundaries when they help future editing.
 
-When creating a new project, use `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or copy from `assets/templates/` when that avoids hand-written scaffold drift. Do not overwrite existing user files; helper scripts must preserve existing files unless the user explicitly asks to regenerate them.
+When creating a new project, use `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or copy from `assets/templates/` when that avoids hand-written scaffold drift. Do not overwrite existing user files; helper scripts must preserve existing files unless the user explicitly asks to regenerate them. If rendered source pages already exist, use `scripts/render_pdf_pages.sh SOURCE_PDF TARGET_DIR DPI --force` only after deciding that replacing previous page evidence is intentional.
 
 Always maintain `conversion-state.md` as the resumable checkpoint file. Keep it concise and update it whenever a milestone completes or the next action changes. It should include:
 

@@ -20,16 +20,22 @@ fi
 cd "$project_dir"
 
 paths=()
-for path in main.tex chapters tables frontmatter backmatter; do
-  [[ -e "$path" ]] && paths+=("$path")
-done
+while IFS= read -r -d '' path; do
+  paths+=("${path#./}")
+done < <(
+  find . \
+    \( -path './logs' -o -path './logs/*' \
+       -o -path './evidence' -o -path './evidence/*' \
+       -o -path './transcripts' -o -path './transcripts/*' \) -prune \
+    -o -type f \( -name '*.tex' -o -name '*.bib' \) -print0
+)
 
 if [[ ${#paths[@]} -eq 0 ]]; then
-  printf 'No standard final-source paths found in %s\n' "$project_dir" >&2
-  exit 0
+  printf 'No LaTeX source or bibliography files found in %s\n' "$project_dir" >&2
+  exit 1
 fi
 
-pattern='\\pdfglyph|extracteddisplay|TODO math|unresolved glyph|raw glyph|MATH_PLACEHOLDER'
+pattern='\\pdfglyph|extracteddisplay|TODO[[:space:]_-]*math|unresolved[[:space:]_-]+glyph|MATH_PLACEHOLDER|%.*raw[[:space:]_-]+glyph|raw[[:space:]_-]+glyph[[:space:]]*:|math[[:space:]_-]*placeholder'
 
 if command -v rg >/dev/null 2>&1; then
   if rg -n "$pattern" "${paths[@]}"; then

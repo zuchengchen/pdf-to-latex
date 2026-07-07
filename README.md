@@ -111,7 +111,7 @@ Run the full local smoke suite after changing the skill:
 skill/scripts/test_skill.sh
 ```
 
-The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, and verifies scaffold generation. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
+The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, verifies scaffold guardrails, and runs a real PDF render/compile smoke test when local TeX and PDF rendering tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
 
 ## Usage Examples
 

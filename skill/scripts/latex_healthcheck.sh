@@ -29,7 +29,9 @@ fi
 mkdir -p logs
 log_file="logs/latex_healthcheck.log"
 findings_file="logs/latex_healthcheck_findings.txt"
-pdf_file="${main_tex%.tex}.pdf"
+main_base=${main_tex##*/}
+pdf_file="${main_base%.tex}.pdf"
+tex_log="${main_base%.tex}.log"
 
 if command -v latexmk >/dev/null 2>&1; then
   if ! latexmk -xelatex -interaction=nonstopmode -halt-on-error "$main_tex" >"$log_file" 2>&1; then
@@ -53,12 +55,22 @@ else
   exit 1
 fi
 
-grep -E 'Undefined control sequence|LaTeX Warning:.*undefined|Citation .* undefined|Reference .* undefined|There were undefined references|Rerun to get cross-references right|Package .* Error|LaTeX Font Warning|File .* not found|Overfull \\hbox|Overfull \\vbox' "$log_file" >"$findings_file" || true
+: >"$findings_file"
+for candidate_log in "$log_file" "$tex_log"; do
+  if [[ -f "$candidate_log" ]]; then
+    grep -E 'Undefined control sequence|LaTeX Warning:.*undefined|Citation .* undefined|Reference .* undefined|There were undefined references|Rerun to get cross-references right|Package .* Error|LaTeX Font Warning|File .* not found|Overfull \\hbox|Overfull \\vbox' "$candidate_log" >>"$findings_file" || true
+  fi
+done
+
+if [[ -s "$findings_file" ]]; then
+  sort -u "$findings_file" -o "$findings_file"
+fi
 
 if [[ -f "$pdf_file" ]]; then
   printf 'Output PDF: %s\n' "$pdf_file"
 else
-  printf 'Warning: compile command succeeded but expected PDF was not found: %s\n' "$pdf_file" >&2
+  printf 'Compile command succeeded but expected PDF was not found: %s\n' "$pdf_file" >&2
+  exit 1
 fi
 
 if [[ -s "$findings_file" ]]; then

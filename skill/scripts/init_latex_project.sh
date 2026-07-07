@@ -30,12 +30,65 @@ if [[ ! -f "$source_pdf" ]]; then
   exit 1
 fi
 
+looks_like_pdf() {
+  local path=$1
+
+  if ! LC_ALL=C grep -aq '%PDF-' < <(head -c 1024 "$path"); then
+    return 1
+  fi
+
+  if command -v pdfinfo >/dev/null 2>&1; then
+    pdfinfo "$path" >/dev/null 2>&1
+    return
+  fi
+
+  return 0
+}
+
+if ! looks_like_pdf "$source_pdf"; then
+  printf 'Source file does not look like a PDF: %s\n' "$source_pdf" >&2
+  exit 1
+fi
+
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 skill_dir=$(cd -- "$script_dir/.." && pwd)
 template_dir="$skill_dir/assets/templates"
 
 if [[ ! -d "$template_dir" ]]; then
   printf 'Template directory not found: %s\n' "$template_dir" >&2
+  exit 1
+fi
+
+directory_has_entries() {
+  local dir=$1
+  local entries
+
+  shopt -s nullglob dotglob
+  entries=("$dir"/*)
+  shopt -u nullglob dotglob
+  [[ ${#entries[@]} -gt 0 ]]
+}
+
+directory_has_project_markers() {
+  local dir=$1
+  local marker
+
+  for marker in conversion-state.md conversion-notes.md main.tex logs evidence/source-pages; do
+    if [[ -e "$dir/$marker" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+if [[ -e "$target_dir" && ! -d "$target_dir" ]]; then
+  printf 'Target path exists but is not a directory: %s\n' "$target_dir" >&2
+  exit 1
+fi
+
+if [[ -d "$target_dir" ]] && directory_has_entries "$target_dir" && ! directory_has_project_markers "$target_dir"; then
+  printf 'Target directory is non-empty and has no recognizable conversion project markers: %s\n' "$target_dir" >&2
+  printf 'Choose an empty directory, a resumable conversion project, or move unrelated files first.\n' >&2
   exit 1
 fi
 

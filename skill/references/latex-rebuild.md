@@ -58,7 +58,7 @@ latex/
 
 Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
 
-For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or the files in `assets/templates/` to create the standard scaffold. The helper creates directories and initial state files without overwriting existing files. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
+For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or the files in `assets/templates/` to create the standard scaffold. The helper creates directories and initial state files without overwriting existing files; it aborts on non-PDF-looking sources and non-empty target directories that do not look like resumable conversion projects. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
 
 For book-scale documents, read `references/book-production.md`. Add `frontmatter/`, `chapters/`, or `backmatter/` when those boundaries make the project easier to edit, and record the decision in `style-profile.md` and `conversion-notes.md`.
 
