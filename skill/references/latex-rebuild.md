@@ -2,6 +2,21 @@
 
 Use this reference when creating the target LaTeX project. The project should be editable, semantic, and easy for a user or future Codex agent to refine.
 
+## Contents
+
+- Reconstruction Principles
+- Project Layout
+- Document Model First
+- XeLaTeX Baseline
+- Structure
+- Text
+- Figures
+- Tables
+- Formulas
+- Citations And References
+- Conversion Notes
+- Conversion State
+
 ## Reconstruction Principles
 
 - Rebuild meaning and document structure before visual details.
@@ -26,6 +41,11 @@ latex/
 ├── figures/
 ├── tables/
 ├── transcripts/
+├── evidence/
+│   ├── source-pages/
+│   ├── rebuilt-pages/
+│   └── crops/
+├── logs/
 ├── page-manifest.md
 ├── object-inventory.md
 ├── math-inventory.md
@@ -36,7 +56,9 @@ latex/
 └── conversion-notes.md
 ```
 
-Small documents may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. Keep `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, and `document-ir.md` when page-level transcription, subagent batches, resume behavior, or quality review need them. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
+Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
+
+For book-scale documents, read `references/book-production.md`. Add `frontmatter/`, `chapters/`, or `backmatter/` when those boundaries make the project easier to edit, and record the decision in `style-profile.md` and `conversion-notes.md`.
 
 Before creating files in an existing project, read `conversion-state.md` and `conversion-notes.md` when present. If they indicate an interrupted conversion, resume from the recorded next action and preserve existing generated or user-edited files.
 
@@ -53,12 +75,13 @@ Metadata:
 Style profile:
 
 Blocks:
-- type: title | abstract | section | paragraph | list | equation | figure | table | citation | bibliography | appendix | note
+- type: title | abstract | part | chapter | section | paragraph | list | theorem | equation | figure | table | citation | bibliography | appendix | glossary | index | note
   source pages:
   content or reference:
   label:
   confidence:
 
+Book model:
 Cross-page merges:
 Objects:
 Math inventory:
@@ -66,7 +89,7 @@ Unresolved blocks:
 Style decisions:
 ```
 
-Generate `main.tex` and `chapters/*.tex` from this document model. The IR should make page order, section hierarchy, object placement, and unresolved uncertainties explicit before final source is written.
+Generate `main.tex` and `chapters/*.tex` from this document model. The IR should make page order, section hierarchy, object placement, and unresolved uncertainties explicit before final source is written. For a light task, a concise outline inside `conversion-notes.md` may replace a standalone IR when the source is short and structurally simple.
 
 ## XeLaTeX Baseline
 
@@ -100,14 +123,17 @@ Use XeLaTeX by default. Start with a simple, portable preamble and add packages 
 
 Use `style-profile.md` to choose the document class, packages, and layout. For CJK or multilingual content, add appropriate XeLaTeX packages such as `xeCJK` when available in the local TeX installation. Use `\IfFontExistsTF` or a simpler default when a preferred font may be missing. If a package is missing, choose a simpler fallback or ask before installing system packages.
 
+For books, theses, monographs, proceedings, or documents with front/back matter, use `references/book-production.md` before choosing between `article`, `report`, `book`, `ctexbook`, a thesis class, or another class. Do not flatten a book into an article merely because the baseline example uses `article`.
+
 ## Structure
 
 Build a semantic outline and document IR first:
 
 - Title, subtitle, authors, affiliations, date, abstract.
+- Book front matter, main matter, and back matter when present: preface, foreword, acknowledgements, table of contents, lists of figures/tables, parts, chapters, appendices, bibliography, glossary, and index.
 - Sections and subsections.
 - Body paragraphs in reading order.
-- Lists, quotations, callouts, appendices, and footnotes.
+- Lists, quotations, callouts, theorem-like blocks, appendices, and footnotes.
 - Figures and tables close to their first reference.
 - Equations with numbering when meaningful.
 - Bibliography or references.
@@ -115,6 +141,8 @@ Build a semantic outline and document IR first:
 Do not preserve repeated page headers, footers, or page numbers unless they carry content.
 
 Build the outline from page transcripts, digital text-layer evidence, `object-inventory.md`, `style-profile.md`, and visual page review. Record the IR checkpoint in `conversion-state.md` before drafting large LaTeX files. Include which chapters, figures, tables, formulas, or references are already planned and what should be written next.
+
+For book-scale documents, also include the book model, numbering policy, generated-list strategy, and cross-reference policy from `references/book-production.md`.
 
 ## Text
 
@@ -213,6 +241,7 @@ Choose the simplest approach that matches the document:
 
 - For short documents, a manual `thebibliography` block is acceptable.
 - For academic papers or many references, create `references.bib` and use `biblatex` or BibTeX only if the local toolchain supports it.
+- For book-scale documents, preserve per-chapter versus global bibliography structure, appendix references, and index/glossary interactions according to `references/book-production.md`.
 - Preserve citation keys consistently, for example `\cite{smith2024method}`.
 
 Label metadata added from public web sources in `conversion-notes.md`.
@@ -222,10 +251,12 @@ Label metadata added from public web sources in `conversion-notes.md`.
 Always maintain `conversion-notes.md` with:
 
 - Source PDF path and conversion date.
+- Selected task profile and any omitted heavy artifacts.
 - Tools and commands used.
 - PDF type and analysis summary.
 - Page manifest and page transcript status.
 - Document IR, object inventory, and style profile status.
+- Book production status, including front matter, main matter, back matter, generated lists, cross-reference audit, bibliography, index/glossary, and appendix handling when applicable.
 - Math inventory, glyph map, artifact counts, and math review status when applicable.
 - Inferred, approximated, or web-sourced content.
 - Missing or unclear regions.
@@ -247,6 +278,7 @@ Source PDF:
 Target directory:
 Last updated:
 Current phase:
+Task profile:
 
 ## Completed Checkpoints
 - [ ] PDF analysis complete
@@ -256,12 +288,14 @@ Current phase:
 - [ ] Object inventory complete
 - [ ] Math inventory/glyph map complete when applicable
 - [ ] Style profile complete
+- [ ] Book production profile complete when applicable
 - [ ] Document IR complete
 - [ ] Semantic outline complete
 - [ ] Project scaffold created
 - [ ] Main content drafted
 - [ ] Figures/assets handled
 - [ ] Tables/formulas handled
+- [ ] Book front/back matter and cross-reference audit complete when applicable
 - [ ] Math artifact cleanup complete when applicable
 - [ ] First compile attempted
 - [ ] First successful compile

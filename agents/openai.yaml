@@ -1,4 +1,0 @@
-interface:
-  display_name: "PDF to LaTeX"
-  short_description: "PDF to LaTeX with math polish"
-  default_prompt: "Use $pdf-to-latex to start or continue a goal-backed visual transcription, document model, XeLaTeX rebuild, math polish, compile, and quality review workflow for this PDF."

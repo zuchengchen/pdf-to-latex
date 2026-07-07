@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF to LaTeX"
+  short_description: "Convert PDFs into editable XeLaTeX projects"
+  default_prompt: "Use $pdf-to-latex to convert or refine this PDF as an editable XeLaTeX project, preserving semantic structure, figures, tables, formulas, citations, and review notes."

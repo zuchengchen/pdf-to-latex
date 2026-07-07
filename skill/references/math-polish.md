@@ -2,6 +2,16 @@
 
 Use this reference for math-heavy PDFs, damaged text layers with custom encoded symbols, or any generated project that contains rough math extraction artifacts. A compiling PDF with unresolved math extraction artifacts is a draft checkpoint, not a near-publication final result.
 
+## Contents
+
+- Blocking Artifacts
+- Required Tracking Files
+- Artifact Census
+- Cleanup Workflow
+- Visual Identification
+- Environment Selection
+- Acceptance Standard
+
 ## Blocking Artifacts
 
 Unless the user explicitly asks for a rough draft or approves documented unresolved artifacts, final source files must not contain:

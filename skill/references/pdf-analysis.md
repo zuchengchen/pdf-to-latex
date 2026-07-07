@@ -2,17 +2,35 @@
 
 Use this reference to understand the source PDF before rebuilding it in LaTeX. The goal is to produce enough evidence for a semantic reconstruction, not to reverse-engineer every drawing command.
 
+## Contents
+
+- Analysis Goals
+- First Pass
+- Classify The PDF
+- Reading Order
+- Codex Visual Transcription Strategy
+- Page Manifest
+- Object Inventory
+- Style Profile
+- Book Production Signals
+- Figures And Images
+- Tables
+- Formulas
+- References And Citations
+- Analysis Output
+
 ## Analysis Goals
 
 Capture:
 
 - PDF path, page count, page sizes, orientation, and whether pages are digital, scanned, or mixed.
+- Selected task profile: light, standard, or book/math-heavy.
 - Logical reading order, section hierarchy, and document metadata.
 - Text layer quality: selectable text, broken encodings, ligature issues, missing whitespace, or damaged extraction.
-- Figures, tables, formulas, captions, footnotes, headers, footers, references, and appendices.
+- Figures, tables, formulas, captions, footnotes, headers, footers, references, appendices, and book-scale structures.
 - Pages or regions that need visual reasoning or approximation.
 - Page-level route map for digital, scanned, mixed, and damaged-text reconstruction.
-- Object inventory for figures, tables, formulas, citations, references, appendices, and unresolved visual regions.
+- Object inventory for figures, tables, formulas, citations, references, appendices, front matter, back matter, index/glossary, cross-references, and unresolved visual regions.
 - Math inventory and glyph-map needs for math-heavy PDFs, custom encoded symbols, or damaged formula extraction.
 - Style profile for the document type and LaTeX strategy.
 
@@ -37,16 +55,17 @@ pdftotext -layout source.pdf -
 
 Use this only as draft evidence for selectable text, not as final LaTeX and not as OCR.
 
-6. Split or render the PDF into page-level evidence. Render all pages for short and scanned PDFs.
+6. Split or render the PDF into stable page-level evidence under the target project. Render all pages for short and scanned PDFs.
 
 ```bash
-pdfseparate source.pdf /tmp/pdf-pages/page-%03d.pdf
-pdftoppm -png -r 160 source.pdf /tmp/pdf-pages/page
+mkdir -p latex/evidence/source-pages
+pdfseparate source.pdf latex/evidence/source-pages/page-%03d.pdf
+pdftoppm -png -r 160 source.pdf latex/evidence/source-pages/page
 ```
 
 7. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
 8. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, and transcription status.
-9. Create or update `object-inventory.md` and `style-profile.md` with the document objects and target LaTeX strategy discovered so far. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
+9. Create or update `object-inventory.md` and `style-profile.md` with the document objects, selected task profile, and target LaTeX strategy discovered so far. For a light task, record why any inventory or IR file is omitted. When the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, or contains front matter, table of contents, list of figures/tables, appendices, bibliography, glossary, or index, read `references/book-production.md` and record the book profile. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
 10. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
@@ -58,6 +77,7 @@ Use these categories:
 - **Mixed**: some pages or regions have usable text, while others require visual transcription.
 - **Encoded or damaged text**: text exists but has scrambled characters, broken ligatures, missing spaces, or bad ordering.
 - **Encoded math layer**: prose may extract acceptably, but formulas contain custom-encoded symbols, missing operators, raw glyph codes, or display blocks that need visual reconstruction.
+- **Book-scale structure**: the PDF has parts, chapters, front matter, generated lists, appendices, bibliography, index/glossary, or chapter-scoped numbering that need `references/book-production.md`.
 
 For scanned, mixed, or damaged-text pages, use Codex visual reading from rendered page images as the transcription source. Do not use `tesseract`, `ocrmypdf`, local OCR engines, or cloud OCR APIs.
 
@@ -71,6 +91,7 @@ Determine reading order before writing LaTeX:
 
 - Single column, multi-column, sidebars, footnotes, floating figures, and tables.
 - Section titles and numbering.
+- Front matter, main matter, back matter, chapters, parts, appendices, table of contents, list of figures, list of tables, bibliography, index, and glossary when present.
 - Captions and their associated figures or tables.
 - Repeated headers and footers that should usually be omitted from semantic reconstruction.
 - Page numbers, watermarks, stamps, or marginalia that should be included only if meaningful.
@@ -82,11 +103,12 @@ For multi-column pages, use the rendered image to infer natural reading flow. `p
 For scanned, mixed, damaged-text, or visually complex pages:
 
 1. Render pages at a readable resolution, usually 180 to 220 DPI; rerender hard pages at 240 to 300 DPI when small text, formulas, or tables require it.
-2. Provide Codex the page image, optional single-page PDF, optional neighboring-page context, and optional digital text-layer excerpt only when the page is digital.
-3. Zoom into hard regions such as formulas, tables, captions, and footnotes.
-4. Transcribe content semantically. Preserve paragraphs, section structure, formulas, table meaning, and citations rather than line breaks or page geometry.
-5. Mark uncertain words, symbols, or table cells in `conversion-notes.md` and `conversion-state.md`.
-6. Store page-level transcription evidence under `transcripts/` or reference it from `conversion-notes.md`.
+2. Keep durable evidence under `latex/evidence/source-pages/`; use temporary files only for throwaway experiments.
+3. Provide Codex the page image, optional single-page PDF, optional neighboring-page context, and optional digital text-layer excerpt only when the page is digital.
+4. Zoom into hard regions such as formulas, tables, captions, and footnotes.
+5. Transcribe content semantically. Preserve paragraphs, section structure, formulas, table meaning, and citations rather than line breaks or page geometry.
+6. Mark uncertain words, symbols, or table cells in `conversion-notes.md` and `conversion-state.md`.
+7. Store page-level transcription evidence under `transcripts/` or reference it from `conversion-notes.md`.
 
 If a digital text-layer extract and visual reading disagree, prefer the visible page unless external evidence proves otherwise.
 
@@ -102,15 +124,16 @@ Use this shape:
 # Page Manifest
 
 Source PDF:
-Rendered pages:
+Rendered pages: evidence/source-pages/
 Single-page PDFs:
 Digital text-layer extracts:
+Task profile:
 
 ## Page Routes
-- Page 001: digital | evidence: pages/page-001.png | text layer: available | status: pending
-- Page 002: scanned | evidence: pages/page-002.png | text layer: none | status: pending
-- Page 003: damaged-text | evidence: pages/page-003.png | text layer: unreliable | status: pending
-- Page 004: encoded-math | evidence: pages/page-004.png | text layer: prose usable, formulas damaged | status: pending
+- Page 001: digital | evidence: evidence/source-pages/page-001.png | text layer: available | status: pending
+- Page 002: scanned | evidence: evidence/source-pages/page-002.png | text layer: none | status: pending
+- Page 003: damaged-text | evidence: evidence/source-pages/page-003.png | text layer: unreliable | status: pending
+- Page 004: encoded-math | evidence: evidence/source-pages/page-004.png | text layer: prose usable, formulas damaged | status: pending
 ```
 
 For each page transcript, capture:
@@ -151,6 +174,14 @@ Tables:
   structure:
   status:
 
+Book structure:
+- front matter:
+- main matter:
+- back matter:
+- table of contents/list pages:
+- appendix pages:
+- index/glossary pages:
+
 Equations:
 - id or number:
   source pages:
@@ -170,6 +201,12 @@ References and citations:
 - bibliography pages:
 - unresolved citations:
 
+Cross-references:
+- label or visible reference:
+  source pages:
+  target object:
+  status:
+
 Unresolved visual regions:
 - source page:
   description:
@@ -185,7 +222,7 @@ Create `style-profile.md` before drafting `main.tex`. Choose a practical target 
 Capture:
 
 ```text
-Document profile: article | academic paper | report | book chapter | thesis | manual | handout | form | math-heavy | table-heavy | CJK/multilingual | other
+Document profile: article | academic paper | report | book | textbook | monograph | proceedings | book chapter | thesis | dissertation | manual | handout | form | math-heavy | table-heavy | CJK/multilingual | other
 Document class:
 Language and font needs:
 Sectioning depth:
@@ -193,12 +230,24 @@ Bibliography strategy:
 Figure strategy:
 Table strategy:
 Math strategy:
+Book production strategy:
 Layout notes:
 Packages likely needed:
 Packages to avoid unless necessary:
 ```
 
-Use the profile to decide whether the baseline should stay minimal or add focused support such as `xeCJK`, `tabularx`, `longtable`, `siunitx`, `biblatex`, `multicol`, landscape pages, or theorem environments. If a package may be missing, prefer a portable fallback and record the decision.
+Use the profile to decide whether the baseline should stay minimal or add focused support such as `book`, `report`, `ctexbook`, `xeCJK`, `tabularx`, `longtable`, `siunitx`, `biblatex`, `multicol`, landscape pages, generated lists, indexing, glossary support, or theorem environments. If a package may be missing, prefer a portable fallback and record the decision.
+
+## Book Production Signals
+
+For book-scale documents, read `references/book-production.md` and record:
+
+- Front matter pages: title, copyright, dedication, foreword, preface, acknowledgements, table of contents, list of figures, list of tables, notation list.
+- Main matter hierarchy: parts, chapters, sections, exercises, theorem-like blocks, and chapter-scoped numbering.
+- Back matter pages: appendices, bibliography/references, glossary, index, colophon, or edition notes.
+- Cross-reference patterns for chapters, equations, figures, tables, appendices, theorem-like blocks, citations, and page references.
+
+Do not force this path for a short paper with only ordinary sections and references.
 
 ## Figures And Images
 
@@ -253,12 +302,15 @@ Page evidence:
 Optional digital text-layer extracts:
 Object inventory:
 Style profile:
+Task profile:
 Structure:
 Figures:
 Tables:
 Formulas:
 Math artifacts:
 References:
+Book structure:
+Cross-references:
 Uncertainties:
 External sources used:
 ```

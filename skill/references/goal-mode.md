@@ -31,7 +31,7 @@ If runtime policy requires the user to explicitly authorize goal creation, ask o
 Use a concrete objective like this, filling in paths:
 
 ```text
-Use $pdf-to-latex to rebuild SOURCE_PDF into an editable XeLaTeX project under TARGET_DIR. Continue from TARGET_DIR/conversion-state.md on every turn when it exists. Complete only when page evidence and page-manifest.md exist, page transcripts are completed or uncertainties are documented, object-inventory.md, style-profile.md, and document-ir.md exist, math-inventory.md and glyph-map.md exist when the document is math-heavy or encoded, main.tex and chapter files are generated from document-ir.md, the project compiles successfully with XeLaTeX, minimum refinement passes and reviewer checks are completed, math artifact scans of final source are clean when applicable, quality-review.md checks pass or true blockers are documented, conversion-notes.md records verification, and conversion-state.md says Next action: None; quality review complete.
+Use $pdf-to-latex to rebuild SOURCE_PDF into an editable XeLaTeX project under TARGET_DIR. Continue from TARGET_DIR/conversion-state.md on every turn when it exists. Complete only when the task profile is recorded, durable page evidence exists under TARGET_DIR/evidence/source-pages when visual transcription or comparison is needed, page-manifest.md and page transcripts exist when the selected profile requires them, object-inventory.md, style-profile.md, and document-ir.md exist or their light-profile omission is documented, book-production checks are completed when the document is a book, thesis, monograph, proceedings volume, or has front/back matter, math-inventory.md and glyph-map.md exist when the document is math-heavy or encoded, main.tex and chapter files are generated from document-ir.md or a documented light-profile outline, the project compiles successfully with XeLaTeX, minimum refinement passes and reviewer checks are completed, math artifact scans of final source are clean when applicable, quality-review.md checks pass or true blockers are documented, conversion-notes.md records verification, and conversion-state.md says Next action: None; quality review complete.
 ```
 
 Do not include a token budget unless the user explicitly requested one.
@@ -58,8 +58,11 @@ This file complements `conversion-state.md`; it should not replace the state fil
 The goal is complete only when:
 
 - `conversion-state.md` exists and is consistent with the filesystem.
-- `page-manifest.md` exists when page-level transcription was used.
-- `object-inventory.md`, `style-profile.md`, and `document-ir.md` exist when page-level reconstruction was used, or their omission is justified for a small/simple document.
+- The selected task profile is recorded in `conversion-state.md` or `conversion-notes.md`.
+- Durable evidence exists under `evidence/source-pages/` when page-level visual transcription or later comparison was needed.
+- `page-manifest.md` exists when page-level transcription was used and the selected profile requires it.
+- `object-inventory.md`, `style-profile.md`, and `document-ir.md` exist when page-level reconstruction was used, or their omission is justified for a light-profile task.
+- For book-scale documents, `references/book-production.md` guidance has been applied and front matter, main matter, back matter, generated lists, appendices, bibliography, index/glossary when present, and cross-references are rebuilt, reviewed, or documented as unresolved.
 - `math-inventory.md` and `glyph-map.md` exist and are reconciled when the document is math-heavy, encoded, or previously contained glyph/display placeholders.
 - Final LaTeX is generated from the document IR rather than raw page transcript stitching.
 - The latest XeLaTeX or `latexmk -xelatex` compile succeeds.

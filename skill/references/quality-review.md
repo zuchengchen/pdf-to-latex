@@ -2,20 +2,33 @@
 
 Use this reference before delivering a rebuilt LaTeX project. The quality bar is semantic completeness, readability, and near-publication math quality when formulas are visible and readable, not pixel-level matching.
 
+## Contents
+
+- Required Checks
+- Compile
+- Text Checks
+- Math Artifact Checks
+- Visual Review
+- Notes Review
+- Refinement Acceptance
+- Delivery Checklist
+- Completion Standard
+
 ## Required Checks
 
 1. Compile the project with XeLaTeX or an equivalent XeLaTeX-based command.
 2. Inspect compile logs for missing files, undefined commands, unresolved references, overfull boxes, and font problems.
 3. Extract text from the compiled PDF when possible and compare it with key source content.
-4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references.
-5. Compare final chapters against `document-ir.md`, `object-inventory.md`, and `style-profile.md`.
-6. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
-7. Complete the quality rubric from `latex-refinement.md`.
-8. Update `conversion-notes.md` with verification results, rubric status, and remaining uncertainties.
-9. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
-10. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
-11. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
-12. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
+4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references. Store durable render artifacts under `evidence/rebuilt-pages/` when they help review or resume.
+5. Compare final chapters against `document-ir.md`, `object-inventory.md`, and `style-profile.md` when present. For light-profile tasks, compare against the recorded concise outline or simplification notes.
+6. For book-scale projects, apply `references/book-production.md` quality gates for front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index/glossary when present, and cross-references.
+7. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
+8. Complete the quality rubric from `latex-refinement.md`.
+9. Update `conversion-notes.md` with verification results, rubric status, and remaining uncertainties.
+10. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
+11. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
+12. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
+13. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
 For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
 
@@ -35,6 +48,14 @@ xelatex -interaction=nonstopmode -halt-on-error main.tex
 ```
 
 Run from inside the `latex/` directory unless paths are configured otherwise.
+
+If the skill helper script is available and fits the project layout, it may be used as a wrapper:
+
+```bash
+path/to/pdf-to-latex/scripts/latex_healthcheck.sh .
+```
+
+Use the actual installed skill path.
 
 If compilation fails, fix LaTeX source instead of hiding errors. Common fixes:
 
@@ -56,6 +77,7 @@ pdftotext rebuilt.pdf -
 Confirm representative source content appears in the rebuilt PDF:
 
 - Title and major headings.
+- Book front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index, and glossary when present.
 - Key paragraphs or terms.
 - Table headers and important cells.
 - Formula identifiers or surrounding explanatory text.
@@ -88,7 +110,8 @@ Also confirm:
 Render pages or inspect the PDF directly:
 
 ```bash
-pdftoppm -png -r 140 rebuilt.pdf /tmp/rebuilt-pages/page
+mkdir -p evidence/rebuilt-pages
+pdftoppm -png -r 140 rebuilt.pdf evidence/rebuilt-pages/page
 ```
 
 Check:
@@ -101,6 +124,8 @@ Check:
 - Formulas are legible.
 - Captions and labels are clear.
 - Section hierarchy is obvious.
+- Book front matter, main matter, and back matter are in a coherent order when applicable.
+- Table of contents, list of figures, list of tables, bibliography, appendix, index, and glossary pages are readable and consistent with the rebuilt structure when present.
 - Tables do not overflow the page and are not left as plain text when structure is legible.
 - Math-heavy pages have display math rendered as LaTeX math, not paragraph text.
 - Formula-heavy pages previously affected by glyph or display placeholders have been re-rendered and compared against the source page images.
@@ -120,6 +145,8 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 - What came from optional digital text-layer extraction, when used.
 - Page transcript or page manifest status.
 - Document IR, object inventory, and style profile status.
+- Book production status, generated-list checks, cross-reference audit, appendix/bibliography handling, and index/glossary status when applicable.
+- Task profile and any intentionally omitted heavy artifacts.
 - Math inventory, glyph map, artifact counts, and formula-heavy pages reviewed when applicable.
 - Polish passes completed and pages or sections reviewed.
 - Quality rubric results.
@@ -150,6 +177,9 @@ Before delivering a refined project, confirm:
 - Every major object in `object-inventory.md` is rebuilt, reviewed, or documented as unresolved.
 - For math-heavy or encoded PDFs, `math-inventory.md` and `glyph-map.md` are reconciled with final source.
 - Style decisions in `style-profile.md` are reflected in document class, sectioning, packages, and layout.
+- For book-scale projects, `references/book-production.md` quality gates are complete or explicitly marked not applicable, and the source is not flattened into an article when the PDF has book structure.
+- Table of contents, list of figures, list of tables, appendices, bibliography/references, index, and glossary are rebuilt, generated, or documented as unresolved according to source visibility and user request.
+- Chapter, equation, figure, table, theorem-like, appendix, citation, and index/glossary references are resolved or documented as unresolved.
 - Local OCR engines were not used.
 - Full-page scanned-image placeholders are absent unless the user explicitly requested them.
 - Raw transcript artifacts and obvious page-boundary artifacts are absent from final chapters.
@@ -167,7 +197,8 @@ Before final response:
 - `main.tex` exists and is the project entry point.
 - `conversion-state.md` exists and reflects the latest completed checkpoint.
 - `page-manifest.md` and page transcripts exist when page-level visual transcription was used.
-- `document-ir.md`, `object-inventory.md`, and `style-profile.md` exist when page-level reconstruction was used.
+- `document-ir.md`, `object-inventory.md`, and `style-profile.md` exist when page-level reconstruction was used, or documented light-profile simplifications replace these files.
+- Book front/back matter files or clearly documented book structure exist when book-scale reconstruction was used.
 - Chapter, figure, and table files are referenced correctly.
 - The compiled PDF exists.
 - The latest compile command succeeded.
@@ -177,4 +208,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete the task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX, minimum refinement passes have been completed or explicitly marked not applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete the task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
