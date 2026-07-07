@@ -44,7 +44,8 @@ latex/
 ├── evidence/
 │   ├── source-pages/
 │   ├── rebuilt-pages/
-│   └── crops/
+│   ├── crops/
+│   └── text-layer/
 ├── logs/
 ├── page-manifest.md
 ├── object-inventory.md
@@ -56,9 +57,9 @@ latex/
 └── conversion-notes.md
 ```
 
-Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
+Small or narrow tasks may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. For light-profile tasks, omit `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, or `document-ir.md` only when they would add no review or resume value, and record the simplification. In that case, put a concise outline, object list, and style decision summary in `conversion-notes.md` before drafting. Keep `evidence/source-pages/` when visual transcription or later comparison is needed. Keep page-bounded `pdftotext` evidence under `evidence/text-layer/` when digital extraction is used. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
 
-For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or the files in `assets/templates/` to create the standard scaffold. The helper creates directories and initial state files without overwriting existing files; it aborts on non-PDF-looking sources and non-empty target directories that do not look like resumable conversion projects. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
+For new projects, prefer `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE` or the files in `assets/templates/` to create the scaffold. Use exact task profile values: `light`, `standard`, `book`, `math-heavy`, or `book-math`. The helper creates directories and initial state files without overwriting existing files; it aborts on non-PDF-looking sources and non-empty target directories that do not look like resumable conversion projects. For book profiles it creates `frontmatter/` and `backmatter/`; for math profiles it creates math tracking files. After scaffolding, replace the minimal `main.tex` with source-derived semantic content.
 
 For book-scale documents, read `references/book-production.md`. Add `frontmatter/`, `chapters/`, or `backmatter/` when those boundaries make the project easier to edit, and record the decision in `style-profile.md` and `conversion-notes.md`.
 
@@ -66,7 +67,7 @@ Before creating files in an existing project, read `conversion-state.md` and `co
 
 ## Document Model First
 
-Before drafting final LaTeX for standard, book, math-heavy, or visually complex projects, build `document-ir.md` from transcripts, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
+Before drafting final LaTeX for standard, book, math-heavy, book-math, or visually complex projects, build `document-ir.md` from transcripts, page-bounded text-layer evidence when used, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
 
 Use this compact shape, or start from `assets/templates/document-ir.md`:
 
@@ -281,8 +282,10 @@ Target directory:
 Last updated:
 Current phase:
 Task profile:
+Delivery level:
 
 ## Completed Checkpoints
+- [ ] Initial triage complete
 - [ ] PDF analysis complete
 - [ ] Page evidence rendered or split
 - [ ] Page manifest complete

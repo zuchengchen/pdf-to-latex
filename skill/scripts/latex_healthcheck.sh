@@ -34,18 +34,18 @@ pdf_file="${main_base%.tex}.pdf"
 tex_log="${main_base%.tex}.log"
 
 if command -v latexmk >/dev/null 2>&1; then
-  if ! latexmk -xelatex -interaction=nonstopmode -halt-on-error "$main_tex" >"$log_file" 2>&1; then
+  if ! latexmk -xelatex -interaction=nonstopmode -halt-on-error -file-line-error "$main_tex" >"$log_file" 2>&1; then
     printf 'XeLaTeX compile failed. See %s\n' "$log_file" >&2
     tail -n 80 "$log_file" >&2 || true
     exit 1
   fi
 elif command -v xelatex >/dev/null 2>&1; then
-  if ! xelatex -interaction=nonstopmode -halt-on-error "$main_tex" >"$log_file" 2>&1; then
+  if ! xelatex -interaction=nonstopmode -halt-on-error -file-line-error "$main_tex" >"$log_file" 2>&1; then
     printf 'XeLaTeX compile failed. See %s\n' "$log_file" >&2
     tail -n 80 "$log_file" >&2 || true
     exit 1
   fi
-  if ! xelatex -interaction=nonstopmode -halt-on-error "$main_tex" >>"$log_file" 2>&1; then
+  if ! xelatex -interaction=nonstopmode -halt-on-error -file-line-error "$main_tex" >>"$log_file" 2>&1; then
     printf 'Second XeLaTeX pass failed. See %s\n' "$log_file" >&2
     tail -n 80 "$log_file" >&2 || true
     exit 1

@@ -100,7 +100,12 @@ mkdir -p \
   "$target_dir/evidence/source-pages" \
   "$target_dir/evidence/rebuilt-pages" \
   "$target_dir/evidence/crops" \
+  "$target_dir/evidence/text-layer" \
   "$target_dir/logs"
+
+if [[ "$task_profile" == book || "$task_profile" == book-math ]]; then
+  mkdir -p "$target_dir/frontmatter" "$target_dir/backmatter"
+fi
 
 escape_sed_replacement() {
   printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'

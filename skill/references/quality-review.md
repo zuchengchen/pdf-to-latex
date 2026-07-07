@@ -18,7 +18,7 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 
 1. Compile the project with XeLaTeX or an equivalent XeLaTeX-based command.
 2. Inspect compile logs for missing files, undefined commands, unresolved references, overfull boxes, and font problems.
-3. Extract text from the compiled PDF when possible and compare it with key source content.
+3. Extract text from the compiled PDF when possible and compare it with key source content, including page-bounded files under `evidence/text-layer/` when digital text-layer evidence was used.
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references. Store durable render artifacts under `evidence/rebuilt-pages/` when they help review or resume.
 5. Compare final chapters against `document-ir.md`, `object-inventory.md`, and `style-profile.md` when present. For light-profile tasks, compare against the recorded concise outline or simplification notes.
 6. For book-scale projects, apply `references/book-production.md` quality gates for front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index/glossary when present, and cross-references.
@@ -150,10 +150,12 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 - What was inferred visually.
 - What was approximated.
 - What came from optional digital text-layer extraction, when used.
+- Batch plan and completed page or chapter ranges for long documents.
 - Page transcript or page manifest status.
 - Document IR, object inventory, and style profile status.
 - Book production status, generated-list checks, cross-reference audit, appendix/bibliography handling, and index/glossary status when applicable.
 - Task profile and any intentionally omitted heavy artifacts.
+- Any profile upgrade such as `standard` to `book`, `math-heavy`, or `book-math`.
 - Math inventory, glyph map, artifact counts, and formula-heavy pages reviewed when applicable.
 - Polish passes completed and pages or sections reviewed.
 - Quality rubric results.
@@ -206,6 +208,7 @@ Before final response:
 - `main.tex` exists and is the project entry point.
 - `conversion-state.md` exists and reflects the latest completed checkpoint.
 - `page-manifest.md` and page transcripts exist when page-level visual transcription was used.
+- `evidence/text-layer/` contains page-bounded text files when digital extraction was used as source evidence.
 - `document-ir.md`, `object-inventory.md`, and `style-profile.md` exist when page-level reconstruction was used, or documented light-profile simplifications replace these files.
 - Book front/back matter files or clearly documented book structure exist when book-scale reconstruction was used.
 - Chapter, figure, and table files are referenced correctly.

@@ -32,6 +32,7 @@ Treat a document as book-scale when several of these are present:
 Record the decision in `style-profile.md`:
 
 ```text
+Task profile: book | book-math
 Book production: yes | no | partial
 Book type: textbook | monograph | proceedings | thesis | dissertation | technical manual | other
 Front matter present:
@@ -80,7 +81,7 @@ Cross-reference audit:
 Unresolved book objects:
 ```
 
-Use this IR to decide file boundaries. For long books, prefer stable files such as `frontmatter/preface.tex`, `chapters/03-methods.tex`, and `backmatter/appendix-a.tex` when that improves maintainability. For shorter theses or manuals, `chapters/` plus clear comments may be enough. Explain simplifications in `conversion-notes.md`.
+Use this IR to decide file boundaries. For long books, prefer stable files such as `frontmatter/preface.tex`, `chapters/03-methods.tex`, and `backmatter/appendix-a.tex` when that improves maintainability. The scaffold helper creates `frontmatter/` and `backmatter/` for `book` and `book-math` profiles; add them manually if a project was initially scaffolded as `standard` and later upgraded. For shorter theses or manuals, `chapters/` plus clear comments may be enough. Explain simplifications in `conversion-notes.md`.
 
 ## LaTeX Strategy
 

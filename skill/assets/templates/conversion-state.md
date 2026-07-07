@@ -5,9 +5,11 @@ Target directory: {{TARGET_DIR}}
 Last updated: {{DATE_UTC}}
 Current phase: scaffold created
 Task profile: {{TASK_PROFILE}}
+Delivery level:
 
 ## Completed Checkpoints
 - [ ] PDF analysis complete
+- [ ] Initial triage complete
 - [ ] Page evidence rendered or split
 - [ ] Page manifest complete
 - [ ] Page transcription complete
@@ -39,6 +41,6 @@ scripts/init_latex_project.sh {{SOURCE_PDF}} {{TARGET_DIR}} {{TASK_PROFILE}}
 ## Active Files
 
 ## Next Action
-Analyze the source PDF and update this checkpoint file.
+Run initial PDF triage or continue analysis, then update this checkpoint file.
 
 ## Blockers Or Uncertainties

@@ -34,14 +34,14 @@ Restart Codex after updating so the new skill instructions are loaded.
 
 ## What It Does
 
-- Chooses a light, standard, or book/math-heavy workflow profile to avoid overloading simple tasks.
+- Chooses exact `light`, `standard`, `book`, `math-heavy`, or `book-math` workflow profiles to avoid overloading simple tasks while supporting specialized long or formula-heavy conversions.
 - Inspects digital, scanned, mixed, encoded, and damaged-text PDFs.
 - Renders durable page evidence under `latex/evidence/source-pages/` for visual transcription and later resume, with page-list and page-range batching for long PDFs.
-- Uses optional `pdftotext` extraction only for digital PDF text-layer evidence.
+- Uses optional page-bounded `pdftotext` extraction under `latex/evidence/text-layer/` only for digital PDF text-layer evidence.
 - Builds document IR, object inventory, and style profile when the selected profile needs them.
 - Detects academic/technical book, textbook, monograph, proceedings, thesis, dissertation, and long manual structures.
 - Tracks math-heavy reconstruction with `math-inventory.md` and `glyph-map.md` when formulas or encoded symbols need focused cleanup.
-- Creates consistent project scaffolds from bundled templates when starting a new conversion.
+- Creates consistent project scaffolds from bundled templates when starting a new conversion, including book front/back matter directories and math tracking files for the relevant profiles.
 - Rebuilds the document as a maintainable XeLaTeX project rather than scanned page screenshots.
 - Uses rough draft, clean semantic, and publication polish delivery levels so simple tasks can finish without book-scale overhead.
 - Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.

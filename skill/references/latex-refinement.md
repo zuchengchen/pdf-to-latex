@@ -57,6 +57,7 @@ Use whichever inputs are available:
 - Current compiled PDF.
 - LaTeX logs such as `main.log`, `.fls`, `.aux`, `.out`, or bibliography logs.
 - Rendered page images from the source and rebuilt PDFs, preferably under `evidence/source-pages/` and `evidence/rebuilt-pages/`.
+- Page-bounded text-layer evidence under `evidence/text-layer/` when digital extraction was used.
 - Page transcripts, page fragments, and optional digital text-layer extracts.
 - `document-ir.md`, `object-inventory.md`, `style-profile.md`, and optional `math-inventory.md` or `glyph-map.md`.
 - `references/book-production.md` when the project is a book, thesis, monograph, proceedings volume, or has front/back matter.
@@ -75,7 +76,7 @@ When resuming an interrupted project, read `conversion-state.md` first. If it is
 4. Record the failure summary and intended fix in `conversion-state.md`.
 5. Fix one focused category of issues or run the next polish pass below.
 6. Recompile.
-7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`; use `scripts/render_rebuilt_pages.sh PROJECT_DIR main.pdf DPI` when available and suitable.
+7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`; use `scripts/render_rebuilt_pages.sh PROJECT_DIR main.pdf DPI` when available and suitable. For digital PDFs, compare against page-bounded files under `evidence/text-layer/` when present rather than relying on a single untracked text dump.
 8. Compare against the source PDF, document IR, object inventory, style profile, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
 9. Run reviewer checks when they can catch a distinct class of issues.
 10. Update `conversion-notes.md` and `conversion-state.md`.
@@ -98,7 +99,7 @@ After the first successful compile, run focused polish passes. The first compili
 9. **Visual Comparison Pass**: render the rebuilt PDF, compare representative pages against the source PDF for semantic coverage and readability, and revisit pages marked uncertain in `page-manifest.md`, `object-inventory.md`, `math-inventory.md`, or `conversion-notes.md`.
 10. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
 
-For light-profile documents, complete only the applicable passes and document skipped heavy artifacts. For long documents, complete at least the minimum refinement below and sample high-risk pages: title or first page, one normal body page, one table-heavy page, one formula-heavy page, references or appendices, and every page marked uncertain.
+For light-profile documents, complete only the applicable passes and document skipped heavy artifacts. For long documents, complete at least the minimum refinement below and sample high-risk pages: title or first page, one normal body page, one table-heavy page, one formula-heavy page, references or appendices, and every page marked uncertain. Keep the batch plan in `page-manifest.md` current during refinement so incomplete or reworked page ranges remain resumable.
 
 ## Minimum Refinement
 
@@ -298,6 +299,7 @@ Update `conversion-state.md` more frequently and more compactly:
 - After each successful compile, record the command, output PDF path, and next review action.
 - After each focused refinement pass, mark the completed checkpoint and name the next unresolved category.
 - During polishing, record the latest completed pass: transcript merge, structure, LaTeX idiom, object polish, typography, reviewer, visual comparison, or final cleanup.
+- During long-document work, record completed page or chapter batches and the next batch range.
 - During book-scale polishing, record book production pass progress, generated-list status, cross-reference audit status, appendix/bibliography status, and index/glossary status when present.
 - During math-heavy polishing, record math publication pass progress, latest artifact counts, and the next unresolved formula or glyph batch.
 - Before stopping or delivering, leave `Next action` as either the remaining concrete task or `None; quality review complete`.

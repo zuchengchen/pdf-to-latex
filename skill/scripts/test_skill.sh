@@ -183,9 +183,12 @@ for expected in \
   document-ir.md \
   math-inventory.md \
   glyph-map.md \
+  frontmatter \
+  backmatter \
   evidence/source-pages \
   evidence/rebuilt-pages \
   evidence/crops \
+  evidence/text-layer \
   logs; do
   if [[ ! -e "$scaffold_project/$expected" ]]; then
     printf 'Scaffold smoke test missing expected path: %s\n' "$expected" >&2
@@ -200,6 +203,11 @@ fi
 
 if ! grep -Fq -- '- [x] Project scaffold created' "$scaffold_project/conversion-state.md"; then
   printf 'Expected scaffold state to mark project scaffold checkpoint complete.\n' >&2
+  exit 1
+fi
+
+if ! grep -Fq -- '- [ ] Initial triage complete' "$scaffold_project/conversion-state.md"; then
+  printf 'Expected scaffold state to include the initial triage checkpoint.\n' >&2
   exit 1
 fi
 

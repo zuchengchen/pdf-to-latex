@@ -4,6 +4,8 @@ Source PDF: {{SOURCE_PDF}}
 Target directory: {{TARGET_DIR}}
 Created: {{DATE_UTC}}
 Task profile: {{TASK_PROFILE}}
+Delivery level:
+Profile history:
 
 ## Commands And Tools
 
