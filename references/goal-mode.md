@@ -10,7 +10,7 @@ Use goal-backed execution for full conversion requests such as:
 $pdf-to-latex 把 "Quantum Field Theory for the Gifted Amateur.pdf" 转成latex
 ```
 
-This is the default intent for complete PDF rebuilding because the work may require page rendering, visual transcription, document modeling, LaTeX generation, compilation, polishing, and quality review over multiple continuations.
+This is the default intent for complete PDF rebuilding because the work may require page rendering, visual transcription, document modeling, LaTeX generation, math publication polish, compilation, polishing, and quality review over multiple continuations.
 
 Do not force goal mode for narrow requests such as explaining this skill, reviewing an existing LaTeX snippet, fixing one compile error, or producing a rough draft when the user explicitly asks for one.
 
@@ -31,7 +31,7 @@ If runtime policy requires the user to explicitly authorize goal creation, ask o
 Use a concrete objective like this, filling in paths:
 
 ```text
-Use $pdf-to-latex to rebuild SOURCE_PDF into an editable XeLaTeX project under TARGET_DIR. Continue from TARGET_DIR/conversion-state.md on every turn when it exists. Complete only when page evidence and page-manifest.md exist, page transcripts are completed or uncertainties are documented, object-inventory.md, style-profile.md, and document-ir.md exist, main.tex and chapter files are generated from document-ir.md, the project compiles successfully with XeLaTeX, minimum refinement passes and reviewer checks are completed, quality-review.md checks pass or remaining issues are explicitly documented, conversion-notes.md records verification, and conversion-state.md says Next action: None; quality review complete.
+Use $pdf-to-latex to rebuild SOURCE_PDF into an editable XeLaTeX project under TARGET_DIR. Continue from TARGET_DIR/conversion-state.md on every turn when it exists. Complete only when page evidence and page-manifest.md exist, page transcripts are completed or uncertainties are documented, object-inventory.md, style-profile.md, and document-ir.md exist, math-inventory.md and glyph-map.md exist when the document is math-heavy or encoded, main.tex and chapter files are generated from document-ir.md, the project compiles successfully with XeLaTeX, minimum refinement passes and reviewer checks are completed, math artifact scans of final source are clean when applicable, quality-review.md checks pass or true blockers are documented, conversion-notes.md records verification, and conversion-state.md says Next action: None; quality review complete.
 ```
 
 Do not include a token budget unless the user explicitly requested one.
@@ -60,9 +60,11 @@ The goal is complete only when:
 - `conversion-state.md` exists and is consistent with the filesystem.
 - `page-manifest.md` exists when page-level transcription was used.
 - `object-inventory.md`, `style-profile.md`, and `document-ir.md` exist when page-level reconstruction was used, or their omission is justified for a small/simple document.
+- `math-inventory.md` and `glyph-map.md` exist and are reconciled when the document is math-heavy, encoded, or previously contained glyph/display placeholders.
 - Final LaTeX is generated from the document IR rather than raw page transcript stitching.
 - The latest XeLaTeX or `latexmk -xelatex` compile succeeds.
 - The minimum refinement passes in `latex-refinement.md` are complete or documented as not applicable.
+- For math-heavy or encoded documents, `references/math-polish.md` acceptance checks pass: final source contains no `\pdfglyph`, `extracteddisplay`, raw encoded math, or formula placeholders unless the user explicitly approved a rough draft or specific unresolved item.
 - Reviewer findings and the quality rubric are addressed or documented.
 - Visual and text checks from `quality-review.md` pass.
 - `conversion-notes.md` lists commands, verification, approximations, and unresolved issues.
@@ -76,6 +78,7 @@ Stop and ask the user when:
 - The target directory exists but has no recoverable state and proceeding may overwrite user work.
 - A required verification tool is missing and no acceptable fallback exists.
 - The source pages are unreadable enough that Codex cannot make a reasonable semantic reconstruction.
+- Formula symbols remain unreadable after visual review and available context, and leaving them unresolved would prevent near-publication delivery.
 - The user requests local OCR, cloud OCR, a bundled converter, or pixel-perfect replication that conflicts with this skill's purpose.
 - A conflicting active goal exists and the user has not chosen which goal to pursue.
 
@@ -89,4 +92,4 @@ On every continuation:
 4. Do the next concrete milestone.
 5. Update `conversion-state.md` and `conversion-notes.md` before yielding.
 
-Do not mark the goal complete merely because a PDF compiled once. The first successful compile is a checkpoint.
+Do not mark the goal complete merely because a PDF compiled once. The first successful compile is a checkpoint, and a compiled project with broad unresolved math artifacts is still in refinement.

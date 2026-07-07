@@ -13,6 +13,7 @@ Capture:
 - Pages or regions that need visual reasoning or approximation.
 - Page-level route map for digital, scanned, mixed, and damaged-text reconstruction.
 - Object inventory for figures, tables, formulas, citations, references, appendices, and unresolved visual regions.
+- Math inventory and glyph-map needs for math-heavy PDFs, custom encoded symbols, or damaged formula extraction.
 - Style profile for the document type and LaTeX strategy.
 
 Record findings in the target `latex/conversion-notes.md` as work proceeds. Also update `latex/conversion-state.md` after the first pass so interrupted work can resume without repeating PDF discovery.
@@ -45,7 +46,7 @@ pdftoppm -png -r 160 source.pdf /tmp/pdf-pages/page
 
 7. Visually compare rendered pages with any extracted text layer. Trust visual page images over broken text extraction.
 8. Create or update `page-manifest.md` with per-page or per-region routes, evidence paths, optional text-layer extracts, and transcription status.
-9. Create or update `object-inventory.md` and `style-profile.md` with the document objects and target LaTeX strategy discovered so far.
+9. Create or update `object-inventory.md` and `style-profile.md` with the document objects and target LaTeX strategy discovered so far. For math-heavy or encoded PDFs, also create `math-inventory.md` and `glyph-map.md` stubs before reconstruction.
 10. Update `conversion-state.md` with the current phase, completed analysis checkpoints, generated helper files, and the next reconstruction action.
 
 ## Classify The PDF
@@ -56,8 +57,11 @@ Use these categories:
 - **Scanned**: text extraction is empty or unusable; pages are images.
 - **Mixed**: some pages or regions have usable text, while others require visual transcription.
 - **Encoded or damaged text**: text exists but has scrambled characters, broken ligatures, missing spaces, or bad ordering.
+- **Encoded math layer**: prose may extract acceptably, but formulas contain custom-encoded symbols, missing operators, raw glyph codes, or display blocks that need visual reconstruction.
 
 For scanned, mixed, or damaged-text pages, use Codex visual reading from rendered page images as the transcription source. Do not use `tesseract`, `ocrmypdf`, local OCR engines, or cloud OCR APIs.
+
+For encoded math layers, treat the text extraction as evidence for nearby prose and recurring markers only. Use rendered page images and `references/math-polish.md` to identify symbols and rebuild formulas.
 
 Rendered page images are analysis artifacts. Do not copy full-page renders into the LaTeX project as page screenshots unless the user explicitly asks for visual replication. The normal scanned-PDF path is Codex visual transcription followed by semantic LaTeX reconstruction.
 
@@ -106,6 +110,7 @@ Digital text-layer extracts:
 - Page 001: digital | evidence: pages/page-001.png | text layer: available | status: pending
 - Page 002: scanned | evidence: pages/page-002.png | text layer: none | status: pending
 - Page 003: damaged-text | evidence: pages/page-003.png | text layer: unreliable | status: pending
+- Page 004: encoded-math | evidence: pages/page-004.png | text layer: prose usable, formulas damaged | status: pending
 ```
 
 For each page transcript, capture:
@@ -150,7 +155,14 @@ Equations:
 - id or number:
   source pages:
   surrounding text:
+  visual evidence:
   confidence:
+  status:
+
+Math artifacts:
+- marker or pattern:
+  source pages:
+  likely symbol:
   status:
 
 References and citations:
@@ -217,6 +229,8 @@ For formulas and equations:
 - Identify inline math, display equations, numbering, and symbols.
 - Prefer standard LaTeX math notation over visual positioning.
 - Mark uncertain symbols explicitly, for example `% uncertain: symbol may be \alpha or a`.
+- Detect recurring encoded glyphs, raw symbol markers, placeholder display blocks, missing relation symbols, and formulas that `pdftotext` flattens into prose.
+- For many formulas or any custom encoded glyph pattern, create `math-inventory.md` and `glyph-map.md`; record source pages, visible symbol evidence, LaTeX replacements, confidence, and review status.
 - Use public web lookup for standard formulas or public papers only when it materially improves accuracy, and record the source.
 
 ## References And Citations
@@ -243,6 +257,7 @@ Structure:
 Figures:
 Tables:
 Formulas:
+Math artifacts:
 References:
 Uncertainties:
 External sources used:

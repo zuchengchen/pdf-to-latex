@@ -1,13 +1,13 @@
 ---
 name: pdf-to-latex
-description: "Use when Codex needs to automatically convert, rebuild, re-typeset, refine, polish, repair, or improve a PDF as an editable LaTeX or XeLaTeX project and compiled PDF, including digital PDFs, scanned PDFs, generated LaTeX cleanup, iterative refinement, compile fixes, layout cleanup, figures, tables, formulas, references, Codex visual page transcription, document modeling, object inventory tracking, semantic restructuring, compilation, and quality checks."
+description: "Use when Codex needs to automatically convert, rebuild, re-typeset, refine, polish, repair, or improve a PDF as an editable LaTeX or XeLaTeX project and compiled PDF, including digital PDFs, scanned PDFs, generated LaTeX cleanup, iterative refinement, compile fixes, layout cleanup, figures, tables, formulas, publication-grade math cleanup, glyph artifact cleanup, references, Codex visual page transcription, document modeling, object inventory tracking, semantic restructuring, compilation, and quality checks."
 ---
 
 # PDF to LaTeX
 
 ## Purpose
 
-Use this skill to rebuild a user-provided PDF into an editable LaTeX project, compile it, and refine the generated LaTeX until the result is semantically complete, readable, and maintainable. Prioritize semantic structure and practical polish over pixel-perfect recreation.
+Use this skill to rebuild a user-provided PDF into an editable LaTeX project, compile it, and refine the generated LaTeX until the result is semantically complete, readable, maintainable, and close to publication quality when the source is readable. Prioritize semantic structure, accurate math, and practical polish over pixel-perfect recreation.
 
 Codex performs the conversion work directly with local tools, visual reasoning, and LaTeX editing. This skill does not provide or require a bundled CLI, `scripts/` directory, installer, local OCR engine, or cloud OCR API. Use local PDF tools for metadata, page splitting, page rendering, digital text-layer extraction, asset extraction, and LaTeX compilation only.
 
@@ -16,6 +16,7 @@ Codex performs the conversion work directly with local tools, visual reasoning, 
 - Read `references/pdf-analysis.md` before inspecting or transcribing the source PDF.
 - Read `references/latex-rebuild.md` before creating or editing the LaTeX project.
 - Read `references/latex-refinement.md` before polishing generated LaTeX, fixing compile or layout issues, or comparing the rebuilt PDF against the source.
+- Read `references/math-polish.md` when the document is math-heavy, the text layer has custom encoded symbols, or final source contains math placeholders such as `\pdfglyph` or `extracteddisplay`.
 - Read `references/quality-review.md` before compiling, reviewing, or delivering the result.
 - Read `references/goal-mode.md` before creating or continuing a goal-backed PDF-to-LaTeX conversion.
 
@@ -34,6 +35,8 @@ latex/
 ├── transcripts/
 ├── page-manifest.md
 ├── object-inventory.md
+├── math-inventory.md
+├── glyph-map.md
 ├── style-profile.md
 ├── document-ir.md
 ├── goal-objective.md
@@ -41,7 +44,7 @@ latex/
 └── conversion-notes.md
 ```
 
-Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep page-level transcripts, object inventory, style profile, and document IR when they are useful for review, resume, or subagent integration.
+Small documents may use fewer subdirectories, but explain the simplification in `conversion-notes.md`. Keep page-level transcripts, object inventory, style profile, and document IR when they are useful for review, resume, or subagent integration. Keep `math-inventory.md` and `glyph-map.md` for math-heavy documents or any project with encoded glyph or display-math artifacts.
 
 Always maintain `conversion-state.md` as the resumable checkpoint file. Keep it concise and update it whenever a milestone completes or the next action changes. It should include:
 
@@ -63,7 +66,7 @@ Use `conversion-notes.md` for richer evidence, decisions, commands, and unresolv
 
 Treat a full conversion request such as `$pdf-to-latex 把 "paper.pdf" 转成latex` as intended for goal-backed execution because PDF-to-LaTeX conversion is usually long-running and resumable. Before starting substantial work, read `references/goal-mode.md` and create or continue a concrete goal when the runtime goal tools and current policy allow it.
 
-If goal creation is allowed, the goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, and stopping only when the quality checks pass or a true blocker is documented.
+If goal creation is allowed, the goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, clearing blocking math extraction artifacts when present, and stopping only when the quality checks pass or a true blocker is documented.
 
 If the current Codex runtime requires an explicit user mention of goal mode before `create_goal` can be called, ask for the shortest confirmation possible, for example: `这个转换任务很长。我可以用 Goal 模式持续执行直到质量检查通过吗？回复 y/Y 确认。` Do not silently downgrade a full conversion into a one-turn rough draft unless the user explicitly asks for a rough draft or no goal mode.
 
@@ -75,11 +78,11 @@ If the current Codex runtime requires an explicit user mention of goal mode befo
 4. Split or render the source into page-level evidence. Prefer per-page images for Codex visual transcription; keep single-page PDFs only when they help asset extraction or page-specific inspection.
 5. Create `page-manifest.md` with the page or region route map. For digital pages only, `pdftotext` may be used as optional text-layer evidence; never use local OCR engines.
 6. Use Codex visual recognition to transcribe each page or page batch into semantic LaTeX fragments under `transcripts/` or equivalent notes. Use subagents for independent page batches only when the current environment and user instructions permit parallel agent work.
-7. Build `object-inventory.md`, `style-profile.md`, and `document-ir.md` before writing final LaTeX. Track document type, section hierarchy, body blocks, figures, tables, formulas, citations, appendices, cross-page merges, style decisions, and unresolved objects. Record the IR checkpoint and next action.
+7. Build `object-inventory.md`, `style-profile.md`, and `document-ir.md` before writing final LaTeX. Track document type, section hierarchy, body blocks, figures, tables, formulas, citations, appendices, cross-page merges, style decisions, and unresolved objects. For math-heavy or damaged-text PDFs, also create `math-inventory.md` and `glyph-map.md` using `references/math-polish.md`. Record the IR checkpoint and next action.
 8. Create the LaTeX project with XeLaTeX as the default engine using `references/latex-rebuild.md`. Generate final chapters from the document IR rather than directly stitching page fragments, and update the state file with created files and active gaps.
 9. Compile the generated project and inspect errors, warnings, rendered pages, extracted text, `conversion-state.md`, and `conversion-notes.md`. Record compile success or the first hard failure.
-10. Run the multi-pass polish loop in `references/latex-refinement.md`: fix compile issues, remove page-transcript artifacts, improve document structure, convert rough text into idiomatic LaTeX objects, tune typography, run reviewer checks, and visually compare rendered output. Update the state file after each focused pass.
-11. Repeat review and refinement until the rebuilt PDF passes the quality gates or the remaining issues are explicitly marked as unresolved. Do not deliver the first compiling PDF as final unless the user explicitly requested only a rough draft.
+10. Run the multi-pass polish loop in `references/latex-refinement.md`: fix compile issues, remove page-transcript artifacts, improve document structure, convert rough text into idiomatic LaTeX objects, run math publication polish when needed, tune typography, run reviewer checks, and visually compare rendered output. Update the state file after each focused pass.
+11. Repeat review and refinement until the rebuilt PDF passes the quality gates or a true blocker is documented. Do not deliver the first compiling PDF as final unless the user explicitly requested only a rough draft. Do not mark near-publication quality complete while final source still contains broad math artifacts such as `\pdfglyph{...}` or `extracteddisplay`.
 12. Deliver the project path, compiled PDF path, verification performed, refinements made, and remaining uncertainties.
 
 If the user provides an existing generated LaTeX project, skip initial reconstruction and start at step 9. Treat refinement as part of the default job, not as a separate optional follow-up.
@@ -112,6 +115,7 @@ Write a state update before ending a long turn, after each successful compile, a
 - For every scanned or visually complex page, use Codex visual recognition from rendered page images as the transcription source. Do not use local OCR.
 - For digital PDFs, `pdftotext` may be used only as optional text-layer evidence. Codex visual review remains responsible for reading order, formulas, tables, captions, footnotes, and extraction correction.
 - For scanned PDFs, rebuild normal LaTeX content: visually transcribe text into paragraphs and sections, convert formulas into math, rebuild legible tables semantically, and include only genuine figures or diagrams as cropped figure assets.
+- For math-heavy or encoded PDFs, treat `\pdfglyph`, `extracteddisplay`, raw encoded math, and placeholder math comments as blocking draft artifacts in final source unless the user explicitly approves a rough draft. Use `math-inventory.md`, `glyph-map.md`, rendered source pages, and Codex visual recognition to resolve them.
 - Use public web lookup only when it helps identify public metadata, citations, public versions, standard formulas, or source context. Label web-sourced additions separately from PDF-derived content.
 - Use XeLaTeX by default, especially for Unicode, multilingual text, and CJK documents.
 - Keep LaTeX maintainable: use packages intentionally, split long content into chapters or sections, and avoid brittle absolute positioning unless the user explicitly requests visual recreation.
@@ -126,5 +130,6 @@ Ask the user before proceeding when:
 - The source PDF path is missing or ambiguous.
 - The target `latex/` directory already exists, has no recoverable state or recognizable project artifacts, and proceeding may overwrite user work.
 - A required system tool for the requested verification is missing and cannot be used.
+- Formula symbols or math regions remain unreadable after visual review and available context, and leaving them unresolved would block near-publication delivery.
 - The user asks for a bundled converter, CLI, script package, skill installation, local OCR dependency, or cloud OCR dependency, because those are outside this skill's design.
 - A newer user instruction conflicts with this skill's output contract.

@@ -1,6 +1,6 @@
 # PDF to LaTeX Skill
 
-`pdf-to-latex` is a Codex Agent Skill for automatically rebuilding PDFs as editable XeLaTeX projects, compiling the result, and refining the generated LaTeX until the output is semantically complete and readable. It is designed for semantic reconstruction: preserve document structure, readable content, formulas, tables, figures, captions, and references rather than trying to recreate every page pixel-for-pixel.
+`pdf-to-latex` is a Codex Agent Skill for automatically rebuilding PDFs as editable XeLaTeX projects, compiling the result, and refining the generated LaTeX until the output is semantically complete, readable, and close to publication quality when the source is readable. It is designed for semantic reconstruction: preserve document structure, readable content, formulas, tables, figures, captions, and references rather than trying to recreate every page pixel-for-pixel.
 
 This is a workflow skill. It does not ship a CLI, bundled conversion scripts, local OCR dependency, or cloud OCR dependency. Codex uses the instructions in `SKILL.md` and `references/` together with local PDF tools and visual reasoning.
 
@@ -38,16 +38,18 @@ Codex should update `${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex` in place w
 - Splits or renders PDFs into page-level evidence for Codex visual transcription.
 - Uses optional `pdftotext` extraction only for digital PDF text layers.
 - Builds a document IR, object inventory, and style profile before final LaTeX generation.
+- Tracks math-heavy reconstruction with `math-inventory.md` and `glyph-map.md` when formulas or custom encoded symbols need focused cleanup.
 - Rebuilds the document as a maintainable XeLaTeX project.
 - For scanned PDFs, uses Codex visual recognition to rebuild semantic content instead of embedding full-page screenshots by default.
 - Automatically runs compile-review-polish loops after the first generated draft.
 - De-pages rough transcripts into normal document structure and idiomatic LaTeX.
-- Uses reviewer checks and a quality rubric to catch missing objects, weak tables, malformed formulas, and layout defects.
+- Uses reviewer checks and a quality rubric to catch missing objects, weak tables, malformed formulas, unresolved glyph artifacts, placeholder display math, and layout defects.
 - Maintains `conversion-state.md` so interrupted conversions can resume from the latest checkpoint.
 - Defaults to creating a `latex/` directory next to the source PDF.
-- Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, `document-ir.md`, `conversion-state.md`, and `conversion-notes.md`.
+- Uses `main.tex`, optional `chapters/`, `figures/`, `tables/`, `transcripts/`, `page-manifest.md`, `object-inventory.md`, `math-inventory.md`, `glyph-map.md`, `style-profile.md`, `document-ir.md`, `conversion-state.md`, and `conversion-notes.md`.
 - Records uncertain, inferred, approximated, or web-supplemented content.
 - Compiles, reviews, and polishes the output PDF for semantic completeness and readability.
+- Treats broad residual math extraction artifacts such as `\pdfglyph{...}` and `extracteddisplay` as unfinished draft quality unless the user explicitly requests a rough draft.
 - Uses goal-backed execution for full conversion requests when the Codex runtime permits it.
 
 ## Repository Structure
@@ -61,6 +63,7 @@ pdf-to-latex/
 │   ├── latex-rebuild.md
 │   ├── latex-refinement.md
 │   ├── goal-mode.md
+│   ├── math-polish.md
 │   ├── pdf-analysis.md
 │   └── quality-review.md
 ├── INSTALL.md
@@ -89,7 +92,7 @@ After installing and restarting Codex:
 $pdf-to-latex 把 ./paper.pdf 重排成可编辑 LaTeX 项目，并编译出 PDF
 ```
 
-For a full conversion request, Codex should start or continue goal-backed execution when the runtime permits it, then create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, build the document IR and object inventory, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction.
+For a full conversion request, Codex should start or continue goal-backed execution when the runtime permits it, then create a `latex/` directory next to `paper.pdf`, maintain `conversion-notes.md`, build the document IR and object inventory, compile with XeLaTeX, run the minimum refinement passes, and report any uncertain reconstruction. For math-heavy or encoded PDFs, it should also maintain `math-inventory.md` and `glyph-map.md`, clear final-source math artifacts, and visually review representative formula-heavy pages.
 It should also maintain `conversion-state.md` so a later Codex session can continue from the latest completed checkpoint.
 
 For a long document, a natural invocation is:

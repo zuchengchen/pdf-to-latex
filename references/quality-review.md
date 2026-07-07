@@ -1,6 +1,6 @@
 # Quality Review Reference
 
-Use this reference before delivering a rebuilt LaTeX project. The quality bar is semantic completeness and readability, not pixel-level matching.
+Use this reference before delivering a rebuilt LaTeX project. The quality bar is semantic completeness, readability, and near-publication math quality when formulas are visible and readable, not pixel-level matching.
 
 ## Required Checks
 
@@ -9,12 +9,13 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar is
 3. Extract text from the compiled PDF when possible and compare it with key source content.
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references.
 5. Compare final chapters against `document-ir.md`, `object-inventory.md`, and `style-profile.md`.
-6. Complete the quality rubric from `latex-refinement.md`.
-7. Update `conversion-notes.md` with verification results, rubric status, and remaining uncertainties.
-8. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
-9. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
-10. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
-11. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
+6. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
+7. Complete the quality rubric from `latex-refinement.md`.
+8. Update `conversion-notes.md` with verification results, rubric status, and remaining uncertainties.
+9. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
+10. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
+11. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
+12. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
 For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable.
 
@@ -64,6 +65,24 @@ Confirm representative source content appears in the rebuilt PDF:
 
 Do not require exact line breaks, pagination, or spacing.
 
+## Math Artifact Checks
+
+For math-heavy documents or any project that previously contained encoded math artifacts, scan final included source files before delivery:
+
+```bash
+rg -n '\\pdfglyph|extracteddisplay|TODO math|unresolved glyph|raw glyph|MATH_PLACEHOLDER' main.tex chapters/ tables/ 2>/dev/null
+```
+
+The final source scan should return no matches unless the user explicitly approved a rough draft or a documented unresolved item. Broad residual counts such as hundreds of `\pdfglyph` markers or placeholder display blocks are blocking defects, even when the project compiles.
+
+Also confirm:
+
+- `math-inventory.md` exists when formulas are numerous or damaged.
+- `glyph-map.md` records recurring glyph decisions and confidence when encoded glyphs were present.
+- Every major display equation in the inventory is rebuilt, compiled, and visually reviewed, or is listed as blocked with a concrete user-facing question.
+- Placeholder display wrappers have been converted to standard math environments.
+- Equation numbers, labels, and references remain consistent where visible.
+
 ## Visual Review
 
 Render pages or inspect the PDF directly:
@@ -84,6 +103,7 @@ Check:
 - Section hierarchy is obvious.
 - Tables do not overflow the page and are not left as plain text when structure is legible.
 - Math-heavy pages have display math rendered as LaTeX math, not paragraph text.
+- Formula-heavy pages previously affected by glyph or display placeholders have been re-rendered and compared against the source page images.
 - Figures are not oversized, undersized, clipped, or detached from captions.
 - The visual style matches `style-profile.md` well enough for the document type.
 - No major content is duplicated or missing.
@@ -100,6 +120,7 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 - What came from optional digital text-layer extraction, when used.
 - Page transcript or page manifest status.
 - Document IR, object inventory, and style profile status.
+- Math inventory, glyph map, artifact counts, and formula-heavy pages reviewed when applicable.
 - Polish passes completed and pages or sections reviewed.
 - Quality rubric results.
 - What came from public web sources, with links or citations when used.
@@ -127,10 +148,12 @@ Before delivering a refined project, confirm:
 - `document-ir.md`, `object-inventory.md`, and `style-profile.md` are present when page-level reconstruction was used, or their omission is documented for small/simple documents.
 - Final chapters align with the document IR rather than directly stitched page transcripts.
 - Every major object in `object-inventory.md` is rebuilt, reviewed, or documented as unresolved.
+- For math-heavy or encoded PDFs, `math-inventory.md` and `glyph-map.md` are reconciled with final source.
 - Style decisions in `style-profile.md` are reflected in document class, sectioning, packages, and layout.
 - Local OCR engines were not used.
 - Full-page scanned-image placeholders are absent unless the user explicitly requested them.
 - Raw transcript artifacts and obvious page-boundary artifacts are absent from final chapters.
+- Final source contains no `\pdfglyph`, `extracteddisplay`, raw encoded math, or formula placeholder comments unless the user explicitly approved a rough draft or a specific documented unresolved item.
 - Major tables, formulas, figures, captions, citations, and references use semantic LaTeX where legible.
 - Severe overfull boxes, clipping, blank pages, huge whitespace, and bad float placement have been reviewed and fixed when reasonable.
 - Representative rendered pages are readable and nonblank.
@@ -154,4 +177,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete the task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX, minimum refinement passes have been completed or explicitly marked not applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete the task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX, minimum refinement passes have been completed or explicitly marked not applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

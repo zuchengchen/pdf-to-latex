@@ -10,6 +10,7 @@ Use this reference when creating the target LaTeX project. The project should be
 - Avoid absolute positioning, page-by-page overlays, and screenshot-only pages unless the user explicitly requests visual recreation.
 - For scanned or visually complex PDFs, do not make a compiling draft by embedding full-page screenshots. Use Codex visual transcription to create semantic text, math, tables, and figure assets instead.
 - For digital PDFs, treat `pdftotext` output as optional text-layer evidence only; visual review still controls reading order and correction.
+- For math-heavy or encoded PDFs, do not treat custom glyph placeholders or display-math wrappers as final LaTeX. Plan a math cleanup path with `math-inventory.md` and `glyph-map.md`.
 - Mark inferred or approximate content in source comments and in `conversion-notes.md`.
 
 ## Project Layout
@@ -27,19 +28,21 @@ latex/
 ├── transcripts/
 ├── page-manifest.md
 ├── object-inventory.md
+├── math-inventory.md
+├── glyph-map.md
 ├── style-profile.md
 ├── document-ir.md
 ├── conversion-state.md
 └── conversion-notes.md
 ```
 
-Small documents may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. Keep `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, and `document-ir.md` when page-level transcription, subagent batches, resume behavior, or quality review need them.
+Small documents may keep all content in `main.tex`, but still include `conversion-state.md` and `conversion-notes.md` unless the user explicitly says otherwise. Keep `transcripts/`, `page-manifest.md`, `object-inventory.md`, `style-profile.md`, and `document-ir.md` when page-level transcription, subagent batches, resume behavior, or quality review need them. Add `math-inventory.md` and `glyph-map.md` when formulas are numerous, when PDF text extraction has custom encoded symbols, or when generated source contains math placeholders.
 
 Before creating files in an existing project, read `conversion-state.md` and `conversion-notes.md` when present. If they indicate an interrupted conversion, resume from the recorded next action and preserve existing generated or user-edited files.
 
 ## Document Model First
 
-Before drafting final LaTeX, build `document-ir.md` from transcripts, `object-inventory.md`, `style-profile.md`, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
+Before drafting final LaTeX, build `document-ir.md` from transcripts, `object-inventory.md`, `style-profile.md`, math inventory when applicable, and visual review. Do not directly stitch page fragments into chapters except for very small documents where the notes explain why an IR would add no value.
 
 Use this compact shape:
 
@@ -58,6 +61,7 @@ Blocks:
 
 Cross-page merges:
 Objects:
+Math inventory:
 Unresolved blocks:
 Style decisions:
 ```
@@ -188,7 +192,7 @@ Use standard LaTeX math:
 \end{equation}
 ```
 
-Use `equation` for single display formulas, `align` or `aligned` for multi-line derivations, and inline math for short terms. Preserve equation numbering when the source uses it. For uncertain symbols, add a local comment and a note:
+Use `equation` for single display formulas, `align` or `aligned` for multi-line derivations, and inline math for short terms. Use `gather`, `multline`, `split`, or `cases` when the source structure calls for them. Preserve equation numbering when the source uses it. For uncertain symbols, add a local comment and a note:
 
 ```tex
 \begin{equation}
@@ -197,7 +201,11 @@ Use `equation` for single display formulas, `align` or `aligned` for multi-line 
 % Uncertain: the scan makes beta difficult to distinguish from gamma.
 ```
 
-Do not leave legible display math as ordinary text. Use web lookup for standard formulas only when it improves accuracy, and record the source.
+Do not leave legible display math as ordinary text. Do not define helper macros such as `\pdfglyph` to hide unresolved symbols in the final source; those are draft artifacts that must be resolved through visual review or documented as blockers. Convert placeholder display wrappers such as `extracteddisplay` into standard math environments before final delivery.
+
+For math-heavy documents, create or update `math-inventory.md` and `glyph-map.md` while writing chapters. Record display equation IDs, source pages, current source files, recurring glyph decisions, confidence, and review status. Use `references/math-polish.md` for the cleanup workflow and acceptance standard.
+
+Use web lookup for standard formulas only when it improves accuracy, and record the source.
 
 ## Citations And References
 
@@ -218,6 +226,7 @@ Always maintain `conversion-notes.md` with:
 - PDF type and analysis summary.
 - Page manifest and page transcript status.
 - Document IR, object inventory, and style profile status.
+- Math inventory, glyph map, artifact counts, and math review status when applicable.
 - Inferred, approximated, or web-sourced content.
 - Missing or unclear regions.
 - Compile command and review status.
@@ -245,6 +254,7 @@ Current phase:
 - [ ] Page manifest complete
 - [ ] Page transcription complete
 - [ ] Object inventory complete
+- [ ] Math inventory/glyph map complete when applicable
 - [ ] Style profile complete
 - [ ] Document IR complete
 - [ ] Semantic outline complete
@@ -252,6 +262,7 @@ Current phase:
 - [ ] Main content drafted
 - [ ] Figures/assets handled
 - [ ] Tables/formulas handled
+- [ ] Math artifact cleanup complete when applicable
 - [ ] First compile attempted
 - [ ] First successful compile
 - [ ] Transcript merge pass complete
