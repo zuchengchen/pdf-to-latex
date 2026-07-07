@@ -47,7 +47,7 @@ Restart Codex after updating so the new skill instructions are loaded.
 - Records a publication-polish delivery contract, source completeness audit, asset discovery gate, midpoint reviewer gate, final reviewer gates, and clean-room build requirements for publication-grade work.
 - Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.
 - Maintains `conversion-state.md` and `conversion-notes.md` so interrupted conversions can resume from the latest checkpoint.
-- Uses helper scripts in `skill/scripts/` for scaffolding, profile upgrades, page-bounded text-layer extraction, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, and smoke testing the skill package.
+- Uses helper scripts in `skill/scripts/` for scaffolding, profile upgrades, page-bounded text-layer extraction, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, checking workflow gates, strict publication gates, and smoke testing the skill package.
 
 ## Repository Structure
 
@@ -74,9 +74,11 @@ pdf-to-latex/
     │   ├── latex-refinement.md
     │   ├── math-polish.md
     │   ├── pdf-analysis.md
-    │   └── quality-review.md
+    │   ├── quality-review.md
+    │   └── reviewer-gates.md
     └── scripts/
         ├── check_latex_artifacts.sh
+        ├── check_workflow_gates.sh
         ├── extract_text_pages.sh
         ├── init_latex_project.sh
         ├── latex_healthcheck.sh
@@ -117,7 +119,7 @@ Run the full local smoke suite after changing the skill:
 skill/scripts/test_skill.sh
 ```
 
-The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact scanning, verifies scaffold and profile-upgrade guardrails, and runs real PDF rendering, text-layer extraction, compile, and publication-gate smoke tests when local TeX and PDF tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
+The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact and workflow-gate scanning, verifies scaffold and profile-upgrade guardrails, and runs real PDF rendering, text-layer extraction, compile, strict publication-gate, and clean rebuild smoke tests when local TeX and PDF tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
 
 ## Usage Examples
 

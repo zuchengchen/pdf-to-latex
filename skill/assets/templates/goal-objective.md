@@ -7,7 +7,7 @@ Goal created:
 ## Completion Criteria
 - Delivery level and task profile recorded.
 - Delivery contract and production spec complete when publication polish applies.
-- Source completeness audit, asset discovery, midpoint reviewer, final reviewer, visual comparison, and clean-room build gates complete when publication polish applies.
+- Source completeness audit, asset discovery, midpoint reviewer, final reviewer, visual comparison, workflow gate check, and clean-room build gates complete when publication polish applies.
 
 ## Stop Conditions
 

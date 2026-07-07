@@ -217,7 +217,8 @@ for required_text in \
   'Delivery contract gate complete when applicable' \
   'Source completeness audit complete when applicable' \
   'Asset discovery gate complete' \
-  'Midpoint reviewer gate complete when applicable'; do
+  'Midpoint reviewer gate complete when applicable' \
+  'Workflow gate check complete when applicable'; do
   if ! grep -Fq "$required_text" "$scaffold_project/conversion-state.md"; then
     printf 'Scaffold state missing publication gate checkpoint: %s\n' "$required_text" >&2
     exit 1
@@ -239,6 +240,153 @@ if ! grep -Fq 'Status values: pending | in-progress | rebuilt | reviewed | block
   printf 'Expected page manifest template to document shared route statuses.\n' >&2
   exit 1
 fi
+
+if "$script_dir/check_workflow_gates.sh" "$scaffold_project" >/dev/null 2>&1; then
+  printf 'Expected workflow gate checker to fail for an unfinished publication-polish scaffold.\n' >&2
+  exit 1
+fi
+
+workflow_project="$tmp_dir/workflow-complete"
+"$script_dir/init_latex_project.sh" "$source_pdf" "$workflow_project" book-math "publication polish" >/dev/null
+
+for checkpoint in \
+  'Initial triage complete' \
+  'Delivery contract gate complete when applicable' \
+  'Production spec gate complete when applicable' \
+  'PDF analysis complete' \
+  'Page evidence rendered or split' \
+  'Page manifest complete' \
+  'Source completeness audit complete when applicable' \
+  'Style profile complete' \
+  'Object inventory seeded' \
+  'Book production profile complete when applicable' \
+  'Math inventory/glyph map complete when applicable' \
+  'Document IR complete' \
+  'Semantic outline complete' \
+  'Skeleton compile gate complete' \
+  'Asset discovery gate complete' \
+  'Midpoint reviewer gate complete when applicable' \
+  'Route-specific reconstruction complete' \
+  'Asset production pass complete' \
+  'Batch compile gate complete' \
+  'Page transcription complete when applicable' \
+  'Main content drafted' \
+  'Figures/assets handled' \
+  'Tables/formulas handled' \
+  'Book front/back matter and cross-reference audit complete when applicable' \
+  'Math artifact cleanup complete when applicable' \
+  'First compile attempted' \
+  'First successful compile' \
+  'Transcript merge pass complete' \
+  'Structure pass complete' \
+  'LaTeX idiom/object polish pass complete' \
+  'Reviewer pass complete' \
+  'Final publication reviewer gates complete when applicable' \
+  'Typography/visual review pass complete' \
+  'Final cleanup pass complete' \
+  'Clean-room build gate complete' \
+  'Workflow gate check complete when applicable' \
+  'Quality review complete'; do
+  CHECKPOINT="$checkpoint" perl -0pi -e '$checkpoint = $ENV{CHECKPOINT}; s/\Q- [ ] $checkpoint\E/- [x] $checkpoint/g' "$workflow_project/conversion-state.md"
+done
+
+for gate in \
+  'Delivery contract' \
+  'Production spec' \
+  'Source completeness audit' \
+  'Skeleton compile' \
+  'Asset discovery' \
+  'Batch compile history' \
+  'Midpoint reviewer' \
+  'Final structure/content reviewer' \
+  'Final math/object reviewer' \
+  'Final build/layout reviewer' \
+  'Visual comparison' \
+  'Artifact scan' \
+  'Clean-room build' \
+  'Final notes/state'; do
+  GATE="$gate" perl -0pi -e '$gate = $ENV{GATE}; s/^\Q$gate:\E/$gate: pass/mg' "$workflow_project/conversion-notes.md"
+done
+
+printf '%s\n' \
+  '# Page Manifest' \
+  "Source PDF: $source_pdf" \
+  'Rendered pages: evidence/source-pages/' \
+  'Single-page PDFs:' \
+  'Digital text-layer extracts:' \
+  'Task profile: book-math' \
+  'Batch plan: complete' \
+  'Profile upgrades:' \
+  'Completeness audit: pass' \
+  '' \
+  '## Page Routes' \
+  '- page: 001' \
+  '  region: full page' \
+  '  route: digital' \
+  '  evidence: evidence/source-pages/page-001.png' \
+  '  text layer: evidence/text-layer/page-001.txt' \
+  '  batch: 001' \
+  '  target: chapters/01-content.tex' \
+  '  status: reviewed' \
+  '  unresolved: none' >"$workflow_project/page-manifest.md"
+
+printf '%s\n' \
+  '# Object Inventory' \
+  "Source PDF: $source_pdf" \
+  'Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason' \
+  '' \
+  '## Figures' \
+  '- id: fig:none' \
+  '  source pages: none' \
+  '  caption: none' \
+  '  target: none' \
+  '  asset/crop needed: no' \
+  '  status: reviewed' \
+  '  unresolved: none' \
+  '' \
+  '## Source Completeness Audit' \
+  '- page or region: 001 full page' \
+  '  required by delivery contract: yes' \
+  '  covered by IR: yes' \
+  '  owned objects: none' \
+  '  status: reviewed' \
+  '  unresolved: none' >"$workflow_project/object-inventory.md"
+
+printf '%s\n' \
+  '# Document IR' \
+  "Source PDF: $source_pdf" \
+  'Task profile: book-math' \
+  '' \
+  'Metadata: complete' \
+  'Style profile: style-profile.md' \
+  '' \
+  '## Blocks' \
+  '- type: paragraph' \
+  '  source pages: 001' \
+  '  content or reference: chapters/01-content.tex' \
+  '  label: none' \
+  '  confidence: high' \
+  '' \
+  '## Source Completeness' \
+  'Page and region coverage: pass' \
+  'Object coverage: pass' \
+  'Blocked blocks: none' \
+  'Omitted-with-reason blocks: none' >"$workflow_project/document-ir.md"
+
+printf '%s\n' \
+  '# Math Inventory' \
+  "Source PDF: $source_pdf" \
+  'Task profile: book-math' \
+  '' \
+  '## Display Equations' \
+  '- id or number: none' \
+  '  source page: none' \
+  '  surrounding text: none' \
+  '  current source file: none' \
+  '  status: reviewed' \
+  '  notes: no math content in smoke fixture' >"$workflow_project/math-inventory.md"
+
+"$script_dir/check_workflow_gates.sh" "$workflow_project" >/dev/null
 
 upgrade_project="$tmp_dir/upgrade-project"
 "$script_dir/init_latex_project.sh" "$source_pdf" "$upgrade_project" light >/dev/null
@@ -397,9 +545,17 @@ if command -v xelatex >/dev/null 2>&1 && { command -v pdftoppm >/dev/null 2>&1 |
     fi
     "$script_dir/render_rebuilt_pages.sh" "$real_project" main.pdf 80 --from 1 --to 1 --force >/dev/null
     "$script_dir/check_latex_artifacts.sh" "$real_project" >/dev/null
-    "$script_dir/publication_gate.sh" "$real_project" main.tex --render-dpi 80 --pages 1 >/dev/null
+    "$script_dir/publication_gate.sh" "$real_project" main.tex --render-dpi 80 --pages 1 --strict-findings >/dev/null
     if [[ ! -s "$real_project/logs/publication_gate_summary.txt" ]]; then
       printf 'Expected publication gate to write a summary file.\n' >&2
+      exit 1
+    fi
+
+    strict_findings_project="$tmp_dir/strict-findings-project"
+    mkdir -p "$strict_findings_project"
+    printf '\\documentclass{article}\\begin{document}Missing reference: \\ref{missing-label}.\\end{document}\\n' >"$strict_findings_project/main.tex"
+    if "$script_dir/publication_gate.sh" "$strict_findings_project" main.tex --skip-render --skip-clean --strict-findings >/dev/null 2>&1; then
+      printf 'Expected strict publication gate to fail on unresolved references.\n' >&2
       exit 1
     fi
 

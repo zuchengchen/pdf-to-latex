@@ -44,6 +44,7 @@ Delivery level: {{DELIVERY_LEVEL}}
 - [ ] Typography/visual review pass complete
 - [ ] Final cleanup pass complete
 - [ ] Clean-room build gate complete
+- [ ] Workflow gate check complete when applicable
 - [ ] Quality review complete
 
 ## Last Successful Command

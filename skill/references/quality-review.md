@@ -12,6 +12,8 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 - Math Artifact Checks
 - Visual Review
 - Clean-Room Build
+- Workflow Gate Check
+- Downgrade Or Blocker Policy
 - Notes Review
 - Refinement Acceptance
 - Delivery Checklist
@@ -28,13 +30,14 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 7. For book-scale projects, apply `references/book-production.md` quality gates for front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index/glossary when present, and cross-references.
 8. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
 9. Complete the quality rubric from `latex-refinement.md`.
-10. For publication polish, complete structure/content, math/object, and build/layout final reviewer gates.
-11. For publication polish, run a clean-room build gate from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex` when available.
-12. Update `conversion-notes.md` with verification results, rubric status, clean-room build result, and remaining uncertainties.
-13. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
-14. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
-15. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
-16. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
+10. For publication polish, complete structure/content, math/object, and build/layout final reviewer gates using `references/reviewer-gates.md`.
+11. For publication polish, run a clean-room build gate from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex --strict-findings` when available.
+12. For publication polish, run `scripts/check_workflow_gates.sh PROJECT_DIR` when available to verify state-file and acceptance-gate completion.
+13. Update `conversion-notes.md` with verification results, rubric status, clean-room build result, workflow gate result, and remaining uncertainties.
+14. Update `conversion-state.md` with the latest successful command, completed quality checkpoints, and any remaining next action.
+15. Confirm the minimum refinement passes from `latex-refinement.md` were completed or explicitly marked not applicable.
+16. Confirm the workflow did not use local OCR engines such as `tesseract` or `ocrmypdf`; `pdftotext` is acceptable only for digital text-layer evidence or output verification.
+17. For scanned PDFs, confirm the rebuilt output is semantic LaTeX content rather than full-page screenshot embedding, unless the user explicitly requested visual replication.
 
 For normal PDF-to-LaTeX work, perform the minimum refinement passes after the first successful compile. The first compiling PDF is a checkpoint, not the default final deliverable. For an explicit rough draft, record skipped clean-semantic checks and do not mark quality review complete.
 
@@ -79,6 +82,7 @@ Quantified floor:
 
 - Latest XeLaTeX build succeeds and produces the expected PDF.
 - `scripts/check_latex_artifacts.sh .` returns clean when math artifacts or placeholders were possible.
+- `scripts/check_workflow_gates.sh .` returns clean for publication polish unless `--allow-blocked` is intentionally used for a documented blocked delivery.
 - Final source has no broad `pending`, `in-progress`, or unowned page/object statuses for content required by the delivery contract.
 - LaTeX logs have no unresolved references, citations, missing files, undefined commands, or rerun warnings that affect delivered content.
 - Representative rendered pages are nonblank and readable; high-risk pages from the source completeness audit are included in visual review.
@@ -196,13 +200,13 @@ Compare against the source PDF for semantic coverage, not pixel identity.
 
 ## Clean-Room Build
 
-For publication polish, prove the project does not depend on stale auxiliary files, absolute paths, missing assets, or hidden local state:
+For publication polish, prove the project does not depend on stale auxiliary files, absolute paths, missing assets, or hidden local state. Prefer strict findings so unresolved references, citations, missing files, undefined commands, package errors, and rerun warnings fail the gate:
 
 ```bash
-path/to/pdf-to-latex/scripts/publication_gate.sh . main.tex
+path/to/pdf-to-latex/scripts/publication_gate.sh . main.tex --strict-findings
 ```
 
-The helper runs a normal health check, scans final source for extraction artifacts, optionally renders rebuilt pages, copies the project to a temporary clean build directory, removes common LaTeX auxiliary files there, and compiles again. It is a deterministic gate, not a semantic reviewer.
+The helper runs a normal health check, optionally fails strict compile findings, scans final source for extraction artifacts, optionally renders rebuilt pages, copies the project to a temporary clean build directory, removes common LaTeX auxiliary files there, and compiles again. It is a deterministic gate, not a semantic reviewer.
 
 If the helper is unavailable, approximate the gate manually:
 
@@ -213,6 +217,34 @@ If the helper is unavailable, approximate the gate manually:
 5. Render or inspect representative rebuilt pages.
 
 Record the command, result, clean build path if useful, and any warnings in `conversion-notes.md`. Do not mark publication polish complete when the clean-room build fails unless the failure is a documented true blocker approved by the user.
+
+## Workflow Gate Check
+
+For publication polish, run the workflow gate checker before final delivery:
+
+```bash
+path/to/pdf-to-latex/scripts/check_workflow_gates.sh .
+```
+
+The checker validates required state-file checkpoints, publication-polish acceptance gate values, profile-specific files, required notes sections, and obvious unfinished statuses such as blank, `pending`, or `in-progress` page/object states. Use:
+
+```bash
+path/to/pdf-to-latex/scripts/check_workflow_gates.sh . --allow-blocked
+```
+
+only when true blockers are documented and the final response will describe a blocked publication-polish delivery rather than claiming completion.
+
+## Downgrade Or Blocker Policy
+
+Do not silently downgrade `publication polish` to `clean semantic` or `rough draft`. When the source, toolchain, or available evidence prevents publication polish:
+
+1. Continue fixing the issue when the content is visible, inferable, and reasonably repairable.
+2. Mark a localized item `blocked` when a required page, formula, table, figure, citation, or build step cannot be resolved with available evidence.
+3. Ask the user before downgrading the delivery level, leaving broad unresolved content, accepting full-page screenshots, skipping book/math gates, or treating unreadable source material as omitted.
+4. If the user approves a lower delivery level, update `Delivery level:`, `conversion-state.md`, `conversion-notes.md`, and the acceptance gates; record which publication-polish gates were intentionally skipped.
+5. If the user does not approve a downgrade and the blocker remains, stop with publication polish blocked and preserve the resumable state.
+
+Use `omitted-with-reason` only for content that is outside the delivery contract, duplicated by generated structure, visibly irrelevant, or explicitly accepted by the user. Use `blocked` for required content that remains unresolved.
 
 ## Notes Review
 
@@ -231,7 +263,7 @@ Record the command, result, clean build path if useful, and any warnings in `con
 - Any profile upgrade such as `standard` to `book`, `math-heavy`, or `book-math`.
 - Math inventory, glyph map, artifact counts, and formula-heavy pages reviewed when applicable.
 - Polish passes completed and pages or sections reviewed.
-- Production spec, skeleton compile, batch compile, midpoint reviewer, final reviewer, and clean-room build status.
+- Production spec, skeleton compile, batch compile, midpoint reviewer, final reviewer, clean-room build, and workflow gate status.
 - Quality rubric results.
 - What came from public web sources, with links or citations when used.
 - Known unresolved issues.
@@ -252,7 +284,7 @@ If the notes contain unresolved critical gaps, report them clearly in the final 
 Before delivering a refined project, confirm the checks required by the selected delivery level:
 
 - The latest compile succeeds.
-- For publication polish, the delivery contract, source completeness audit, asset discovery, skeleton compile, batch compile, midpoint reviewer, final reviewer, and clean-room build gates have passed or true blockers are documented.
+- For publication polish, the delivery contract, source completeness audit, asset discovery, skeleton compile, batch compile, midpoint reviewer, final reviewer, workflow gate, and clean-room build gates have passed or true blockers are documented.
 - User-stated issues have been addressed or explicitly documented as unresolved.
 - No new missing file, undefined command, or unresolved reference issue was introduced.
 - Minimum refinement passes completed or explicitly marked not applicable.
@@ -274,6 +306,7 @@ Before delivering a refined project, confirm the checks required by the selected
 - Representative rendered pages are readable and nonblank.
 - High-risk pages or objects from the source completeness audit have been visually reviewed or documented as blocked.
 - The project rebuilds from a clean copy or clean working tree state for publication polish.
+- The workflow gate checker passes for publication polish, or `--allow-blocked` is used only for a documented blocked outcome.
 - Key semantic content from the source PDF remains present after refinement.
 - `conversion-notes.md` lists the refinement passes, commands, fixes, and remaining issues.
 
@@ -294,10 +327,11 @@ Before final response:
 - The latest compile command succeeded.
 - Publication-polish clean-room build succeeded or a true blocker is documented.
 - Publication-polish acceptance gates are recorded in `conversion-notes.md`.
+- Publication-polish workflow gate check succeeded or is documented as blocked.
 - Text extraction or manual inspection confirms key content.
 - Temporary files outside the target project are cleaned up where practical.
 - The final answer names the LaTeX project path, compiled PDF path, verification performed, and remaining uncertainties.
 
 ## Completion Standard
 
-Complete a clean semantic or publication-polish task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete publication polish only when the delivery contract, production spec, source completeness audit, skeleton compile, asset discovery, batch compile record, midpoint reviewer, final reviewer gates, visual comparison, artifact scans, and clean-room build gate have passed or true blockers are documented. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete a clean semantic or publication-polish task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete publication polish only when the delivery contract, production spec, source completeness audit, skeleton compile, asset discovery, batch compile record, midpoint reviewer, final reviewer gates, visual comparison, artifact scans, workflow gate check, and clean-room build gate have passed or true blockers are documented. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

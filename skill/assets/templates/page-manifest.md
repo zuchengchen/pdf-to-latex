@@ -15,6 +15,18 @@ No page routes recorded yet. Replace this line with one route per real source pa
 
 Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
 
+```text
+- page:
+  region:
+  route: digital | scanned | mixed | encoded-math | damaged-text | visual-complex
+  evidence:
+  text layer:
+  batch:
+  target:
+  status:
+  unresolved:
+```
+
 ## Transcript Template
 
 Page:

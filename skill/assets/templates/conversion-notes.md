@@ -72,15 +72,48 @@ Blocked or omitted assets:
 
 ## Reviewer Gates
 
+Use `references/reviewer-gates.md` output format.
+
 Midpoint review:
+- Result:
+- Scope reviewed:
+- Blocking issues:
+
 Structure/content review:
+- Result:
+- Scope reviewed:
+- Blocking issues:
+
 Math/object review:
+- Result:
+- Scope reviewed:
+- Blocking issues:
+
 Build/layout review:
+- Result:
+- Scope reviewed:
+- Blocking issues:
 
 ## Quality Review
 
 Publication-polish acceptance gates:
+Delivery contract:
+Production spec:
+Source completeness audit:
+Skeleton compile:
+Asset discovery:
+Batch compile history:
+Midpoint reviewer:
+Final structure/content reviewer:
+Final math/object reviewer:
+Final build/layout reviewer:
+Visual comparison:
+Artifact scan:
 Clean-room build:
+Final notes/state:
+
+Clean-room build:
+Workflow gate check:
 
 ## Inferences, Approximations, And External Sources
 

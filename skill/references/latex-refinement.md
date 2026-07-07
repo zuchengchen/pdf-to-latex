@@ -12,6 +12,7 @@ Use this reference after Codex has generated a LaTeX project from a PDF, or when
 - Minimum Refinement
 - Quality Rubric
 - Reviewer Gates
+- Workflow Gate Check
 - Issue Order
 - Compile Fixes
 - Layout And Readability
@@ -82,7 +83,7 @@ When resuming an interrupted project, read `conversion-state.md` first. If it is
 6. Recompile.
 7. Inspect rendered output and extracted text. Keep durable rendered comparison pages under `evidence/rebuilt-pages/`; use `scripts/render_rebuilt_pages.sh PROJECT_DIR main.pdf DPI` when available and suitable. For digital PDFs, compare against page-bounded files under `evidence/text-layer/` when present rather than relying on a single untracked text dump.
 8. Compare against the source PDF, delivery contract, source completeness audit, document IR, object inventory, style profile, production spec, or user target. For light tasks, compare against the concise outline or notes used in place of full inventories.
-9. Run reviewer gates when they can catch a distinct class of issues. For publication polish, use a midpoint reviewer gate for plan-level gaps before broad drafting and final reviewer gates for structure/content, math/object, and build/layout after polishing.
+9. Run reviewer gates when they can catch a distinct class of issues. For publication polish, read `references/reviewer-gates.md`, use a midpoint reviewer gate for plan-level gaps before broad drafting, and use final reviewer gates for structure/content, math/object, and build/layout after polishing.
 10. Update `conversion-notes.md` and `conversion-state.md`.
 11. Repeat until the selected delivery level passes or a true blocker is documented. Broad fixable artifacts are not complete merely because they are listed in notes.
 
@@ -99,9 +100,9 @@ After the first successful compile, run focused polish passes. The first compili
 5. **Object Polish Pass**: refine tables, formulas, figures, captions, labels, references, cross-references, units, and notes. Fix table-like plain text and display math left as ordinary paragraphs when legible.
 6. **Book Production Pass**: when applicable, run the book structure, numbering, cross-reference, back matter, and long-document typography passes from `references/book-production.md`.
 7. **Typography Pass**: tune margins, heading spacing, paragraph flow, figure sizes, table widths, float placement, severe overfull boxes, clipped content, blank pages, and awkward whitespace.
-8. **Final Reviewer Gates**: review the generated LaTeX and rendered PDF in separate passes: structure/content, math/object, and build/layout. Use subagent reviewers when available and useful, but keep final edits under the main agent's control.
+8. **Final Reviewer Gates**: read `references/reviewer-gates.md`, then review the generated LaTeX and rendered PDF in separate passes: structure/content, math/object, and build/layout. Use subagent reviewers when available and useful, but keep final edits under the main agent's control.
 9. **Visual Comparison Pass**: render the rebuilt PDF, compare representative pages against the source PDF for semantic coverage and readability, and revisit pages marked uncertain in `page-manifest.md`, `object-inventory.md`, `math-inventory.md`, or `conversion-notes.md`.
-10. **Clean-Room Build Pass**: for publication polish, rebuild from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex` when available; fix missing assets, absolute paths, stale auxiliary assumptions, or hidden dependencies.
+10. **Clean-Room Build Pass**: for publication polish, rebuild from a clean project copy or clean working tree state. Prefer `scripts/publication_gate.sh PROJECT_DIR main.tex --strict-findings` when available; fix missing assets, absolute paths, stale auxiliary assumptions, or hidden dependencies.
 11. **Final Cleanup Pass**: remove temporary transcript comments that are no longer useful, stale `\input` lines, unused labels, duplicate macros, and unresolved placeholders that can be fixed. Keep necessary uncertainty comments concise.
 
 For light-profile documents, complete only the applicable passes and document skipped heavy artifacts. For long documents, complete at least the minimum refinement below and sample high-risk pages: title or first page, one normal body page, one table-heavy page, one formula-heavy page, references or appendices, and every page marked uncertain. Keep the batch plan in `page-manifest.md` current during refinement so incomplete or reworked page ranges remain resumable.
@@ -156,7 +157,7 @@ Record the rubric in `conversion-notes.md` during the reviewer or final cleanup 
 
 ## Reviewer Gates
 
-Use reviewer gates to catch problems the authoring pass may miss. A reviewer should inspect the source PDF evidence, delivery contract, production spec, source completeness audit, `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, rendered rebuilt pages when available, and final LaTeX source when it exists, then report only concrete issues.
+Use reviewer gates to catch problems the authoring pass may miss. Read `references/reviewer-gates.md` for the required output format. A reviewer should inspect the source PDF evidence, delivery contract, production spec, source completeness audit, `document-ir.md`, `object-inventory.md`, `math-inventory.md` when present, rendered rebuilt pages when available, and final LaTeX source when it exists, then report only concrete issues.
 
 For publication polish, run two kinds of review:
 
@@ -188,6 +189,16 @@ Report findings such as:
 - Layout defects such as clipping, blank pages, unreadable tables, or severe overfull boxes.
 
 When subagents are permitted, delegate reviewer tasks by gate rather than by file ownership. Subagents should return findings only. The main agent integrates findings, edits source files, recompiles, and updates shared notes and state files.
+
+## Workflow Gate Check
+
+For publication polish, run the deterministic workflow gate checker before final delivery when available:
+
+```bash
+path/to/pdf-to-latex/scripts/check_workflow_gates.sh .
+```
+
+Use `--allow-blocked` only when true blockers are documented and the final answer will not claim publication polish complete. The checker validates state-file checkpoints, acceptance gate values, required project files, and obvious unfinished statuses; it does not replace semantic review.
 
 ## Issue Order
 

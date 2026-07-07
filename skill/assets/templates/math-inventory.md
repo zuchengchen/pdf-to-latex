@@ -3,6 +3,8 @@
 Source PDF: {{SOURCE_PDF}}
 Task profile: {{TASK_PROFILE}}
 
+Status values: pending | in-progress | rebuilt | compiled | visually reviewed | reviewed | blocked | omitted-with-reason
+
 ## Display Equations
 - id or number:
   source page:

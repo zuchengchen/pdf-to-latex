@@ -2,7 +2,7 @@
 set -euo pipefail
 
 usage() {
-  printf 'Usage: %s [PROJECT_DIR] [MAIN_TEX] [--skip-render] [--skip-clean] [--render-dpi DPI] [--pages LIST | --from N --to M]\n' "$0" >&2
+  printf 'Usage: %s [PROJECT_DIR] [MAIN_TEX] [--skip-render] [--skip-clean] [--strict-findings] [--render-dpi DPI] [--pages LIST | --from N --to M]\n' "$0" >&2
   printf 'Runs deterministic publication gates: compile, artifact scan, optional render, text extraction, and clean rebuild.\n' >&2
 }
 
@@ -19,6 +19,7 @@ positive_int() {
 
 skip_render=false
 skip_clean=false
+strict_findings=false
 render_dpi=140
 render_args=()
 positional=()
@@ -31,6 +32,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --skip-clean)
       skip_clean=true
+      shift
+      ;;
+    --strict-findings)
+      strict_findings=true
       shift
       ;;
     --render-dpi)
@@ -94,6 +99,33 @@ run_step() {
   printf 'PASS: %s\n' "$label" | tee -a "$summary_file" "$gate_log"
 }
 
+check_strict_findings() {
+  local checked_project=$1
+  local label=$2
+  local findings_file="$checked_project/logs/latex_healthcheck_findings.txt"
+  local strict_pattern='Undefined control sequence|LaTeX Warning:.*undefined|Citation .* undefined|Reference .* undefined|There were undefined references|Rerun to get cross-references right|Package .* Error|File .* not found'
+
+  [[ "$strict_findings" == true ]] || return
+
+  printf '== Strict findings check: %s ==\n' "$label" | tee -a "$gate_log"
+
+  if [[ ! -f "$findings_file" ]]; then
+    printf 'FAIL: Strict findings check missing %s\n' "$findings_file" | tee -a "$summary_file" "$gate_log" >&2
+    exit 1
+  fi
+
+  if grep -E "$strict_pattern" "$findings_file" | tee -a "$gate_log"; then
+    printf 'FAIL: Strict findings check: %s\n' "$label" | tee -a "$summary_file" "$gate_log" >&2
+    exit 1
+  fi
+
+  if grep -E 'Overfull \\hbox|Overfull \\vbox' "$findings_file" | tee -a "$gate_log"; then
+    printf 'WARN: Strict findings check saw overfull boxes for %s; review typography.\n' "$label" | tee -a "$summary_file" "$gate_log"
+  fi
+
+  printf 'PASS: Strict findings check: %s\n' "$label" | tee -a "$summary_file" "$gate_log"
+}
+
 find_compiled_pdf() {
   local main_base=${main_tex##*/}
   local expected="$project_dir/${main_base%.tex}.pdf"
@@ -116,6 +148,7 @@ find_compiled_pdf() {
 }
 
 run_step "XeLaTeX healthcheck" "$script_dir/latex_healthcheck.sh" "$project_dir" "$main_tex"
+check_strict_findings "$project_dir" "primary build"
 run_step "Final source artifact scan" "$script_dir/check_latex_artifacts.sh" "$project_dir"
 
 compiled_pdf=$(find_compiled_pdf) || die 'Could not identify compiled PDF after healthcheck.'
@@ -167,6 +200,7 @@ if [[ "$skip_clean" != true ]]; then
   rm -f -- "$clean_project/$compiled_pdf_name"
 
   run_step "Clean-room XeLaTeX rebuild" "$script_dir/latex_healthcheck.sh" "$clean_project" "$main_tex"
+  check_strict_findings "$clean_project" "clean-room build"
 else
   printf 'SKIP: Clean-room XeLaTeX rebuild\n' | tee -a "$summary_file" "$gate_log"
 fi

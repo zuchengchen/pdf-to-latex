@@ -187,7 +187,7 @@ Discovery may happen before actual cropping or table reconstruction, but it must
 
 ## Midpoint Reviewer Gate
 
-For `publication polish`, run a plan-level review after the delivery contract, production spec, source completeness audit, skeleton compile, and asset discovery are ready, but before most final content is drafted.
+For `publication polish`, read `references/reviewer-gates.md` and run a plan-level review after the delivery contract, production spec, source completeness audit, skeleton compile, and asset discovery are ready, but before most final content is drafted.
 
 Review:
 

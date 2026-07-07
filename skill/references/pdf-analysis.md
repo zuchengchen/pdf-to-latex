@@ -211,10 +211,15 @@ Task profile:
 Rendering plan:
 
 ## Page Routes
-- Page 001: digital | evidence: evidence/source-pages/page-001.png | text layer: evidence/text-layer/page-001.txt | batch: 001 | status: pending
-- Page 002: scanned | evidence: evidence/source-pages/page-002.png | text layer: none | batch: 001 | status: pending
-- Page 003: damaged-text | evidence: evidence/source-pages/page-003.png | text layer: unreliable | batch: 001 | status: pending
-- Page 004: encoded-math | evidence: evidence/source-pages/page-004.png | text layer: prose usable, formulas damaged | batch: 001 | status: pending
+- page: 001
+  region: full page
+  route: digital
+  evidence: evidence/source-pages/page-001.png
+  text layer: evidence/text-layer/page-001.txt
+  batch: 001
+  target: chapters/01-introduction.tex
+  status: pending
+  unresolved:
 ```
 
 For each page transcript, capture:
@@ -268,15 +273,19 @@ Figures:
 - id:
   source pages:
   caption:
+  target:
   asset/crop needed:
   status:
+  unresolved:
 
 Tables:
 - id:
   source pages:
   caption:
   structure:
+  target:
   status:
+  unresolved:
 
 Book structure:
 - front matter:
@@ -291,8 +300,10 @@ Equations:
   source pages:
   surrounding text:
   visual evidence:
+  target:
   confidence:
   status:
+  unresolved:
 
 Math artifacts:
 - marker or pattern:
