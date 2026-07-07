@@ -1,6 +1,6 @@
 ---
 name: pdf-to-latex
-description: "Use when Codex needs to convert a user-provided PDF into an editable LaTeX or XeLaTeX project, rebuild or refine a PDF-derived LaTeX project, compile the result, and run semantic quality review. Handles digital, scanned, mixed, math-heavy, book-scale, thesis, and technical PDFs. Not for generic PDF editing, signing, compression, page rearrangement, form filling, or extraction-only tasks unless the goal is LaTeX reconstruction."
+description: "Use when Codex needs to convert a user-provided PDF into an editable LaTeX or XeLaTeX project, rebuild or refine a PDF-derived LaTeX project, compile the result, and run semantic quality review with mandatory Goal-mode planning when supported. Handles digital, scanned, mixed, math-heavy, book-scale, thesis, and technical PDFs. Not for generic PDF editing, signing, compression, page rearrangement, form filling, or extraction-only tasks unless the goal is LaTeX reconstruction."
 ---
 
 # PDF to LaTeX
@@ -20,12 +20,12 @@ Codex performs the conversion work directly with local tools, visual reasoning, 
 - Read `references/math-polish.md` when the document is math-heavy, the text layer has custom encoded symbols, or final source contains math placeholders such as `\pdfglyph` or `extracteddisplay`.
 - Read `references/reviewer-gates.md` before running midpoint or final reviewer gates for `publication polish`.
 - Read `references/quality-review.md` before final delivery or a formal quality review, not for every routine compile.
-- Read `references/goal-mode.md` before creating or continuing a goal-backed PDF-to-LaTeX conversion.
+- Read `references/goal-mode.md` during initial triage for every conversion, reconstruction, broad refinement, or quality-review request so Goal-mode planning is resolved before substantial work.
 - Use `scripts/init_latex_project.sh`, `scripts/upgrade_latex_project.sh`, `scripts/render_pdf_pages.sh`, `scripts/extract_text_pages.sh`, `scripts/render_rebuilt_pages.sh`, `scripts/check_latex_artifacts.sh`, `scripts/check_workflow_gates.sh`, `scripts/latex_healthcheck.sh`, and `scripts/publication_gate.sh` when they fit the local environment; they are helpers, not a replacement for semantic reconstruction. Use `assets/templates/` as the standard scaffold source when creating state, notes, manifest, inventory, IR, math, glyph, or goal tracking files. The helper scripts are intentionally conservative: scaffold only from PDF-looking sources, refuse unrelated non-empty targets, preserve existing project files, and refuse to replace rendered or extracted page evidence unless `--force` is explicit. Use page-selection flags such as `--pages 1,3,5-8` or `--from 10 --to 20` for large PDFs.
 
 ## Canonical Workflow Contract
 
-Treat this file as the source of truth for task profile names, delivery levels, default output contract, required state fields, and stop-and-ask rules. Reference files may add local procedure, examples, and quality gates, but they should not redefine the profile matrix or delivery-level contract. When a scaffold template and prose differ, prefer the bundled template and update the prose to match.
+Treat this file as the source of truth for task profile names, delivery levels, mandatory Goal-mode planning, default output contract, required state fields, and stop-and-ask rules. Reference files may add local procedure, examples, and quality gates, but they should not redefine the profile matrix, Goal-mode contract, or delivery-level contract. When a scaffold template and prose differ, prefer the bundled template and update the prose to match.
 
 ## Task Profiles
 
@@ -50,7 +50,7 @@ math-heavy   standard files plus math-inventory.md and glyph-map.md
 book-math    book files plus math-inventory.md and glyph-map.md
 ```
 
-`goal-objective.md` is optional and belongs only to goal-backed work. If a project starts as `standard` and later needs a heavier profile, run `scripts/upgrade_latex_project.sh TARGET_DIR NEW_PROFILE`, or add the missing template files manually without overwriting existing work, then update `conversion-state.md` and `conversion-notes.md`.
+`goal-objective.md` is optional and belongs only to goal-backed work; record the Goal-mode decision in `conversion-state.md` and `conversion-notes.md` even when this optional file is omitted. If a project starts as `standard` and later needs a heavier profile, run `scripts/upgrade_latex_project.sh TARGET_DIR NEW_PROFILE`, or add the missing template files manually without overwriting existing work, then update `conversion-state.md` and `conversion-notes.md`.
 
 ## Delivery Levels
 
@@ -64,18 +64,19 @@ Choose the delivery level before major reconstruction and record it in `conversi
 
 For `publication polish`, treat these gates as required unless a true blocker is documented:
 
-1. **Delivery contract gate**: before broad work, record the selected delivery level, fidelity target, non-goals, allowed approximation policy, unresolved-content policy, exact-pagination policy, and expected final verification in `conversion-notes.md`.
-2. **Production spec gate**: before broad transcription or final drafting, record the intended document class, page geometry, font and language plan, sectioning depth, figure/table/math strategy, citation and bibliography strategy, book/index/glossary strategy when applicable, non-goals such as pixel-perfect tracing, and toolchain assumptions in `style-profile.md` and `conversion-notes.md`.
-3. **Evidence and route gate**: classify pages or regions as digital, scanned, mixed, encoded-math, damaged-text, or visual-complex, then record a route map in `page-manifest.md` before broad work. Digital pages may use text-layer evidence plus visual correction; scanned and damaged regions require visual transcription.
-4. **Inventory seed gate**: seed `object-inventory.md`, `style-profile.md`, `document-ir.md`, and math/book tracking files before large-scale reconstruction, then finalize them as batches complete.
-5. **Source completeness audit gate**: before large-scale reconstruction, reconcile page routes with `object-inventory.md` and `document-ir.md`. Every source page or meaningful region should be marked `pending`, `in-progress`, `rebuilt`, `reviewed`, `blocked`, or `omitted-with-reason`; every major figure, table, formula, citation, appendix, front/back-matter item, index/glossary item, and unresolved visual region should have an owner/status.
-6. **Skeleton compile gate**: before filling most final content, create the production preamble, document class, package choices, macros, chapter inputs, bibliography/index/glossary hooks when used, and compile the skeleton successfully.
-7. **Asset discovery gate**: before drafting large final chapters, locate figure/table/diagram/bibliography/math assets, decide which objects are cropped, recreated, semantic, or blocked, and record statuses in `object-inventory.md`.
-8. **Batch compile gate**: compile after each chapter, major section, or high-risk object batch before starting the next batch.
-9. **Midpoint reviewer gate**: after route maps, inventories, production spec, asset discovery, and skeleton compile are ready, review the plan for missing content, weak object strategy, class/package mistakes, and likely book/math blockers before most final drafting.
-10. **Final reviewer gate**: perform independent reviewer passes for structure/content, math/objects, and build/layout after polishing. Use subagents for bounded findings when permitted; otherwise perform the passes separately and record results.
-11. **Workflow gate check**: before delivery, run `scripts/check_workflow_gates.sh TARGET_DIR` when available so state-file checkpoints, acceptance gate values, and obvious unfinished statuses are checked deterministically.
-12. **Clean-room build gate**: before delivery, rebuild from a clean project copy or clean working tree state so hidden auxiliary files, absolute paths, stale generated files, or missing assets are caught. Prefer `scripts/publication_gate.sh TARGET_DIR main.tex --strict-findings` when available, then record the result.
+1. **Goal-mode planning gate**: before scaffolding or broad work, classify the request as `goal-required`, `goal-skipped`, or `goal-unavailable-fallback`; create or continue the Goal when required and available, or record the fallback/blocker.
+2. **Delivery contract gate**: before broad work, record the selected delivery level, fidelity target, non-goals, allowed approximation policy, unresolved-content policy, exact-pagination policy, and expected final verification in `conversion-notes.md`.
+3. **Production spec gate**: before broad transcription or final drafting, record the intended document class, page geometry, font and language plan, sectioning depth, figure/table/math strategy, citation and bibliography strategy, book/index/glossary strategy when applicable, non-goals such as pixel-perfect tracing, and toolchain assumptions in `style-profile.md` and `conversion-notes.md`.
+4. **Evidence and route gate**: classify pages or regions as digital, scanned, mixed, encoded-math, damaged-text, or visual-complex, then record a route map in `page-manifest.md` before broad work. Digital pages may use text-layer evidence plus visual correction; scanned and damaged regions require visual transcription.
+5. **Inventory seed gate**: seed `object-inventory.md`, `style-profile.md`, `document-ir.md`, and math/book tracking files before large-scale reconstruction, then finalize them as batches complete.
+6. **Source completeness audit gate**: before large-scale reconstruction, reconcile page routes with `object-inventory.md` and `document-ir.md`. Every source page or meaningful region should be marked `pending`, `in-progress`, `rebuilt`, `reviewed`, `blocked`, or `omitted-with-reason`; every major figure, table, formula, citation, appendix, front/back-matter item, index/glossary item, and unresolved visual region should have an owner/status.
+7. **Skeleton compile gate**: before filling most final content, create the production preamble, document class, package choices, macros, chapter inputs, bibliography/index/glossary hooks when used, and compile the skeleton successfully.
+8. **Asset discovery gate**: before drafting large final chapters, locate figure/table/diagram/bibliography/math assets, decide which objects are cropped, recreated, semantic, or blocked, and record statuses in `object-inventory.md`.
+9. **Batch compile gate**: compile after each chapter, major section, or high-risk object batch before starting the next batch.
+10. **Midpoint reviewer gate**: after route maps, inventories, production spec, asset discovery, and skeleton compile are ready, review the plan for missing content, weak object strategy, class/package mistakes, and likely book/math blockers before most final drafting.
+11. **Final reviewer gate**: perform independent reviewer passes for structure/content, math/objects, and build/layout after polishing. Use subagents for bounded findings when permitted; otherwise perform the passes separately and record results.
+12. **Workflow gate check**: before delivery, run `scripts/check_workflow_gates.sh TARGET_DIR` when available so state-file checkpoints, acceptance gate values, and obvious unfinished statuses are checked deterministically.
+13. **Clean-room build gate**: before delivery, rebuild from a clean project copy or clean working tree state so hidden auxiliary files, absolute paths, stale generated files, or missing assets are caught. Prefer `scripts/publication_gate.sh TARGET_DIR main.tex --strict-findings` when available, then record the result.
 
 ## Initial Triage
 
@@ -86,9 +87,9 @@ Before creating a new scaffold, read `references/pdf-analysis.md` and do only en
 3. For selectable PDFs, sample the text layer with page-bounded extraction such as `pdftotext -f 1 -l 1 -layout SOURCE_PDF -`.
 4. For scanned, mixed, long, or visually complex PDFs, render only representative pages first when practical: page 1, an early body page, a middle page, a final page, and any obvious table/formula/reference pages. Use `scripts/render_pdf_pages.sh SOURCE_PDF TARGET_DIR DPI --pages LIST` after the target scaffold exists, or temporary render paths for pre-scaffold inspection.
 5. Choose a provisional task profile from `light`, `standard`, `book`, `math-heavy`, or `book-math`, plus a delivery level.
-6. For long, scanned, mixed, math-heavy, or book-scale PDFs, decide whether a full conversion needs explicit user confirmation, Goal mode approval, or a narrower first milestone before broad transcription.
+6. Run Mandatory Goal Mode Planning from this file. For `goal-required` work, create or continue the Goal before broad transcription when goal tools are available and policy allows it; otherwise record `goal-unavailable-fallback` or stop for required user approval.
 
-After the scaffold exists, immediately write the durable triage and feasibility note into `conversion-notes.md` and update `conversion-state.md`. Include page count, estimated scanned or visually complex pages, planned batch size, first milestone, recommended delivery level, profile decision, initial production-spec assumptions for publication polish, and whether Goal mode was explicitly approved or state-file resumability will be used instead.
+After the scaffold exists, immediately write the durable triage and feasibility note into `conversion-notes.md` and update `conversion-state.md`. Include page count, estimated scanned or visually complex pages, planned batch size, first milestone, recommended delivery level, profile decision, initial production-spec assumptions for publication polish, and the Goal-mode decision, active Goal status, or fallback reason.
 
 If the profile is uncertain, start with `standard` rather than guessing a heavier specialized profile. After deeper analysis, upgrade the project by adding missing tracking files, book directories, or math inventories from `assets/templates/`, then update `conversion-state.md` and `conversion-notes.md`.
 
@@ -135,6 +136,8 @@ Last updated:
 Current phase:
 Task profile:
 Delivery level:
+Goal mode decision:
+Goal status:
 Completed checkpoints:
 Last successful command:
 Active files:
@@ -144,17 +147,21 @@ Blockers or uncertainties:
 
 Use `conversion-notes.md` for richer evidence, decisions, commands, and unresolved details; use `conversion-state.md` for fast restart.
 
-## Goal-Backed Execution
+## Mandatory Goal Mode Planning
 
-Treat a complex full conversion request such as `$pdf-to-latex 把 "book.pdf" 转成latex` as likely to benefit from goal-backed execution because PDF-to-LaTeX conversion can be long-running and resumable. Before starting substantial work on long, scanned, mixed, math-heavy, or book-scale PDFs, read `references/goal-mode.md`. Create or continue a concrete goal only when goal tools are available, current runtime policy allows it, and the user explicitly asked for Goal mode or approved it after a short confirmation. Do not force Goal mode for short light-profile conversions, one-off repairs, compile fixes, or user-requested rough drafts.
+Before scaffolding a new conversion, resuming broad reconstruction, or starting major refinement or quality review, read `references/goal-mode.md` and classify the request in `conversion-state.md` and `conversion-notes.md` as one of:
 
-If goal creation is allowed and approved, the goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, clearing blocking math extraction artifacts when present, and stopping only when the quality checks pass or a true blocker is documented.
+- `goal-required`: use for any full PDF-to-LaTeX conversion or rebuild; any existing PDF-derived LaTeX project needing broad refinement or quality review; any `publication polish` task; any long, scanned, mixed, math-heavy, encoded, book-scale, or multi-batch task. This includes light-profile full conversions when the user expects a completed LaTeX project rather than a one-shot rough draft.
+- `goal-skipped`: use only for explaining this skill, initial triage with no reconstruction, reviewing a snippet, fixing one localized compile or layout issue, or a user-requested rough draft, one-shot partial pass, or narrow repair that can be completed in the current turn. Record the reason.
+- `goal-unavailable-fallback`: use when the task is `goal-required` but goal tools are unavailable or runtime policy forbids goal creation. Continue with the same resumable workflow using `conversion-state.md` and `conversion-notes.md`, record the limitation, and do not lower the delivery level merely because Goal mode is unavailable.
 
-Ask for the shortest confirmation possible before calling a goal tool, for example: `这个转换任务很长。我可以用 Goal 模式持续执行直到质量检查通过吗？回复 y/Y 确认。` If the user does not approve Goal mode, goal tools are unavailable, or policy forbids goal creation, continue with the same resumable workflow using `conversion-state.md` and `conversion-notes.md`. Do not silently downgrade a full conversion into a one-turn rough draft unless the user explicitly asks for a rough draft or no goal mode.
+When the decision is `goal-required` and goal tools are available, create or continue a concrete Goal after the source PDF and target directory are known and before major analysis, scaffolding, broad transcription, reconstruction, or refinement. If the current runtime requires explicit user approval and the user has not already requested Goal mode, ask for the shortest yes/no confirmation and stop before broad work until it is approved. If the user declines Goal mode for a `goal-required` full conversion, do not proceed as a normal full conversion; ask whether to reduce scope to rough draft, triage, or a narrow repair, or record a blocker.
+
+The Goal must require using this skill, reading `conversion-state.md` first on every continuation, updating checkpoints after each milestone, compiling with XeLaTeX, completing minimum refinement and quality review, clearing blocking math extraction artifacts when present, and stopping only when the quality checks pass or a true blocker is documented.
 
 ## Automatic Conversion And Refinement Workflow
 
-1. Confirm the source PDF path and target output location. If the target exists, first inspect it for `conversion-state.md`, `conversion-notes.md`, `main.tex`, LaTeX logs, and compiled PDFs.
+1. Confirm the source PDF path and target output location, then run Mandatory Goal Mode Planning. If the target exists, first inspect it for `conversion-state.md`, `conversion-notes.md`, `main.tex`, LaTeX logs, and compiled PDFs.
 2. When a resumable project is found, continue from `conversion-state.md`'s `Next action`. If the state file is missing but project artifacts exist, infer the current phase from available files and logs, create `conversion-state.md`, and resume without overwriting work.
 3. For a new target directory, read `references/pdf-analysis.md`, run the pre-scaffold Initial Triage above, then create the scaffold with `scripts/init_latex_project.sh SOURCE_PDF TARGET_DIR TASK_PROFILE DELIVERY_LEVEL` or the matching files in `assets/templates/`. Immediately write durable triage notes and update `conversion-state.md`.
 4. Run the delivery contract gate for `publication polish`, or a lighter delivery note for other levels. Record fidelity target, non-goals, approximation policy, unresolved-content policy, exact-pagination policy, and expected final verification.
@@ -228,6 +235,7 @@ Ask the user before proceeding when:
 - The source PDF path is missing or ambiguous.
 - The target `latex/` directory already exists, has no recoverable state or recognizable project artifacts, and proceeding may overwrite user work.
 - A required system tool for the requested verification is missing and cannot be used.
+- Goal mode is required, the runtime requires explicit approval, and the user declines or has not answered.
 - Formula symbols or math regions remain unreadable after visual review and available context, and leaving them unresolved would block near-publication delivery.
 - The user asks for a bundled converter, local OCR dependency, cloud OCR dependency, or generic PDF editing behavior outside LaTeX reconstruction.
 - A newer user instruction conflicts with this skill's output contract.

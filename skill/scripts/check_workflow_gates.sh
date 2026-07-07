@@ -214,6 +214,8 @@ scan_unfinished_statuses() {
 require_file main.tex
 require_file conversion-state.md
 require_file conversion-notes.md
+require_section '## Goal Mode Planning'
+require_checkpoint 'Goal mode planning complete'
 
 delivery_level=$delivery_override
 if [[ -z "$delivery_level" ]]; then
@@ -292,6 +294,7 @@ if [[ "$delivery_level" == "publication polish" ]]; then
   require_checkpoint 'Clean-room build gate complete'
   require_checkpoint 'Quality review complete'
 
+  require_acceptance_gate 'Goal mode planning'
   require_acceptance_gate 'Delivery contract'
   require_acceptance_gate 'Production spec'
   require_acceptance_gate 'Source completeness audit'

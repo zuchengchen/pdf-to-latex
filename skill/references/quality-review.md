@@ -26,7 +26,7 @@ Use this reference before delivering a rebuilt LaTeX project. The quality bar fo
 3. Extract text from the compiled PDF when possible and compare it with key source content, including page-bounded files under `evidence/text-layer/` when digital text-layer evidence was used.
 4. Render or open the compiled PDF and check readability, page flow, figures, tables, formulas, and references. Store durable render artifacts under `evidence/rebuilt-pages/` when they help review or resume.
 5. Compare final chapters against the delivery contract, source completeness audit, `document-ir.md`, `object-inventory.md`, and `style-profile.md` when present. For light-profile tasks, compare against the recorded concise outline or simplification notes.
-6. For publication polish, confirm the delivery contract, production spec, source completeness audit, asset discovery, skeleton compile, batch compile, midpoint reviewer, final reviewer, visual comparison, and clean-room build gates are passed or blocked with concrete user-facing reasons.
+6. For publication polish, confirm the Goal-mode planning, delivery contract, production spec, source completeness audit, asset discovery, skeleton compile, batch compile, midpoint reviewer, final reviewer, visual comparison, and clean-room build gates are passed or blocked with concrete user-facing reasons.
 7. For book-scale projects, apply `references/book-production.md` quality gates for front matter, table of contents, lists of figures/tables, chapters, appendices, bibliography, index/glossary when present, and cross-references.
 8. For math-heavy, encoded, or formula-damaged projects, run math artifact scans on final source and reconcile `math-inventory.md` and `glyph-map.md`.
 9. Complete the quality rubric from `latex-refinement.md`.
@@ -60,6 +60,7 @@ For clean semantic delivery, the matching row is the minimum bar. For publicatio
 Treat these gates as required for `publication polish` unless a true blocker is documented and surfaced to the user:
 
 ```text
+Goal mode planning: pass | blocked
 Delivery contract: pass | blocked
 Production spec: pass | blocked
 Source completeness audit: pass | blocked
@@ -81,6 +82,7 @@ Use `not applicable` only when the source lacks that category, for example no ma
 Quantified floor:
 
 - Latest XeLaTeX build succeeds and produces the expected PDF.
+- Goal-mode planning is recorded, and `goal-required` work used an active Goal when available or recorded a concrete fallback/blocker.
 - `scripts/check_latex_artifacts.sh .` returns clean when math artifacts or placeholders were possible.
 - `scripts/check_workflow_gates.sh .` returns clean for publication polish unless `--allow-blocked` is intentionally used for a documented blocked delivery.
 - Final source has no broad `pending`, `in-progress`, or unowned page/object statuses for content required by the delivery contract.
@@ -334,4 +336,4 @@ Before final response:
 
 ## Completion Standard
 
-Complete a clean semantic or publication-polish task only when the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete publication polish only when the delivery contract, production spec, source completeness audit, skeleton compile, asset discovery, batch compile record, midpoint reviewer, final reviewer gates, visual comparison, artifact scans, workflow gate check, and clean-room build gate have passed or true blockers are documented. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.
+Complete a clean semantic or publication-polish task only when Goal-mode planning is recorded, the rebuilt PDF compiles, key semantic content is present, the document IR and object inventory have been reconciled with final LaTeX or their light-profile omission is documented, minimum refinement passes have been completed or explicitly marked not applicable, book-production gates pass when applicable, math artifact scans are clean when applicable, and the final chapters no longer look like raw page transcripts. Complete publication polish only when Goal-mode planning, the delivery contract, production spec, source completeness audit, skeleton compile, asset discovery, batch compile record, midpoint reviewer, final reviewer gates, visual comparison, artifact scans, workflow gate check, and clean-room build gate have passed or true blockers are documented. Complete a rough draft only when the user requested that level and the remaining work is recorded plainly. If a required system tool for verification is missing, stop and tell the user exactly what is missing and which verification step could not run.

@@ -6,9 +6,12 @@ Last updated: {{DATE_UTC}}
 Current phase: scaffold created
 Task profile: {{TASK_PROFILE}}
 Delivery level: {{DELIVERY_LEVEL}}
+Goal mode decision:
+Goal status:
 
 ## Completed Checkpoints
 - [x] Project scaffold created
+- [ ] Goal mode planning complete
 - [ ] Initial triage complete
 - [ ] Delivery contract gate complete when applicable
 - [ ] Production spec gate complete when applicable

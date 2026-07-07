@@ -57,7 +57,7 @@ pdfinfo source.pdf
 
 5. Sample the first page's text layer when `pdftotext` is available and the PDF appears selectable; for visually complex, scanned, long, or book-like PDFs, render representative pages to a temporary location when needed before scaffolding.
 6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis. For book-scale or math-heavy work, default to `publication polish` unless the user explicitly requests a lower delivery level. When using `publication polish`, record the acceptance contract after scaffolding before broad work.
-7. For long, scanned, mixed, math-heavy, encoded, or book-scale PDFs, decide whether broad transcription needs explicit user confirmation, Goal mode approval, or a narrower first milestone. Do not commit to full-page transcription until this is settled.
+7. Run Mandatory Goal Mode Planning from `SKILL.md`. For `goal-required` work, create or continue the Goal before broad transcription when tools and policy allow it; otherwise record `goal-unavailable-fallback` or stop for required approval. Do not commit to full-page transcription until this is settled.
 8. For a new target directory, use `scripts/init_latex_project.sh` or the bundled `assets/templates/` files to create the scaffold with the provisional task profile and delivery level before recording durable analysis.
 
 Keep this pass short. Its job is to choose a safe target, task profile, and delivery level, not to finish the analysis.
@@ -66,7 +66,7 @@ Keep this pass short. Its job is to choose a safe target, task profile, and deli
 
 After the scaffold exists, record durable findings in `conversion-notes.md` and update `conversion-state.md`.
 
-1. Add a feasibility note for long, scanned, mixed, math-heavy, encoded, or book-scale PDFs. Include page count, estimated scanned or visually complex pages, selected delivery level, first milestone, batch size, initial production-spec assumptions, and whether Goal mode was explicitly approved or the state-file workflow will be used.
+1. Add a feasibility note for long, scanned, mixed, math-heavy, encoded, or book-scale PDFs. Include page count, estimated scanned or visually complex pages, selected delivery level, first milestone, batch size, initial production-spec assumptions, Goal-mode decision, active Goal status, and any `goal-unavailable-fallback` reason.
 2. For digital PDFs, optionally extract page-bounded text-layer evidence under the project:
 
 ```bash
@@ -170,7 +170,7 @@ Do not create a compileable draft by embedding each scanned page as `\includegra
 For long PDFs, make batching explicit before large transcription or reconstruction:
 
 - Start with representative analysis pages: first page, one early body page, one middle body page, one final page, plus known table-heavy, formula-heavy, bibliography, appendix, index, or glossary pages when detected.
-- Record a feasibility note before broad transcription: total pages, estimated scanned or complex pages, target delivery level, proposed first milestone, and whether Goal mode was approved or a user-approved first milestone will be used instead.
+- Record a feasibility note before broad transcription: total pages, estimated scanned or complex pages, target delivery level, proposed first milestone, Goal-mode decision, active Goal status, and any fallback or blocker.
 - Use 5-10 pages per batch for scanned, mixed, damaged-text, table-heavy, or formula-heavy pages.
 - Use 20-50 pages per batch for mostly digital prose after page-bounded text-layer evidence exists.
 - For mostly digital prose, a batch may be a text-layer correction and object review batch rather than a visual transcript batch.
@@ -178,7 +178,7 @@ For long PDFs, make batching explicit before large transcription or reconstructi
 - Update `conversion-state.md` after every completed batch with the latest completed pages and the next concrete batch.
 - For books, batch by structural boundary when possible: front matter, each chapter or chapter section, appendices, bibliography, and index/glossary.
 
-Do not commit to full-page transcription for a very long scanned PDF without a resumable batch plan, a current state file, and either explicit Goal-mode approval or a user-approved first milestone.
+Do not commit to full-page transcription for a very long scanned PDF without a resumable batch plan, a current state file, and an active Goal or a documented `goal-unavailable-fallback`/blocker.
 
 ## Profile Upgrade Checklist
 

@@ -214,6 +214,7 @@ if grep -Fq 'Page 001: pending' "$scaffold_project/page-manifest.md"; then
 fi
 
 for required_text in \
+  'Goal mode planning complete' \
   'Delivery contract gate complete when applicable' \
   'Source completeness audit complete when applicable' \
   'Asset discovery gate complete' \
@@ -226,6 +227,7 @@ for required_text in \
 done
 
 for required_text in \
+  '## Goal Mode Planning' \
   '## Delivery Contract' \
   '## Source Completeness Audit' \
   '## Asset Discovery' \
@@ -250,6 +252,7 @@ workflow_project="$tmp_dir/workflow-complete"
 "$script_dir/init_latex_project.sh" "$source_pdf" "$workflow_project" book-math "publication polish" >/dev/null
 
 for checkpoint in \
+  'Goal mode planning complete' \
   'Initial triage complete' \
   'Delivery contract gate complete when applicable' \
   'Production spec gate complete when applicable' \
@@ -291,6 +294,7 @@ for checkpoint in \
 done
 
 for gate in \
+  'Goal mode planning' \
   'Delivery contract' \
   'Production spec' \
   'Source completeness audit' \

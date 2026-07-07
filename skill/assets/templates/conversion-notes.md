@@ -7,6 +7,16 @@ Task profile: {{TASK_PROFILE}}
 Delivery level: {{DELIVERY_LEVEL}}
 Profile history:
 
+## Goal Mode Planning
+
+Decision: goal-required | goal-skipped | goal-unavailable-fallback
+Reason:
+Goal status:
+Goal tool availability:
+Active goal:
+Approval or fallback:
+First milestone:
+
 ## Commands And Tools
 
 ## PDF Analysis Summary
@@ -97,6 +107,7 @@ Build/layout review:
 ## Quality Review
 
 Publication-polish acceptance gates:
+Goal mode planning:
 Delivery contract:
 Production spec:
 Source completeness audit:
