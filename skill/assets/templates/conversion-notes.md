@@ -21,6 +21,8 @@ First milestone:
 
 ## PDF Analysis Summary
 
+Source page size: {{SOURCE_PAGE_SIZE}}
+
 ## Delivery Contract
 
 Fidelity target:
@@ -33,6 +35,8 @@ Expected verification:
 ## Production Spec
 
 Document class:
+Source page size: {{SOURCE_PAGE_SIZE}}
+Target paper size:
 Page geometry:
 Font and language plan:
 Sectioning depth:

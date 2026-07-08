@@ -238,6 +238,19 @@ for required_text in \
   fi
 done
 
+if grep -Fq '{{SOURCE_PAGE_SIZE}}' "$scaffold_project/conversion-notes.md" "$scaffold_project/style-profile.md"; then
+  printf 'Scaffold files should replace the source page size placeholder.\n' >&2
+  exit 1
+fi
+
+if command -v pdfinfo >/dev/null 2>&1; then
+  expected_page_size=$(pdfinfo "$source_pdf" 2>/dev/null | sed -n 's/^Page size:[[:space:]]*//p' | head -n 1 || true)
+  if [[ -n "$expected_page_size" ]] && ! grep -Fq "Source page size: $expected_page_size" "$scaffold_project/style-profile.md"; then
+    printf 'Scaffold style profile missing detected source page size: %s\n' "$expected_page_size" >&2
+    exit 1
+  fi
+fi
+
 if ! grep -Fq 'Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason' "$scaffold_project/page-manifest.md"; then
   printf 'Expected page manifest template to document shared route statuses.\n' >&2
   exit 1

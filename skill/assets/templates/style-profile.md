@@ -7,7 +7,10 @@ Delivery level: {{DELIVERY_LEVEL}}
 
 Document profile:
 Document class:
+Source page size: {{SOURCE_PAGE_SIZE}}
+Target paper size:
 Page geometry:
+Page size policy: Match the source PDF page size when practical; document any mixed-size or reflow exception.
 Language and font needs:
 Sectioning depth:
 Bibliography strategy:

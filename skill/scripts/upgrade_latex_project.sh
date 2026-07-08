@@ -129,6 +129,22 @@ new_profile_value=$(escape_sed_replacement "$new_profile")
 delivery_level_value=$(escape_sed_replacement "$delivery_level")
 date_value=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
+source_page_size() {
+  local value
+
+  if [[ -f "$source_pdf" ]] && command -v pdfinfo >/dev/null 2>&1; then
+    value=$(pdfinfo "$source_pdf" 2>/dev/null | sed -n 's/^Page size:[[:space:]]*//p' | head -n 1 || true)
+    if [[ -n "$value" ]]; then
+      printf '%s' "$value"
+      return
+    fi
+  fi
+
+  printf 'pending; inspect source PDF page size with pdfinfo'
+}
+
+source_page_size_value=$(escape_sed_replacement "$(source_page_size)")
+
 copy_template() {
   local template_name=$1
   local destination=$2
@@ -144,6 +160,7 @@ copy_template() {
     -e "s|{{TASK_PROFILE}}|$new_profile_value|g" \
     -e "s|{{DELIVERY_LEVEL}}|$delivery_level_value|g" \
     -e "s|{{DATE_UTC}}|$date_value|g" \
+    -e "s|{{SOURCE_PAGE_SIZE}}|$source_page_size_value|g" \
     "$template_dir/$template_name" >"$destination"
   printf 'Created %s\n' "$destination"
 }

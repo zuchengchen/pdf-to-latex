@@ -240,6 +240,7 @@ Record package or font substitutions in `conversion-notes.md`.
 
 Improve readability without trying to trace every pixel:
 
+- Preserve the source-derived target paper size during typography fixes unless the recorded production spec explains a different choice.
 - Adjust `geometry` margins only when content is cramped or source proportions clearly require it.
 - Remove artificial `\newpage`, `\clearpage`, and page-level section breaks that only came from transcript boundaries.
 - Use normal LaTeX floats before manual placement.

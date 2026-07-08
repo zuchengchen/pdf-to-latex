@@ -29,7 +29,7 @@ Use this reference to understand the source PDF before rebuilding it in LaTeX. T
 
 Capture:
 
-- PDF path, page count, page sizes, orientation, and whether pages are digital, scanned, or mixed.
+- PDF path, page count, page sizes, dominant or mixed-size pattern, orientation, and whether pages are digital, scanned, or mixed.
 - Selected task profile: `light`, `standard`, `book`, `math-heavy`, or `book-math`.
 - Selected delivery level and publication-polish acceptance contract when applicable.
 - Logical reading order, section hierarchy, and document metadata.
@@ -49,11 +49,13 @@ Record findings in the target `latex/conversion-notes.md` as work proceeds. Also
 1. Locate the PDF and decide the output directory.
 2. If the output directory already exists, inspect `conversion-state.md`, `conversion-notes.md`, `main.tex`, existing rendered pages, extracted text, logs, and compiled PDFs before re-running analysis.
 3. Check available local tools for PDF inspection and rendering, for example `pdfinfo`, `pdfseparate`, `pdftotext`, `pdftoppm`, `mutool draw`, or `pdfimages`. Do not use local OCR tools.
-4. Inspect metadata and page count when tools are available:
+4. Inspect metadata, page count, and source page size when tools are available:
 
 ```bash
 pdfinfo source.pdf
 ```
+
+Record the `Page size` value or mixed-size evidence in `conversion-notes.md` and `style-profile.md`. Use this as the default target paper size for the rebuilt LaTeX project unless mixed page sizes, missing metadata, or an explicit user request justify a different paper size.
 
 5. Sample the first page's text layer when `pdftotext` is available and the PDF appears selectable; for visually complex, scanned, long, or book-like PDFs, render representative pages to a temporary location when needed before scaffolding.
 6. Choose a provisional task profile before scaffolding. Use the exact helper values `light`, `standard`, `book`, `math-heavy`, or `book-math`. Choose a delivery level before broad reconstruction: `rough draft`, `clean semantic`, or `publication polish`. If the quick evidence is inconclusive, start with `standard` and `clean semantic`, then upgrade later after deeper analysis. For book-scale or math-heavy work, default to `publication polish` unless the user explicitly requests a lower delivery level. When using `publication polish`, record the acceptance contract after scaffolding before broad work.
@@ -126,6 +128,7 @@ For `clean semantic`, keep a shorter delivery note in `conversion-notes.md` that
 For `publication polish`, gather enough evidence before broad transcription to define the production target:
 
 - Document class family: `article`, `report`, `book`, `ctexbook`, thesis class, proceedings structure, or another justified choice.
+- Source page size and target paper size. Prefer matching the PDF's original paper size through a standard paper option such as `a4paper` or `letterpaper`, or explicit `paperwidth` and `paperheight` values when the source size is nonstandard.
 - Page geometry, one-sided or two-sided intent, margins, heading depth, and float strategy.
 - Font and language needs, including CJK or multilingual support.
 - Math strategy: numbering, theorem-like environments, symbol cleanup, and encoded glyph handling.
@@ -339,6 +342,8 @@ Capture:
 ```text
 Document profile: article | academic paper | report | book | textbook | monograph | proceedings | book chapter | thesis | dissertation | manual | handout | form | math-heavy | table-heavy | CJK/multilingual | other
 Document class:
+Source page size:
+Target paper size:
 Language and font needs:
 Sectioning depth:
 Bibliography strategy:

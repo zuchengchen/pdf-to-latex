@@ -107,7 +107,7 @@ Generate `main.tex` and `chapters/*.tex` from this document model. The IR should
 For publication polish, write the production spec before filling most final source:
 
 - Document class and matter model.
-- Page geometry, one-sided or two-sided policy, and sectioning depth.
+- Source page size, target paper size, page geometry, one-sided or two-sided policy, and sectioning depth.
 - Font, language, Unicode, CJK, and package assumptions.
 - Figure, table, math, theorem-like, citation, bibliography, index, glossary, and generated-list strategy.
 - Asset boundaries: extracted figures, cropped regions, recreated diagrams, semantic tables, and objects intentionally approximated.
@@ -145,7 +145,7 @@ Use XeLaTeX by default. Start with a simple, portable preamble and add packages 
 \end{document}
 ```
 
-Use `style-profile.md` to choose the document class, packages, and layout. For CJK or multilingual content, add appropriate XeLaTeX packages such as `xeCJK` when available in the local TeX installation. Use `\IfFontExistsTF` or a simpler default when a preferred font may be missing. If a package is missing, choose a simpler fallback or ask before installing system packages.
+Use `style-profile.md` to choose the document class, paper size, packages, and layout. Prefer a target paper size that matches the source PDF page size when practical. Use standard class or `geometry` options such as `a4paper` or `letterpaper` when they match the source, or explicit dimensions such as `\geometry{paperwidth=6in,paperheight=9in,margin=...}` for nonstandard source pages. Treat exact pagination as a separate goal; matching paper size does not require line-for-line page tracing. For CJK or multilingual content, add appropriate XeLaTeX packages such as `xeCJK` when available in the local TeX installation. Use `\IfFontExistsTF` or a simpler default when a preferred font may be missing. If a package is missing, choose a simpler fallback or ask before installing system packages.
 
 For books, theses, monographs, proceedings, or documents with front/back matter, use `references/book-production.md` before choosing between `article`, `report`, `book`, `ctexbook`, a thesis class, or another class. Do not flatten a book into an article merely because the baseline example uses `article`.
 
@@ -165,7 +165,7 @@ If the audit reveals gaps, update the manifest, inventory, style profile, IR, no
 
 Before drafting most publication-polish content, create and compile a minimal production skeleton:
 
-1. Choose the document class, page geometry, fonts, packages, macros, theorem environments, bibliography/index/glossary hooks, and file structure from `style-profile.md`.
+1. Choose the document class, source-derived target paper size, page geometry, fonts, packages, macros, theorem environments, bibliography/index/glossary hooks, and file structure from `style-profile.md`.
 2. Create `main.tex` and any required empty or lightly seeded `frontmatter/`, `chapters/`, or `backmatter/` inputs.
 3. Compile with XeLaTeX or `scripts/latex_healthcheck.sh TARGET_DIR main.tex`.
 4. Fix class, package, font, missing-file, bibliography/index/glossary, and macro errors before filling large content.
