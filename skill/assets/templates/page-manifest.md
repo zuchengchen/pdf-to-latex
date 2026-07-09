@@ -1,34 +1,40 @@
 # Page Manifest
 
 Source PDF: {{SOURCE_PDF}}
+Operation: {{OPERATION}}
+Source kind: {{SOURCE_KIND}}
+Document traits: {{DOCUMENT_TRAITS}}
 Rendered pages: evidence/source-pages/
-Single-page PDFs:
-Digital text-layer extracts:
-Task profile: {{TASK_PROFILE}}
+Digital text-layer extracts: evidence/text-layer/
 Batch plan:
-Profile upgrades:
-Completeness audit:
 
-## Page Routes
+## Page Coverage
 
-No page routes recorded yet. Replace this line with one route per real source page or region after triage or rendering.
+### Page coverage: initial
+Status: pending
+Reason:
+Next action: Replace this placeholder with one record per real source page or coherent page region.
 
-Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+## Page Records
 
 ```text
-- page:
-  region:
-  route: digital | scanned | mixed | encoded-math | damaged-text | visual-complex
-  evidence:
-  text layer:
-  batch:
-  target:
-  status:
-  unresolved:
+### Page: 1
+Region: full-page
+Route: digital | scanned | mixed | encoded-math | damaged-text | visual-complex
+Evidence:
+Text layer:
+Batch:
+Target:
+Status: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+Compile check: not-run | pass | fail
+Visual review: not-run | pass | fail | not-applicable
+Reason:
+Next action:
 ```
 
-## Transcript Template
+## Transcript Record
 
+```text
 Page:
 Route:
 Batch:
@@ -38,3 +44,4 @@ Tables:
 Equations:
 Continuity:
 Uncertainties:
+```

@@ -1,135 +1,61 @@
 # Conversion Notes
 
+State schema: 2
+Skill version: 1.0.0
+Contract version: 1
 Source PDF: {{SOURCE_PDF}}
 Target directory: {{TARGET_DIR}}
 Created: {{DATE_UTC}}
-Task profile: {{TASK_PROFILE}}
+Operation: {{OPERATION}}
+Source kind: {{SOURCE_KIND}}
+Document traits: {{DOCUMENT_TRAITS}}
 Delivery level: {{DELIVERY_LEVEL}}
-Profile history:
+Execution mode: {{EXECUTION_MODE}}
+Verification scope: {{VERIFICATION_SCOPE}}
+Outcome: in-progress
 
-## Goal Mode Planning
+## Scope And Authority
 
-Decision: goal-required | goal-skipped | goal-unavailable-fallback
-Reason:
-Goal status:
-Goal tool availability:
-Active goal:
-Approval or fallback:
-First milestone:
+User-authorized changes:
+Read-only boundaries:
+External inputs or approvals:
 
-## Commands And Tools
+## Source Analysis
 
-## PDF Analysis Summary
-
-Source page size: {{SOURCE_PAGE_SIZE}}
+Page size: {{SOURCE_PAGE_SIZE}}
+Text-layer findings:
+Visual findings:
+Source limitations:
 
 ## Delivery Contract
 
-Fidelity target:
-Typography/layout target:
+Semantic fidelity target:
+Structure and object target:
+Typography and layout target:
 Approximation policy:
 Blocking policy:
-Exact pagination policy:
-Expected verification:
 
-## Production Spec
+## Reconstruction Decisions
 
-Document class:
-Source page size: {{SOURCE_PAGE_SIZE}}
-Target paper size:
-Page geometry:
+Document model:
 Font and language plan:
-Sectioning depth:
-Figure/table/math strategy:
+Figure, table, and math strategy:
 Citation and bibliography strategy:
-Book/index/glossary strategy:
-Toolchain assumptions:
-Non-goals:
+Book production strategy:
 
-## Page Evidence And Transcription
+## Build And Verification
 
-## Route Map And Batch Plan
-
-## Source Completeness Audit
-
-Page and region coverage:
-Object coverage:
-IR coverage:
-Blocked items:
-Omitted-with-reason items:
-Audit result:
-
-## Document Model
-
-## Objects
-
-## Asset Discovery
-
-Figure assets:
-Table strategy:
-Diagram strategy:
-Bibliography assets:
-Math/formula assets:
-Blocked or omitted assets:
-
-## Book Production
-
-## Math And Glyphs
-
-## Figures And Tables
-
-## Skeleton Compile
-
-## Batch Compiles
-
-## Compile And Refinement
-
-## Reviewer Gates
-
-Use `references/reviewer-gates.md` output format.
-
-Midpoint review:
-- Result:
-- Scope reviewed:
-- Blocking issues:
-
-Structure/content review:
-- Result:
-- Scope reviewed:
-- Blocking issues:
-
-Math/object review:
-- Result:
-- Scope reviewed:
-- Blocking issues:
-
-Build/layout review:
-- Result:
-- Scope reviewed:
-- Blocking issues:
-
-## Quality Review
-
-Publication-polish acceptance gates:
-Goal mode planning:
-Delivery contract:
-Production spec:
-Source completeness audit:
-Skeleton compile:
-Asset discovery:
-Batch compile history:
-Midpoint reviewer:
-Final structure/content reviewer:
-Final math/object reviewer:
-Final build/layout reviewer:
+Build commands:
+Compile findings:
 Visual comparison:
 Artifact scan:
 Clean-room build:
-Final notes/state:
+Source fidelity result:
 
-Clean-room build:
-Workflow gate check:
+## Inferences And Approximations
 
-## Inferences, Approximations, And External Sources
+None recorded.
 
 ## Remaining Uncertainties
+
+None recorded.

@@ -1,50 +1,49 @@
 # Document IR
 
 Source PDF: {{SOURCE_PDF}}
-Task profile: {{TASK_PROFILE}}
+Operation: {{OPERATION}}
+Document traits: {{DOCUMENT_TRAITS}}
 
-Metadata:
-Style profile:
+## Model Coverage
 
-## Blocks
-- type: title | abstract | part | chapter | section | paragraph | list | theorem | equation | figure | table | citation | bibliography | appendix | glossary | index | note
-  source pages:
-  content or reference:
-  label:
-  confidence:
+### Document model: initial
+Status: pending
+Reason:
+Next action: Record the semantic block model and mark this record reviewed when its coverage is verified.
 
-## Book Model
-  document class target:
-  front matter:
-  main matter:
-  back matter:
-  numbering policy:
-  cross-reference policy:
+## Block Records
+
+Use one level-three record per semantic block or coherent block group.
+
+```text
+### Block: stable-identifier
+Type: title | abstract | part | chapter | section | paragraph | list | theorem | equation | figure | table | citation | bibliography | appendix | glossary | index | note
+Source pages:
+Content or reference:
+Target:
+Confidence: high | medium | low
+Status: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+Compile check: not-run | pass | fail
+Visual review: not-run | pass | fail | not-applicable
+Reason:
+Next action:
+```
 
 ## Cross-Page Merges
+
+None recorded.
 
 ## Source Completeness
 
 Page and region coverage:
 Object coverage:
-Blocked blocks:
 Omitted-with-reason blocks:
-
-## Route-Specific Reconstruction
-
-Digital text-layer batches:
-Visual transcription batches:
-Encoded math batches:
-Damaged or uncertain regions:
-
-## Objects
-
-## Asset Plan
-
-## Math Inventory
 
 ## Build Skeleton
 
-## Unresolved Blocks
-
-## Style Decisions
+Document class target:
+Front matter:
+Main matter:
+Back matter:
+Numbering policy:
+Cross-reference policy:

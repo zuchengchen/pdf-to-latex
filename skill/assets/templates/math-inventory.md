@@ -1,30 +1,34 @@
 # Math Inventory
 
 Source PDF: {{SOURCE_PDF}}
-Task profile: {{TASK_PROFILE}}
+Operation: {{OPERATION}}
+Document traits: {{DOCUMENT_TRAITS}}
 
-Status values: pending | in-progress | rebuilt | compiled | visually reviewed | reviewed | blocked | omitted-with-reason
+## Math Coverage
 
-## Display Equations
-- id or number:
-  source page:
-  surrounding text:
-  current source file:
-  status: pending | rebuilt | compiled | visually reviewed | blocked
-  notes:
+### Math coverage: initial
+Status: pending
+Reason:
+Next action: Inventory the relevant formulas and symbols, then mark this record reviewed when coverage is verified.
 
-## Inline Math And Symbol Hotspots
-- source page:
-  context:
-  issue:
-  status:
+## Formula Records
+
+```text
+### Formula: stable-identifier
+Source pages:
+Surrounding text:
+Current source file:
+Target:
+Confidence: high | medium | low
+Status: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+Compile check: not-run | pass | fail
+Visual review: not-run | pass | fail | not-applicable
+Reason:
+Next action:
+```
 
 ## Artifact Counts
-- pdfglyph:
-- extracteddisplay:
-- raw math placeholders:
 
-## Blocked Items
-- source page:
-  visible evidence:
-  question:
+Raw glyph placeholders:
+Extracted display placeholders:
+Other encoded-math artifacts:

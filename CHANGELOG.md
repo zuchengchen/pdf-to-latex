@@ -1,0 +1,19 @@
+# Changelog
+
+## 1.0.0 - 2026-07-10
+
+- Replace the combined task-profile model with explicit operation, source,
+  document-trait, delivery, execution, verification, and outcome fields.
+- Add a machine-readable workflow contract and deterministic state validation.
+- Make review operations read-only and decouple Goal mode from delivery quality.
+- Compile from temporary staged projects with sanitized startup environments,
+  restrictive Kpathsea I/O, and rejection of symlinks, hard links, and special
+  files.
+- Make publication findings strict by default, including missing-glyph,
+  visible-pixel, normalized-text, dependency-closure, and clean-room checks.
+- Add atomic scaffold updates, source fingerprints, transactional page evidence,
+  recovery handling, and evidence manifests.
+- Add atomic install/update guidance, stable release installation, and expanded
+  integration validation.
+- Clarify that the skill performs editable semantic reconstruction, not
+  pixel-perfect facsimile generation or OCR.

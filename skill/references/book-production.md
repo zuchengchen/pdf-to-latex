@@ -1,107 +1,66 @@
-# Book Production Reference
+# Book Production
 
-Use this reference when the PDF is a book, textbook, technical monograph, proceedings volume, thesis, dissertation, long academic manual, or when it contains book-specific structures such as preface, table of contents, list of figures, list of tables, appendices, bibliography, glossary, or index.
-
-Do not load this path for a short article merely because it has sections, figures, or references. The goal is publication-grade long-document reconstruction without making simple conversions heavier.
+Use this reference only after the `book` trait is established. It adds long-document and book-apparatus guidance without redefining the workflow contract or general acceptance gates.
 
 ## Contents
 
-- Book Signals
-- Book IR
-- LaTeX Strategy
+- Establish The Trait
+- Book Model
+- Class And File Strategy
 - Front Matter
 - Main Matter
-- Figures, Tables, And Formulas
 - Back Matter
-- Index And Glossary
+- Generated Apparatus
 - Cross-Reference Audit
-- Refinement Passes
-- Quality Gates
+- Book Review
 
-## Book Signals
+## Establish The Trait
 
-Treat a document as book-scale when several of these are present:
+Treat an explicitly identified book, textbook, monograph, thesis, dissertation, or proceedings volume as book work. Otherwise require several signals:
 
-- Parts, chapters, lessons, or numbered chapter-level sections.
-- Front matter such as half title, title page, copyright page, dedication, foreword, preface, acknowledgements, abstract, table of contents, list of figures, list of tables, or notation list.
-- Back matter such as appendices, bibliography, references, glossary, index, author biography, colophon, or edition notes.
-- Chapter-scoped numbering for equations, figures, tables, examples, exercises, theorems, definitions, or algorithms.
-- Repeated running heads, recto/verso page style, Roman numeral front matter pages, or a clear transition from front matter to main matter.
-- Long cross-reference chains such as "see Chapter 4", "Equation (3.2)", "Figure 7.5", "Appendix B", or "Table 2.1".
+- parts or chapters;
+- distinct front, main, and back matter;
+- chapter-scoped figure, table, equation, theorem, example, or exercise numbering;
+- Roman-numbered front matter;
+- recto/verso layout or running heads;
+- multiple back-matter classes;
+- long chapter-to-chapter reference chains.
 
-Record the decision in `style-profile.md`:
+A bibliography, references section, appendix, table of contents, or long page count alone does not establish the trait.
 
-```text
-Task profile: book | book-math
-Book production: yes | no | partial
-Book type: textbook | monograph | proceedings | thesis | dissertation | technical manual | other
-Front matter present:
-Main matter structure:
-Back matter present:
-Numbering style:
-Index/glossary present:
-Book reference loaded: yes
-```
+## Book Model
 
-## Book IR
-
-Extend `document-ir.md` with book-level structure before writing final LaTeX:
+Extend the document model with:
 
 ```text
-Book model:
-  document class target:
-  front matter:
-  main matter:
-  back matter:
-  numbering policy:
-  cross-reference policy:
-
-Front matter:
-- type: half-title | title-page | copyright | dedication | foreword | preface | acknowledgements | abstract | toc | lof | lot | notation
-  source pages:
-  target file:
-  status:
-
-Main matter:
-- type: part | chapter | section | subsection | theorem | definition | example | exercise | paragraph | equation | figure | table | note
-  number:
-  title:
-  source pages:
-  target file:
-  labels:
-  status:
-
-Back matter:
-- type: appendix | bibliography | references | glossary | index | colophon | note
-  source pages:
-  target file:
-  status:
-
-Cross-reference audit:
+Book type and class target:
+Front matter and order:
+Main-matter parts and chapters:
+Back matter and order:
+Numbering policy:
+Generated-list policy:
+Bibliography policy:
+Index and glossary policy:
+Cross-reference policy:
+File ownership:
 Unresolved book objects:
 ```
 
-Use this IR to decide file boundaries. For long books, prefer stable files such as `frontmatter/preface.tex`, `chapters/03-methods.tex`, and `backmatter/appendix-a.tex` when that improves maintainability. The scaffold helper creates `frontmatter/` and `backmatter/` for `book` and `book-math` profiles; add them manually if a project was initially scaffolded as `standard` and later upgraded. For shorter theses or manuals, `chapters/` plus clear comments may be enough. Explain simplifications in `conversion-notes.md`.
+Map source pages to front, main, and back matter before final drafting. Use stable source files such as `frontmatter/preface.tex`, `chapters/03-methods.tex`, and `backmatter/appendix-a.tex` when they improve maintainability. Short theses or manuals may use fewer files if structural ownership remains clear.
 
-## LaTeX Strategy
+## Class And File Strategy
 
-Choose the class and packages from the production spec and document profile, not from a desire to mimic every page:
+- Use `book` for ordinary books and monographs when no stronger class is required.
+- Use `report` for thesis-like or technical structures that do not need book matter switches.
+- Use an institution-specific class only when the user supplies it or it already belongs to the project.
+- Use `ctexbook`, `xeCJK`, or another CJK strategy only when language and installed fonts support it.
+- Prefer portable class and package choices over speculative production frameworks.
 
-- Use `book` for ordinary books and monographs when no stronger class is needed.
-- Use `report` for thesis-like or technical report structures that do not need true book front/back matter.
-- Use a user-provided or institution-specific thesis class only when it already exists in the project or the user supplies it.
-- Use CJK-capable classes or packages, such as `ctexbook` or `xeCJK`, only when the language and local TeX installation support them.
-- Consider `memoir` or KOMA-Script only when already present or clearly helpful and available; prefer portable defaults when uncertain.
-- Use `amsmath`, `amssymb`, and theorem packages only when the document actually needs them.
-- Use `makeidx`, `imakeidx`, `glossaries`, `biblatex`, or BibTeX only when needed and supported by the local toolchain; otherwise use simpler semantic fallbacks and record the limitation.
-
-For book-class projects, use normal matter switches where appropriate:
+For a true book class, use semantic matter transitions when appropriate:
 
 ```tex
 \frontmatter
 \tableofcontents
-\listoffigures
-\listoftables
 
 \mainmatter
 \input{chapters/01-introduction}
@@ -110,118 +69,75 @@ For book-class projects, use normal matter switches where appropriate:
 \input{backmatter/appendix-a}
 
 \backmatter
-\printbibliography
-\printindex
 ```
 
-Do not emit commands such as `\printindex`, `\printglossary`, or `\printbibliography` unless the corresponding package, data, and compilation path are present or a documented fallback exists.
-
-For publication polish, test the book skeleton before drafting most content. The skeleton should include matter switches, representative chapter inputs, generated list commands when supported, bibliography/index/glossary hooks when used, theorem or equation numbering policy when needed, and any class-specific packages. Compile this skeleton before broad reconstruction so class and generated-list failures are caught early.
+Add `\listoffigures`, `\listoftables`, bibliography, index, or glossary commands only when corresponding content and build tooling exist. Compile the structural skeleton before drafting most chapters.
 
 ## Front Matter
 
-Reconstruct visible front matter semantically:
+Preserve visible front matter semantically:
 
-- Title page, subtitle, authors, editors, affiliations, publisher, edition, date, and series information.
-- Copyright, ISBN, license, edition, printing, or publisher notes when visible.
-- Dedication, epigraph, foreword, preface, acknowledgements, abstract, and notation list.
-- Table of contents, list of figures, and list of tables.
+- half title, title page, subtitle, authors, editors, affiliations, publisher, edition, and date;
+- copyright, ISBN, license, series, printing, and edition notes;
+- dedication, epigraph, foreword, preface, acknowledgements, abstract, and notation list;
+- table of contents, list of figures, and list of tables.
 
-Use generated `\tableofcontents`, `\listoffigures`, and `\listoftables` when the rebuilt structure and captions support them. Preserve source TOC text in notes only when generated lists cannot yet be trusted. Do not hand-type a static TOC as final output unless the user explicitly requests source-page reproduction.
-
-For front matter with Roman numbering in the source, use `\frontmatter` or an equivalent numbering policy when the chosen class supports it. Record any divergence from source page numbering in `conversion-notes.md`.
+Prefer generated contents and lists when final headings and captions support them. Do not hand-type a static source TOC to imitate source pagination. Record intentional changes to page numbering.
 
 ## Main Matter
 
-Rebuild the main text as a book, not as one flat article:
+- Preserve parts, chapters, sections, examples, exercises, summaries, and theorem-like structures.
+- Use repeated semantic environments for theorem, definition, lemma, proposition, corollary, proof, example, and exercise when the source supports them.
+- Preserve chapter-scoped numbering and visible labels.
+- Remove running heads and page numbers from body text; implement page style only when it adds value.
+- Preserve meaningful footnotes, endnotes, and sidebars.
 
-- Preserve parts, chapters, sections, subsections, exercises, examples, theorem-like blocks, and chapter summaries.
-- Use semantic environments for theorem-like content when repeated structures are visible: `theorem`, `definition`, `lemma`, `proposition`, `corollary`, `example`, `exercise`, `proof`, or project-specific names.
-- Preserve chapter-scoped numbering when visible, such as Equation (2.3), Figure 4.1, Table 5.2, or Theorem 1.4.
-- Keep labels stable and descriptive, for example `chap:introduction`, `sec:fourier-transform`, `fig:phase-portrait`, `tab:error-rates`, `eq:wave-equation`, `thm:existence`.
-- Convert repeated running headers, page numbers, and decorative dividers into page-style decisions only when useful; do not leave them in body text.
-- Preserve footnotes and endnotes when meaningful. Convert marginal notes or sidebars into semantic notes only when they carry content.
+For proceedings, keep editor-level front matter and per-paper chapter boundaries. Preserve each paper's title, authors, abstract, local sections, references, and appendices where visible.
 
-For proceedings volumes, preserve editor-level front matter and per-paper chapter boundaries. Treat each paper chapter like a local article inside the volume, with its own title, authors, abstract, references, and appendices when visible.
-
-## Figures, Tables, And Formulas
-
-Use the normal figure, table, and math guidance from `latex-rebuild.md` and `math-polish.md`, with book-specific checks:
-
-- Preserve chapter-scoped figure, table, theorem, and equation numbering when visible.
-- Make captions sufficient for generated lists of figures and tables.
-- Use `\label` and `\ref` consistently for objects that are referenced in the text.
-- For long tables, consider `longtable`, `tabularx`, landscape pages, or appendix placement only when the source structure calls for it.
-- For formula-heavy books, keep `math-inventory.md` organized by chapter and source page.
-- For notation lists, preserve symbol, meaning, units, and first-use context when visible.
-
-Do not let a generated TOC, list of figures, or list of tables become the only proof that objects exist. Reconcile them against `object-inventory.md` and the rendered PDF.
+Batch long reconstruction by structural boundary. Update durable state after each chapter or apparatus group and compile before proceeding to the next high-risk batch.
 
 ## Back Matter
 
-Reconstruct back matter according to the source:
+- Use `\appendix` or class-equivalent behavior and preserve appendix identifiers.
+- Preserve bibliography identity and citation associations. Keep per-chapter bibliographies distinct when the source does.
+- Rebuild visible glossary, notation, index, colophon, biography, and edition notes without inventing entries.
+- Use semantic manual lists when index or glossary tooling is unavailable; record the limitation.
 
-- Appendices should use `\appendix` or equivalent class support, preserve appendix letters/numbers, and keep appendix figures, tables, formulas, and references coherent.
-- Bibliography or references should preserve the source citation style where practical. Use `references.bib`, `biblatex`, BibTeX, or `thebibliography` according to document size and local tool support.
-- For per-chapter bibliographies, keep the chapter association clear and avoid flattening them into one list unless the user asks.
-- Glossary and notation lists should be semantic lists or glossary tooling when tool support is available.
-- Index pages should be reconstructed or prepared only when visible in the source or explicitly requested. Do not invent index terms.
+Public lookup may correct identifiable DOI, arXiv, author, title, venue, or BibTeX metadata. Label public metadata separately from PDF-derived content.
 
-For bibliography cleanup, public web lookup may be used for DOI, arXiv, title, author, venue, or BibTeX metadata only when it improves accuracy. Record which metadata came from the PDF and which came from public sources.
+## Generated Apparatus
 
-## Index And Glossary
+Generated apparatus is valid only when its underlying structure exists:
 
-When an index is present:
+- A table of contents must agree with final parts, chapters, and sections.
+- Lists of figures and tables must agree with visible objects and captions.
+- Bibliography commands require data and a supported build stage.
+- Index terms must derive from a visible source index or explicit user direction.
+- Glossary entries must preserve visible terms, definitions, symbols, units, and first-use context.
 
-- Record index pages in `object-inventory.md` and `document-ir.md`.
-- Preserve visible index headings, terms, subterms, and page-reference style when reconstructing an index page manually.
-- If using generated indexing, add `\index{...}` entries only for terms visible in the source index or explicitly requested by the user.
-- Compile with the required indexing step only when the local toolchain supports it; otherwise keep a semantic manual index and document the limitation.
-- Verify that the final output does not contain `\printindex` without generated index content.
-
-When a glossary or notation list is present:
-
-- Preserve term, definition, symbol, unit, and first-use context when visible.
-- Use glossary tooling only when supported and useful; otherwise use a semantic `description`, `longtable`, or chapter-level notation section.
-- Do not silently merge glossary, notation, and index content unless the source does so.
+Do not use a generated list as the only proof that source objects were reconstructed. Reconcile it with the object inventory and rendered PDF.
 
 ## Cross-Reference Audit
 
-Before delivery, audit book-level references:
+Audit:
 
-- Chapters, sections, appendices, figures, tables, equations, theorems, exercises, examples, bibliography entries, footnotes, and index/glossary entries.
-- Source references such as "see page", "see above", "later in this chapter", or "the next section" that may be wrong after repagination.
-- Undefined `\ref`, `\pageref`, `\eqref`, `\cite`, and generated-list warnings in LaTeX logs.
-- Duplicate labels and stale labels left from generated drafts.
-- Captions missing labels when the text refers to the object.
-- Appendix numbering, equation numbering, and theorem numbering after `\appendix`.
+- chapters, sections, appendices, figures, tables, equations, theorem-like blocks, examples, and exercises;
+- citations, bibliography entries, footnotes, generated lists, index, and glossary;
+- undefined, duplicate, and stale labels;
+- source wording such as "see page" that became false after repagination;
+- numbering after matter switches and `\appendix`.
 
-Fix references when the source intent is clear. If source page references cannot be preserved after semantic repagination, document the change and prefer structural references such as chapter, section, figure, table, or equation.
+When exact source page references cannot survive semantic reflow, prefer chapter, section, figure, table, or equation references and document the change.
 
-## Refinement Passes
+## Book Review
 
-For book-scale documents, add these passes to the normal refinement loop:
+Add these focused passes to the general refinement workflow:
 
-1. **Book Structure Pass**: confirm front matter, main matter, and back matter boundaries; replace flat sections with parts, chapters, appendices, and generated lists where appropriate.
-2. **Numbering Pass**: reconcile chapter, equation, figure, table, theorem, appendix, and bibliography numbering against the source.
-3. **Cross-Reference Pass**: fix labels, references, citations, generated lists, and source page-reference wording.
-4. **Back Matter Pass**: reconcile appendices, bibliography, glossary, and index against the source PDF and inventories.
-5. **Long-Document Typography Pass**: review chapter openings, page breaks, large floats, long tables, running heads when used, and severe overfull boxes.
-6. **Clean Book Build Pass**: for publication polish, rebuild from a clean copy or clean working tree state and confirm generated lists, bibliography, index/glossary hooks, and cross-references still build without stale auxiliary files.
+1. Structure: verify front/main/back boundaries and correct order.
+2. Numbering: reconcile chapter-scoped objects and appendices.
+3. Generated apparatus: rebuild and inspect contents, lists, bibliography, index, and glossary.
+4. Cross-references: clear undefined, stale, and source-page-dependent references.
+5. Long-document typography: inspect chapter openings, blank pages, running heads, long tables, large floats, and severe overflow.
+6. Clean build: verify all generated apparatus from a clean environment without stale auxiliary files.
 
-For long books, sample every structural area rather than only early pages: front matter, an early chapter, a middle chapter, a formula-heavy page, a table-heavy page, appendices, bibliography, and index/glossary pages when present.
-
-## Quality Gates
-
-Do not call a book-scale reconstruction publication-grade until:
-
-- `style-profile.md` records the book profile and chosen class strategy.
-- `document-ir.md` includes front matter, main matter, back matter, numbering policy, and cross-reference policy when present in the source.
-- Generated or reconstructed table of contents, list of figures, and list of tables are consistent with final headings and captions when they are present or requested.
-- Source completeness audit covers visible front matter, main matter, back matter, generated lists, appendices, bibliography, glossary, index, and major book-level cross-references, or documents localized blockers.
-- Major figures, formulas, tables, theorem-like blocks, appendices, bibliography entries, and index/glossary items are rebuilt, reviewed, or explicitly documented as unresolved.
-- LaTeX logs have no unresolved references or citations that affect delivered content.
-- Book-specific refinement passes are complete or marked not applicable with a reason.
-- The skeleton and clean build gates pass for publication-polish book projects.
-- The rendered PDF is readable across sampled front matter, normal chapters, dense object pages, appendices, bibliography, and index/glossary pages.
-- The final source remains maintainable: book structure is semantic, labels are meaningful, and long content is split into files when that helps future editing.
+Sample every structural area: front matter, early and middle chapters, dense object pages, late chapters, appendices, bibliography, and index or glossary when present. Publication completion requires maintainable semantic structure, coherent apparatus, resolved build stages, and no required book object left pending or blocked.

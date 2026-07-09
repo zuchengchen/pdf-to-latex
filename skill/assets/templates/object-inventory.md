@@ -1,73 +1,46 @@
 # Object Inventory
 
 Source PDF: {{SOURCE_PDF}}
+Operation: {{OPERATION}}
+Document traits: {{DOCUMENT_TRAITS}}
 
-Status values: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+## Inventory Coverage
 
-## Figures
-- id:
-  source pages:
-  caption:
-  target:
-  asset/crop needed:
-  status:
-  unresolved:
+### Object coverage: initial
+Status: pending
+Reason:
+Next action: Inventory source objects and mark this record reviewed when coverage is verified.
 
-## Tables
-- id:
-  source pages:
-  caption:
-  structure:
-  target:
-  status:
-  unresolved:
+## Object Records
+
+Use the same record shape for figures, tables, equations, citations, cross-references, and other owned objects.
+
+```text
+### Object: stable-identifier
+Type: figure | table | equation | citation | bibliography | cross-reference | glossary | index | other
+Source pages:
+Caption or surrounding text:
+Target:
+Asset or reconstruction plan:
+Confidence: high | medium | low
+Status: pending | in-progress | rebuilt | reviewed | blocked | omitted-with-reason
+Compile check: not-run | pass | fail
+Visual review: not-run | pass | fail | not-applicable
+Reason:
+Next action:
+```
 
 ## Book Structure
-- front matter:
-- main matter:
-- back matter:
-- table of contents/list pages:
-- appendix pages:
-- index/glossary pages:
 
-## Equations
-- id or number:
-  source pages:
-  surrounding text:
-  visual evidence:
-  target:
-  confidence:
-  status:
-  unresolved:
+Front matter:
+Main matter:
+Back matter:
+Table of contents and list pages:
+Appendix pages:
+Index or glossary pages:
 
-## Math Artifacts
-- marker or pattern:
-  source pages:
-  likely symbol:
-  status:
+## Source Completeness
 
-## References And Citations
-- citation style:
-- bibliography pages:
-- unresolved citations:
-  status:
-
-## Cross-References
-- label or visible reference:
-  source pages:
-  target object:
-  status:
-  unresolved:
-
-## Source Completeness Audit
-- page or region:
-  required by delivery contract:
-  covered by IR:
-  owned objects:
-  status:
-  unresolved:
-
-## Unresolved Visual Regions
-- source page:
-  description:
-  next action:
+Covered pages and regions:
+Unowned objects:
+Omitted-with-reason objects:

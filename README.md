@@ -1,152 +1,170 @@
 # PDF to LaTeX Skill
 
-`pdf-to-latex` is a Codex Agent Skill for rebuilding PDFs as editable XeLaTeX projects, compiling the result, and refining the generated LaTeX until it is semantically complete, readable, and maintainable. It favors semantic reconstruction over pixel-perfect page tracing: preserve structure, text, formulas, tables, figures, captions, references, and book-scale apparatus when present.
+`pdf-to-latex` is a Codex skill for rebuilding user-provided PDFs as editable,
+semantic XeLaTeX projects. It supports new conversions, resumable work, broad
+refinement, localized repairs, and read-only reviews of PDF-derived projects.
 
-The installable skill lives in [`skill/`](skill/). The repository root contains human-facing docs and development notes only.
+The normal target is maintainable LaTeX with faithful structure, text, math,
+tables, figures, citations, and book apparatus. Pixel-perfect facsimiles,
+full-page screenshot wrapping, OCR services, and generic PDF editing are outside
+the skill's scope.
 
-This is a workflow skill, not a bundled PDF-to-LaTeX converter. It does include reusable templates and small helper scripts for project scaffolding, repeatable page rendering, LaTeX compile health checks, and artifact scans. It does not require local OCR engines or cloud OCR APIs.
+The installable skill is [`skill/`](skill/). The repository root contains
+publishing, installation, and development material and is not itself a skill.
 
-## Quick Install
+## Stable Install
 
-In Codex, enter:
-
-```text
-安装 skill https://github.com/zuchengchen/pdf-to-latex，path 使用 skill，名称使用 pdf-to-latex
-```
-
-If Codex asks for details, choose:
-
-- GitHub URL: `https://github.com/zuchengchen/pdf-to-latex`
-- Skill path inside repo: `skill`
-- Skill name: `pdf-to-latex`
-
-After installation, restart Codex so the new skill is discovered.
-
-## Quick Update
-
-On a machine where this skill is already installed, ask Codex:
+In Codex, request the tagged release and the repository's `skill/` path:
 
 ```text
-更新 skill https://github.com/zuchengchen/pdf-to-latex.git，path 使用 skill，名称使用 pdf-to-latex，直接覆盖已安装目录，不要创建备份
+安装 skill https://github.com/zuchengchen/pdf-to-latex，ref 使用 v1.0.0，path 使用 skill，名称使用 pdf-to-latex
 ```
 
-This skill's update policy is direct replacement of the installed `pdf-to-latex` skill directory. Do not create `.backup.*` directories during update. Restart Codex after updating so the new skill instructions are loaded.
+Equivalent installer command:
 
-## What It Does
+```bash
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-installer/scripts/install-skill-from-github.py" \
+  --url https://github.com/zuchengchen/pdf-to-latex \
+  --ref v1.0.0 \
+  --path skill \
+  --name pdf-to-latex
+```
 
-- Chooses exact `light`, `standard`, `book`, `math-heavy`, or `book-math` workflow profiles to avoid overloading simple tasks while supporting specialized long or formula-heavy conversions.
-- Inspects digital, scanned, mixed, encoded, and damaged-text PDFs.
-- Renders durable page evidence under `latex/evidence/source-pages/` for visual transcription and later resume, with page-list and page-range batching for long PDFs.
-- Uses optional page-bounded `pdftotext` extraction under `latex/evidence/text-layer/` only for digital PDF text-layer evidence.
-- Builds document IR, object inventory, and style profile when the selected profile needs them.
-- Detects academic/technical book, textbook, monograph, proceedings, thesis, dissertation, and long manual structures.
-- Tracks math-heavy reconstruction with `math-inventory.md` and `glyph-map.md` when formulas or encoded symbols need focused cleanup.
-- Creates consistent project scaffolds from bundled templates when starting a new conversion, including book front/back matter directories and math tracking files for the relevant profiles.
-- Rebuilds the document as a maintainable XeLaTeX project rather than scanned page screenshots.
-- Uses rough draft, clean semantic, and publication polish delivery levels so simple tasks can finish without book-scale overhead.
-- Records a publication-polish delivery contract, source completeness audit, asset discovery gate, midpoint reviewer gate, final reviewer gates, and clean-room build requirements for publication-grade work.
-- Runs compile-review-polish loops after the first generated draft unless the user explicitly asks for a rough draft.
-- Maintains `conversion-state.md` and `conversion-notes.md` so interrupted conversions can resume from the latest checkpoint.
-- Uses helper scripts in `skill/scripts/` for scaffolding, profile upgrades, page-bounded text-layer extraction, rendering source or rebuilt pages, checking LaTeX health, scanning final source for extraction artifacts, checking workflow gates, strict publication gates, and smoke testing the skill package.
+Restart Codex after installation. See [INSTALL.md](INSTALL.md) for atomic manual
+installation, update, verification, and uninstall procedures.
+
+## Workflow Model
+
+The skill records independent workflow dimensions instead of a combined task
+profile:
+
+```text
+Operation:          convert | resume | refine | repair | review
+Source kind:        digital | scanned | mixed | unknown
+Document traits:    book, long-document, math-heavy, encoded-math, cjk, visual-complex
+Delivery level:     rough-draft | clean-semantic | publication-polish
+Execution mode:     one-turn | resumable | goal-backed
+Verification scope: source-aware | project-only
+Outcome:            in-progress | complete | blocked | downgraded
+```
+
+File layout is derived from these fields. For example, book traits add stable
+front/main/back matter boundaries, while math traits add math and glyph tracking.
+Read-only `review` operations compile and render only in temporary copies and do
+not update the user's project.
+
+## Safety And Quality
+
+- Ignores project `.latexmkrc` files and disables shell escape by default.
+- Requires explicit approval to enable project rc execution or shell escape.
+- Compiles in a temporary staged project and rejects project symlinks, hard links,
+  special files, and project-external TeX inputs during final verification.
+- Forces restrictive Kpathsea input/output policy and sanitizes runtime startup
+  variables before invoking the toolchain.
+- Classifies missing characters, missing files, undefined references, and package
+  failures as blocking findings.
+- Treats ordinary font substitution and box warnings as reviewable warnings.
+- Uses project-closure reports and a sanitized clean-room rebuild for publication
+  polish.
+- Records source PDF SHA-256 identity and refuses to reuse stale page evidence.
+- Writes page renders and text-layer evidence transactionally with JSON manifests.
+- Makes publication findings strict by default; diagnostic overrides cannot be
+  reported as a passing final gate.
+
+## Runtime Capabilities
+
+| Capability | Requirement | When needed |
+| --- | --- | --- |
+| Contract, state, evidence | Python 3.10+ | All deterministic helpers |
+| Shell entrypoints | Bash 3.2+ | Wrapper commands; macOS system Bash is supported |
+| Simple compilation | XeLaTeX | Rough draft and simple clean-semantic work |
+| Full compilation | `latexmk` + XeLaTeX | Publication polish and complex build chains |
+| PDF metadata/pages | `pdfinfo` | Full conversion, source identity, publication checks |
+| Page rendering | `pdftoppm` or `mutool` | Visual analysis and comparison |
+| Digital text layer | `pdftotext` | Digital evidence and output verification |
+| Single-page PDFs | `pdfseparate` | Only with explicit `--single-page-pdf` |
+| Bibliography/index/glossary | biber/BibTeX, makeindex, makeglossaries as used | Project-dependent |
+
+The skill does not use `tesseract`, `ocrmypdf`, cloud OCR APIs, or a bundled
+converter. Scanned pages are visually transcribed by Codex from rendered page
+evidence.
 
 ## Repository Structure
 
 ```text
 pdf-to-latex/
-├── .github/
-│   └── workflows/
-│       └── validate.yml
-├── README.md
+├── .github/workflows/validate.yml
+├── CHANGELOG.md
 ├── INSTALL.md
+├── LICENSE
+├── README.md
 ├── dev-goals/
-│   └── ...
 └── skill/
     ├── SKILL.md
-    ├── agents/
-    │   └── openai.yaml
-    ├── assets/
-    │   └── templates/
-    │       └── ...
+    ├── agents/openai.yaml
+    ├── assets/templates/
     ├── references/
-    │   ├── book-production.md
-    │   ├── goal-mode.md
-    │   ├── latex-rebuild.md
-    │   ├── latex-refinement.md
-    │   ├── math-polish.md
+    │   ├── workflow-contract.json
+    │   ├── security-and-build.md
     │   ├── pdf-analysis.md
-    │   ├── quality-review.md
-    │   └── reviewer-gates.md
+    │   ├── latex-rebuild.md
+    │   ├── refinement-and-review.md
+    │   ├── book-production.md
+    │   └── math-polish.md
     └── scripts/
-        ├── check_latex_artifacts.sh
-        ├── check_workflow_gates.sh
-        ├── extract_text_pages.sh
-        ├── init_latex_project.sh
-        ├── latex_healthcheck.sh
-        ├── publication_gate.sh
-        ├── render_pdf_pages.sh
-        ├── render_rebuilt_pages.sh
-        ├── test_skill.sh
-        └── upgrade_latex_project.sh
 ```
-
-`skill/SKILL.md` is the trigger and workflow entry point. Detailed procedures live in `skill/references/` so Codex can load only the guidance it needs.
-
-## Dependencies
-
-The skill has no package manager dependencies.
-
-Useful local tools for actual PDF-to-LaTeX work include:
-
-- XeLaTeX or `latexmk -xelatex`
-- Poppler tools such as `pdftotext`, `pdfinfo`, `pdfseparate`, `pdftoppm`, or `pdfimages`
-- Optional renderer alternatives such as `mutool draw`
-
-The skill is written so Codex uses visual recognition for scanned pages. Do not use local OCR engines such as `tesseract` or `ocrmypdf`. Rendered page images are analysis inputs, not the default LaTeX output.
-
-## Known Limitations
-
-- This skill guides Codex through reconstruction; it is not a one-command converter and does not bundle a PDF-to-LaTeX engine.
-- Long, scanned, damaged-text, or math-heavy PDFs may need multiple resumable passes before the result is clean.
-- Scanned pages are meant to be visually transcribed into semantic LaTeX. Full-page screenshots are not the normal final output.
-- Pixel-perfect reproduction is outside the default goal. The normal target is editable, readable, semantically faithful XeLaTeX.
-- Public web lookup may be used only for metadata, citations, public source context, or standard formulas, and should be documented separately from PDF-derived content.
 
 ## Development Validation
 
-Run the full local smoke suite after changing the skill:
+Fast portable checks:
 
 ```bash
-skill/scripts/test_skill.sh
+skill/scripts/test_skill.sh --portable
 ```
 
-The smoke suite validates skill metadata when the Codex system validator is available, checks shell syntax, exercises artifact and workflow-gate scanning, verifies scaffold and profile-upgrade guardrails, and runs real PDF rendering, text-layer extraction, compile, strict publication-gate, and clean rebuild smoke tests when local TeX and PDF tools are available. The repository also includes a GitHub Actions workflow that runs the portable checks on push and pull request.
+Required local integration checks:
+
+```bash
+skill/scripts/test_skill.sh --integration --require-tools
+```
+
+Metadata validation remains available directly:
+
+```bash
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" skill
+```
+
+CI runs portable validation and a real XeLaTeX/Poppler integration job for every
+pull request. Longer bibliography, index, glossary, CJK, book, and forward-test
+corpora run on scheduled or release validation.
 
 ## Usage Examples
 
-After installing and restarting Codex:
-
 ```text
-$pdf-to-latex 把 ./paper.pdf 重排成可编辑 LaTeX 项目，并编译出 PDF
+$pdf-to-latex 把 ./paper.pdf 重建成可编辑 XeLaTeX 项目并完成语义检查
 ```
 
-For an academic or technical book:
-
 ```text
-$pdf-to-latex 把 "Quantum Field Theory for the Gifted Amateur.pdf" 转成latex
+$pdf-to-latex 继续 ./latex 中上次中断的转换
 ```
 
-For an existing generated project:
-
 ```text
-$pdf-to-latex 对照 ./paper.pdf 自动精修 ./latex，并重新编译输出 PDF
+$pdf-to-latex 只读审查 ./latex，对照 ./paper.pdf 给出问题，不要修改项目
 ```
 
-To resume interrupted work:
-
 ```text
-$pdf-to-latex 继续 ./latex 里上次中断的 PDF 转 LaTeX 任务
+$pdf-to-latex 修复 ./latex 中这个局部编译问题，不要展开成完整重建
 ```
 
-## More Installation Options
+## Versioning
 
-See [INSTALL.md](INSTALL.md) for exact installer parameters, manual installation, update, uninstall, and troubleshooting notes.
+Tagged releases such as `v1.0.0` are the stable installation channel. The
+`main` branch is the development channel and may contain unreleased contract or
+workflow changes. Workflow contract and state schema versions are recorded
+separately inside `skill/references/workflow-contract.json`. Version-tag pushes
+run the extended release corpus before the corresponding GitHub Release is
+published.
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
