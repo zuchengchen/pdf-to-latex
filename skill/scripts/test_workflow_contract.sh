@@ -344,6 +344,36 @@ grep -Fq 'missing required rule: explicit token-budget authority' "$tmp_dir/last
 grep -Fq 'missing required rule: terminal completion validation' "$tmp_dir/last.stderr" || fail 'package validation accepted weak Goal completion rules'
 grep -Fq 'missing required rule: Goal blocker-threshold handling' "$tmp_dir/last.stderr" || fail 'package validation accepted weak Goal blocker handling'
 
+missing_self_updater_skill="$tmp_dir/missing-self-updater-skill"
+cp -R "$script_dir/.." "$missing_self_updater_skill"
+rm "$missing_self_updater_skill/scripts/update_installed_skill.sh"
+expect_status 1 "$validator" validate-package "$missing_self_updater_skill"
+grep -Fq 'Missing package file: scripts/update_installed_skill.sh' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing self-updater'
+
+missing_self_update_route_skill="$tmp_dir/missing-self-update-route-skill"
+cp -R "$script_dir/.." "$missing_self_update_route_skill"
+python3 - "$missing_self_update_route_skill/SKILL.md" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+text = text.replace("update skill pdf-to-latex", "refresh the installed package")
+text = text.replace("更新 skill pdf-to-latex", "刷新已安装包")
+text = text.replace("scripts/update_installed_skill.sh", "scripts/check_environment.sh")
+text = text.replace(
+    "Only enter this route when the trimmed request matches exactly",
+    "Enter this route for related requests",
+)
+path.write_text(text, encoding="utf-8")
+PY
+expect_status 1 "$validator" validate-package "$missing_self_update_route_skill"
+grep -Fq 'description must advertise the update skill pdf-to-latex trigger' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing English self-update trigger'
+grep -Fq 'description must advertise the 更新 skill pdf-to-latex trigger' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing Chinese self-update trigger'
+grep -Fq 'SKILL.md must reference scripts/update_installed_skill.sh' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing self-update route'
+grep -Fq 'SKILL.md must invoke the self-updater through Bash' "$tmp_dir/last.stderr" || fail 'package validation accepted a non-portable self-update invocation'
+grep -Fq 'SKILL.md must restrict self-update to exact command forms' "$tmp_dir/last.stderr" || fail 'package validation accepted broad self-update routing'
+
 mutated_skill="$tmp_dir/mutated-skill"
 cp -R "$script_dir/.." "$mutated_skill"
 python3 - "$mutated_skill/references/workflow-contract.json" <<'PY'

@@ -35,6 +35,13 @@ FENCE_CLOSE_RE = re.compile(r"^[ \t]*(`{3,}|~{3,})[ \t]*$")
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 GOAL_POLICY_MARKER = "prefer goal-backed execution by default"
 GOAL_REFERENCE = "references/goal-mode.md"
+SELF_UPDATE_SCRIPT = "scripts/update_installed_skill.sh"
+SELF_UPDATE_COMMAND = 'bash "$SKILL_DIR/scripts/update_installed_skill.sh"'
+SELF_UPDATE_EXACT_ROUTE_MARKER = (
+    "only enter this route when the trimmed request matches exactly"
+)
+SELF_UPDATE_TRIGGER = "update skill pdf-to-latex"
+SELF_UPDATE_TRIGGER_ZH = "更新 skill pdf-to-latex"
 RESOURCE_RE = re.compile(
     r"(?<![A-Za-z0-9_.-])((?:references|scripts|assets)/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*)"
 )
@@ -1570,6 +1577,7 @@ def validate_package(skill_dir: Path, contract: dict[str, Any]) -> list[str]:
         "agents/openai.yaml",
         GOAL_REFERENCE,
         "references/workflow-contract.json",
+        SELF_UPDATE_SCRIPT,
         "scripts/workflow_contract.py",
         "scripts/check_workflow_gates.sh",
         "assets/templates/main.tex",
@@ -1579,8 +1587,18 @@ def validate_package(skill_dir: Path, contract: dict[str, Any]) -> list[str]:
             errors.append(f"Missing package file: {relative}")
 
     if (skill_dir / "SKILL.md").is_file():
-        _, frontmatter_errors = parse_skill_frontmatter(skill_dir / "SKILL.md")
+        skill_metadata, frontmatter_errors = parse_skill_frontmatter(
+            skill_dir / "SKILL.md"
+        )
         errors.extend(frontmatter_errors)
+        if SELF_UPDATE_TRIGGER not in skill_metadata.get("description", "").lower():
+            errors.append(
+                "SKILL.md description must advertise the update skill pdf-to-latex trigger."
+            )
+        if SELF_UPDATE_TRIGGER_ZH not in skill_metadata.get("description", ""):
+            errors.append(
+                "SKILL.md description must advertise the 更新 skill pdf-to-latex trigger."
+            )
         try:
             skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
@@ -1590,6 +1608,12 @@ def validate_package(skill_dir: Path, contract: dict[str, Any]) -> list[str]:
                 errors.append(f"SKILL.md must reference {GOAL_REFERENCE}.")
             if GOAL_POLICY_MARKER not in skill_text.lower():
                 errors.append("SKILL.md must prefer Goal-backed execution by default.")
+            if SELF_UPDATE_SCRIPT not in skill_text:
+                errors.append(f"SKILL.md must reference {SELF_UPDATE_SCRIPT}.")
+            if SELF_UPDATE_COMMAND not in skill_text:
+                errors.append("SKILL.md must invoke the self-updater through Bash.")
+            if SELF_UPDATE_EXACT_ROUTE_MARKER not in skill_text.lower():
+                errors.append("SKILL.md must restrict self-update to exact command forms.")
     if (skill_dir / "agents/openai.yaml").is_file():
         _, yaml_errors = parse_openai_yaml(skill_dir / "agents/openai.yaml")
         errors.extend(yaml_errors)

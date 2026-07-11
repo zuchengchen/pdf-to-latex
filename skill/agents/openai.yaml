@@ -1,4 +1,4 @@
 interface:
   display_name: "PDF to LaTeX"
-  short_description: "Semantic PDF rebuilds with resumable Goal execution"
+  short_description: "Semantic PDF rebuilds with Goal and fast self-update"
   default_prompt: "Use $pdf-to-latex for this PDF-derived work. Prefer Goal-backed execution by default for a full conversion, broad resume or refinement, multi-batch reconstruction, or publication-scale task: start or continue Goal mode automatically without separate confirmation and continue until a valid terminal outcome or a true user-decision blocker; use the lightest suitable mode for a bounded repair, explicit one-turn rough draft, or read-only review."

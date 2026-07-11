@@ -27,6 +27,37 @@ procedure below for an existing installation.
 
 Restart Codex after installation.
 
+## Fast Codex Update
+
+After installing a version that contains `scripts/update_installed_skill.sh`,
+the normal update command is:
+
+```text
+更新 skill pdf-to-latex
+```
+
+The skill routes this exact command to its bundled updater instead of the
+conversion workflow or the conservative atomic procedure below. The bare
+command updates from the development branch `main`; use
+`更新 skill pdf-to-latex 到 REF` for a tag, branch, or commit.
+
+The fast path uses Codex's system GitHub installer in download mode, writes into
+same-filesystem staging, restores executable bits, runs exactly one bundled
+package validation, and swaps directories by rename with rollback. It does not
+run `quick_validate.py`, `bash -n`, portable, integration, or extended tests.
+Those checks belong in repository CI and release validation.
+
+The equivalent direct command from an existing installed copy is:
+
+```bash
+skill_dir="${CODEX_HOME:-$HOME/.codex}/skills/pdf-to-latex"
+bash "$skill_dir/scripts/update_installed_skill.sh" --ref main
+```
+
+An older installation that does not contain the updater must use the system
+installer or Atomic Update once. Restart Codex or start a new session after the
+fast update.
+
 ## Manual Prerequisites
 
 The manual install and update procedures require Git, Python 3.10+, Bash 3.2+,

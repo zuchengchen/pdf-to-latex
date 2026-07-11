@@ -6,6 +6,8 @@
   publication-scale writable work without a separate confirmation prompt.
 - Add a concise Goal startup, continuation, completion, and resumable-fallback
   protocol while keeping project state authoritative.
+- Add a fast self-update trigger and rollback-capable updater for requests such
+  as `update skill pdf-to-latex`.
 
 ## 1.0.0 - 2026-07-10
 

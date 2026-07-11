@@ -33,6 +33,25 @@ python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-installer/scripts/inst
 Restart Codex after installation. See [INSTALL.md](INSTALL.md) for atomic manual
 installation, update, verification, and uninstall procedures.
 
+## Fast Self-Update
+
+After installing a version that contains the bundled updater, update the skill
+from inside Codex with:
+
+```text
+更新 skill pdf-to-latex
+```
+
+The bare command updates from the development branch `main`, downloads into
+same-filesystem staging, repairs ZIP-lost executable bits, runs one package
+validation, and swaps directories by rename with rollback. It does not run the
+portable or integration suites during an ordinary fast update. Start a new
+Codex session after it completes.
+
+Use `更新 skill pdf-to-latex 到 REF` to select a tag, branch, or commit. An
+installation older than the bundled updater needs one update through the manual
+or system-installer path before this command becomes available.
+
 ## Workflow Model
 
 The skill records independent workflow dimensions instead of a combined task

@@ -58,6 +58,16 @@ if [[ -f "$repo_dir/README.md" ]]; then
     printf 'README.md must document the default Goal-backed execution policy.\n' >&2
     exit 1
   }
+  grep -Fq '更新 skill pdf-to-latex' "$repo_dir/README.md" || {
+    printf 'README.md must document the fast self-update command.\n' >&2
+    exit 1
+  }
+fi
+if [[ -f "$repo_dir/INSTALL.md" ]]; then
+  grep -Fq '更新 skill pdf-to-latex' "$repo_dir/INSTALL.md" || {
+    printf 'INSTALL.md must document the fast self-update command.\n' >&2
+    exit 1
+  }
 fi
 
 validator="${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py"
@@ -87,6 +97,7 @@ PY
 
 python3 "$script_dir/toolchain_probe.py" --json >/dev/null
 "$script_dir/test_workflow_contract.sh"
+"$script_dir/test_skill_update.sh"
 "$script_dir/test_project_scaffold.sh"
 "$script_dir/test_evidence_pipeline.sh"
 if [[ "$mode" == portable ]]; then
