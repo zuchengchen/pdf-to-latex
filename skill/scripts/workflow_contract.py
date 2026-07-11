@@ -33,6 +33,8 @@ HEADING_RE = re.compile(r"^###[ \t]+(.+?)[ \t]*$")
 FENCE_RE = re.compile(r"^[ \t]*(`{3,}|~{3,})")
 FENCE_CLOSE_RE = re.compile(r"^[ \t]*(`{3,}|~{3,})[ \t]*$")
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+GOAL_POLICY_MARKER = "prefer goal-backed execution by default"
+GOAL_REFERENCE = "references/goal-mode.md"
 RESOURCE_RE = re.compile(
     r"(?<![A-Za-z0-9_.-])((?:references|scripts|assets)/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*)"
 )
@@ -1535,6 +1537,10 @@ def parse_openai_yaml(path: Path) -> tuple[dict[str, str], list[str]]:
         errors.append(f"agents/openai.yaml is missing: {', '.join(sorted(missing))}")
     if "$pdf-to-latex" not in values.get("default_prompt", ""):
         errors.append("agents/openai.yaml default_prompt must include $pdf-to-latex.")
+    if GOAL_POLICY_MARKER not in values.get("default_prompt", "").lower():
+        errors.append(
+            "agents/openai.yaml default_prompt must prefer Goal-backed execution by default."
+        )
     return values, errors
 
 
@@ -1562,6 +1568,7 @@ def validate_package(skill_dir: Path, contract: dict[str, Any]) -> list[str]:
     required_paths = (
         "SKILL.md",
         "agents/openai.yaml",
+        GOAL_REFERENCE,
         "references/workflow-contract.json",
         "scripts/workflow_contract.py",
         "scripts/check_workflow_gates.sh",
@@ -1574,9 +1581,39 @@ def validate_package(skill_dir: Path, contract: dict[str, Any]) -> list[str]:
     if (skill_dir / "SKILL.md").is_file():
         _, frontmatter_errors = parse_skill_frontmatter(skill_dir / "SKILL.md")
         errors.extend(frontmatter_errors)
+        try:
+            skill_text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            skill_text = ""
+        if skill_text:
+            if GOAL_REFERENCE not in skill_text:
+                errors.append(f"SKILL.md must reference {GOAL_REFERENCE}.")
+            if GOAL_POLICY_MARKER not in skill_text.lower():
+                errors.append("SKILL.md must prefer Goal-backed execution by default.")
     if (skill_dir / "agents/openai.yaml").is_file():
         _, yaml_errors = parse_openai_yaml(skill_dir / "agents/openai.yaml")
         errors.extend(yaml_errors)
+
+    goal_reference = skill_dir / GOAL_REFERENCE
+    if goal_reference.is_file():
+        try:
+            goal_text = goal_reference.read_text(encoding="utf-8").lower()
+        except (OSError, UnicodeDecodeError) as exc:
+            errors.append(f"Cannot read UTF-8 {GOAL_REFERENCE}: {exc}")
+        else:
+            required_goal_rules = {
+                GOAL_POLICY_MARKER: "automatic Goal selection",
+                "do not ask for separate goal confirmation": "no separate Goal confirmation",
+                "fall back to `resumable`": "resumable fallback",
+                "user-decision": "user-decision stop boundary",
+                "check current goal state": "existing Goal inspection",
+                "do not set a token budget unless the user explicitly requested one": "explicit token-budget authority",
+                "mark a matching goal complete only after": "terminal completion validation",
+                "blocker threshold": "Goal blocker-threshold handling",
+            }
+            for marker, label in required_goal_rules.items():
+                if marker not in goal_text:
+                    errors.append(f"{GOAL_REFERENCE} is missing required rule: {label}.")
 
     resources, resource_errors = referenced_resources(skill_dir)
     errors.extend(resource_errors)

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Prefer automatic Goal-backed execution for full, broad, multi-batch, and
+  publication-scale writable work without a separate confirmation prompt.
+- Add a concise Goal startup, continuation, completion, and resumable-fallback
+  protocol while keeping project state authoritative.
+
 ## 1.0.0 - 2026-07-10
 
 - Replace the combined task-profile model with explicit operation, source,

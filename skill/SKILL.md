@@ -25,6 +25,7 @@ SKILL_DIR="<directory containing SKILL.md>"
 Load references progressively:
 
 - Read `references/pdf-analysis.md` for source inspection, source identity, evidence, routing, and completeness analysis.
+- Read `references/goal-mode.md` during execution-mode selection and before starting or continuing goal-backed work.
 - Read `references/latex-rebuild.md` before creating or substantially editing final LaTeX.
 - Read `references/security-and-build.md` before compiling an existing project and before any publication gate.
 - Read `references/refinement-and-review.md` for refinement, read-only review, reviewer gates, acceptance, and delivery.
@@ -38,7 +39,7 @@ Record the canonical fields before broad work. For a strictly read-only review, 
 - `Operation`: `convert`, `resume`, `refine`, `repair`, or `review`.
 - `Source kind`: `digital`, `scanned`, `mixed`, or `unknown`.
 - `Document traits`: any applicable values from `book`, `long-document`, `math-heavy`, `encoded-math`, `cjk`, and `visual-complex`.
-- `Delivery level`: `rough-draft`, `clean-semantic`, or `publication-polish`.
+- `Delivery level`: `rough-draft`, `clean-semantic`, or `publication-polish`. Default to `clean-semantic` for ordinary complete work when the user does not name a level.
 - `Execution mode`: `one-turn`, `resumable`, or `goal-backed`.
 - `Verification scope`: `source-aware` or `project-only`.
 - `Outcome`: `in-progress`, `complete`, `blocked`, or `downgraded`.
@@ -51,28 +52,29 @@ Choose the operation by authorization and scope:
 - `repair`: make a bounded fix. Do not create a full inventory for a one-turn local repair unless it adds real value.
 - `review`: inspect and report only. Never modify the project, create state files, update notes, or leave build artifacts. Compile and render only in a temporary copy.
 
-Execution mode controls continuity, not quality. Use `one-turn` for bounded work, `resumable` for work needing durable checkpoints, and `goal-backed` for long, multi-batch, or publication-scale work when Goal tools are useful. If Goal tools are unavailable or the user declines Goal mode, use `resumable` without lowering the delivery level.
+Execution mode controls continuity, not quality. Prefer Goal-backed execution by default for full conversions, broad resume or refinement work, writable publication-scale work, and work expected to span multiple batches. Do not ask for separate Goal confirmation. Start or continue a Goal before broad work when Goal tools are available and the current request or runtime policy permits it. Use `one-turn` for bounded work that can finish now, including ordinary localized repair and read-only review. If Goal startup is unavailable or disallowed, use `resumable` without lowering the delivery level or asking only for Goal permission. A conflicting active Goal requires a user choice rather than silent replacement or fallback. Record `goal-backed` only after a matching Goal is active.
 
 Use `source-aware` only when the relevant source PDF is available and verified. Use `project-only` when resuming, reviewing, refining, or repairing without the source. Project-only publication polish may establish build and project quality, but must say that source fidelity was not verified. A new `convert` requires a source. If the user requires source comparison and the source is unavailable, set the outcome to `blocked`.
 
 ## Core Workflow
 
-1. Confirm the source and target boundaries. For `review`, establish a temporary workspace and preserve strict read-only behavior. For other operations, inspect existing state before creating files.
-2. Classify the work using the canonical fields. Do not infer a missing delivery level or accept values outside the contract. For source-aware completion, resolve `Source kind: unknown` when available evidence permits classification.
-3. For a source-aware operation, read `references/pdf-analysis.md`, establish source identity, inspect representative pages, classify source kind and traits, and choose page or region routes.
-4. For a new resumable project, initialize the scaffold through the bundled helper or templates using the canonical fields. Required tracking files are derived from operation, traits, delivery, and execution; there is no task profile.
-5. Record the delivery contract and verification scope. For publication polish, include fidelity targets, allowed approximations, blocker policy, exact-pagination policy, and required final checks.
-6. Build the document model, object strategy, style decisions, and source-completeness coverage needed for the task. Long, book, math, and visually complex work requires more durable evidence than a small repair.
-7. Read `references/security-and-build.md`, create a safe production skeleton, and compile it before broad drafting. Discover project assets and toolchain needs early.
-8. Reconstruct by semantic region and structural boundary. Use page-bounded text-layer evidence only as evidence; correct it visually. Visually transcribe scanned, damaged, encoded, and complex regions. Keep genuine figures as project assets and rebuild legible tables and formulas semantically.
-9. Compile after each chapter, structural batch, or high-risk object batch. Update resumable state only after filesystem and build evidence support the claimed checkpoint.
-10. Apply the focused passes in `references/refinement-and-review.md`, plus book and math passes when their traits apply. For publication polish, perform midpoint review before most drafting and independent final structure/content, math/object, and build/layout reviews.
-11. Run deterministic workflow, artifact, build, text, visual, dependency-closure, and clean-room checks required by the delivery level. A first successful compile is a checkpoint, not normal completion.
-12. Reconcile state, notes, manifests, inventories, and final source. Set a canonical outcome and report project path, compiled PDF path, verification scope, checks performed, and unresolved issues.
+1. Confirm the source and target boundaries. For a new conversion with no target, use `latex/` only when that path is absent or is a recognizable resumable target. For `review`, establish a temporary workspace and preserve strict read-only behavior. For other operations, inspect existing state before creating files.
+2. Classify the work using the canonical fields. Use `clean-semantic` for ordinary complete work when the user does not specify a delivery level; do not invent values outside the contract. For source-aware completion, resolve `Source kind: unknown` when available evidence permits classification.
+3. Read `references/goal-mode.md` and resolve Goal startup before broad analysis or writable project work. Continue a matching active Goal or create one immediately when permitted. Do not set a token budget unless the user explicitly requested one. If Goal startup is unavailable or disallowed, select `resumable` and record the fallback reason. If an unrelated Goal is active, stop for a user choice.
+4. For a source-aware operation, read `references/pdf-analysis.md`, establish source identity, inspect representative pages, classify source kind and traits, and choose page or region routes.
+5. For a new resumable or goal-backed project, initialize the scaffold through the bundled helper or templates using the canonical fields. Required tracking files are derived from operation, traits, delivery, and execution; there is no task profile.
+6. Record the delivery contract and verification scope. For publication polish, include fidelity targets, allowed approximations, blocker policy, exact-pagination policy, and required final checks.
+7. Build the document model, object strategy, style decisions, and source-completeness coverage needed for the task. Long, book, math, and visually complex work requires more durable evidence than a small repair.
+8. Read `references/security-and-build.md`, create a safe production skeleton, and compile it before broad drafting. Discover project assets and toolchain needs early.
+9. Reconstruct by semantic region and structural boundary. Use page-bounded text-layer evidence only as evidence; correct it visually. Visually transcribe scanned, damaged, encoded, and complex regions. Keep genuine figures as project assets and rebuild legible tables and formulas semantically.
+10. Compile after each chapter, structural batch, or high-risk object batch. Update durable state only after filesystem and build evidence support the claimed checkpoint.
+11. Apply the focused passes in `references/refinement-and-review.md`, plus book and math passes when their traits apply. For publication polish, perform midpoint review before most drafting and independent final structure/content, math/object, and build/layout reviews.
+12. Run deterministic workflow, artifact, build, text, visual, dependency-closure, and clean-room checks required by the delivery level. A first successful compile is a checkpoint, not normal completion.
+13. Reconcile state, notes, manifests, inventories, and final source. Set a canonical outcome and report project path, compiled PDF path, verification scope, checks performed, and unresolved issues. Synchronize a matching Goal to a terminal status only under the current Goal-tool rules.
 
 ## Evidence And Resume Discipline
 
-For resumable work, maintain `conversion-state.md` as the concise restart record and `conversion-notes.md` as the evidence and decision log. Store durable source and rebuilt evidence inside the project. Preserve the recorded source path, SHA-256, size, and page count even when the source is temporarily unavailable. Verify identity before source-aware resume, rendering, extraction, or comparison.
+For resumable and goal-backed work, maintain `conversion-state.md` as the authoritative concise restart record and `conversion-notes.md` as the evidence and decision log. Goal state supplements these files; it does not replace them. Store durable source and rebuilt evidence inside the project. Preserve the recorded source path, SHA-256, size, and page count even when the source is temporarily unavailable. Verify identity before source-aware resume, rendering, extraction, or comparison.
 
 Do not reuse evidence when source content changes. A moved source with the same digest may be rebound; a changed digest requires explicit acceptance and regeneration of affected manifests, page evidence, inventories, and fidelity status.
 
@@ -93,4 +95,4 @@ Use `complete` only when all checks required by the operation, delivery level, t
 
 For project-only work, never claim source fidelity. For publication polish, require a strict publication gate, clean source-artifact scan, dependency closure, clean-environment rebuild, representative visual review, and final reviewer gates. Skipped clean or render checks make the publication result incomplete, not passed.
 
-Ask before proceeding only when authorization, overwrite risk, source replacement, unsafe build capability, material approximation, delivery downgrade, or an unreadable required region needs a user decision. Otherwise continue to the selected completion standard and leave resumable state when work spans turns.
+Ask before proceeding only when overwrite risk, source replacement, unsafe build capability, material approximation, delivery downgrade, a conflicting active Goal, an unreadable required region, or another authorization boundary needs a user decision. Goal startup alone is not such a boundary; do not ask solely whether to enable Goal mode. Otherwise continue to the selected completion standard and leave resumable state when work spans turns.

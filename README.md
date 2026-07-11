@@ -53,6 +53,13 @@ front/main/back matter boundaries, while math traits add math and glyph tracking
 Read-only `review` operations compile and render only in temporary copies and do
 not update the user's project.
 
+Prefer Goal-backed execution by default for full conversions, broad resume or
+refinement work, writable publication-scale work, and work expected to span
+multiple batches. The skill does not ask for a separate Goal confirmation. It
+starts or continues Goal mode when the current Codex runtime permits it and
+falls back to the same-quality `resumable` workflow when Goal startup is
+unavailable or disallowed.
+
 ## Safety And Quality
 
 - Ignores project `.latexmkrc` files and disables shell escape by default.
@@ -104,6 +111,7 @@ pdf-to-latex/
     ├── agents/openai.yaml
     ├── assets/templates/
     ├── references/
+    │   ├── goal-mode.md
     │   ├── workflow-contract.json
     │   ├── security-and-build.md
     │   ├── pdf-analysis.md
@@ -141,7 +149,7 @@ corpora run on scheduled or release validation.
 ## Usage Examples
 
 ```text
-$pdf-to-latex 把 ./paper.pdf 重建成可编辑 XeLaTeX 项目并完成语义检查
+$pdf-to-latex 把 ./paper.pdf 重建成可编辑 XeLaTeX 项目并完成语义检查；默认自动启动或继续 Goal，持续执行到工作流完成或遇到必须由我决定的问题
 ```
 
 ```text

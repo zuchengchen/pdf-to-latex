@@ -275,6 +275,75 @@ grep -Fq 'gate_rules rule stateful-base outputs do not match schema 2' "$tmp_dir
 
 rm -rf "$script_dir/__pycache__"
 "$validator" validate-package "$script_dir/.." >/dev/null
+
+missing_goal_skill="$tmp_dir/missing-goal-skill"
+cp -R "$script_dir/.." "$missing_goal_skill"
+rm "$missing_goal_skill/references/goal-mode.md"
+expect_status 1 "$validator" validate-package "$missing_goal_skill"
+grep -Fq 'Missing package file: references/goal-mode.md' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing Goal reference'
+
+missing_goal_policy_skill="$tmp_dir/missing-goal-policy-skill"
+cp -R "$script_dir/.." "$missing_goal_policy_skill"
+python3 - "$missing_goal_policy_skill/SKILL.md" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+text = text.replace("Prefer Goal-backed execution by default", "Consider Goal-backed execution")
+text = text.replace("references/goal-mode.md", "references/pdf-analysis.md")
+path.write_text(text, encoding="utf-8")
+PY
+expect_status 1 "$validator" validate-package "$missing_goal_policy_skill"
+grep -Fq 'SKILL.md must reference references/goal-mode.md' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing Goal reference route'
+grep -Fq 'SKILL.md must prefer Goal-backed execution by default' "$tmp_dir/last.stderr" || fail 'package validation accepted a missing automatic Goal policy'
+
+missing_goal_prompt_skill="$tmp_dir/missing-goal-prompt-skill"
+cp -R "$script_dir/.." "$missing_goal_prompt_skill"
+python3 - "$missing_goal_prompt_skill/agents/openai.yaml" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+path.write_text(
+    text.replace("Prefer Goal-backed execution by default", "Consider Goal-backed execution"),
+    encoding="utf-8",
+)
+PY
+expect_status 1 "$validator" validate-package "$missing_goal_prompt_skill"
+grep -Fq 'default_prompt must prefer Goal-backed execution by default' "$tmp_dir/last.stderr" || fail 'package validation accepted a default prompt without automatic Goal policy'
+
+incomplete_goal_reference_skill="$tmp_dir/incomplete-goal-reference-skill"
+cp -R "$script_dir/.." "$incomplete_goal_reference_skill"
+printf '%s\n' '# Goal-Backed Execution' >"$incomplete_goal_reference_skill/references/goal-mode.md"
+expect_status 1 "$validator" validate-package "$incomplete_goal_reference_skill"
+grep -Fq 'references/goal-mode.md is missing required rule: automatic Goal selection' "$tmp_dir/last.stderr" || fail 'package validation accepted an incomplete Goal reference'
+
+missing_goal_runtime_rules_skill="$tmp_dir/missing-goal-runtime-rules-skill"
+cp -R "$script_dir/.." "$missing_goal_runtime_rules_skill"
+python3 - "$missing_goal_runtime_rules_skill/references/goal-mode.md" <<'PY'
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+replacements = {
+    "Check current Goal state": "Observe Goal availability",
+    "Do not set a token budget unless the user explicitly requested one": "Choose a suitable token budget",
+    "Mark a matching Goal complete only after": "Conclude a matching Goal when",
+    "blocker threshold": "blocking policy",
+}
+for old, new in replacements.items():
+    text = text.replace(old, new)
+path.write_text(text, encoding="utf-8")
+PY
+expect_status 1 "$validator" validate-package "$missing_goal_runtime_rules_skill"
+grep -Fq 'missing required rule: existing Goal inspection' "$tmp_dir/last.stderr" || fail 'package validation accepted Goal startup without existing-state inspection'
+grep -Fq 'missing required rule: explicit token-budget authority' "$tmp_dir/last.stderr" || fail 'package validation accepted implicit Goal token budgets'
+grep -Fq 'missing required rule: terminal completion validation' "$tmp_dir/last.stderr" || fail 'package validation accepted weak Goal completion rules'
+grep -Fq 'missing required rule: Goal blocker-threshold handling' "$tmp_dir/last.stderr" || fail 'package validation accepted weak Goal blocker handling'
+
 mutated_skill="$tmp_dir/mutated-skill"
 cp -R "$script_dir/.." "$mutated_skill"
 python3 - "$mutated_skill/references/workflow-contract.json" <<'PY'

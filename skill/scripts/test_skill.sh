@@ -41,6 +41,7 @@ fi
 
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 skill_dir=$(CDPATH='' cd -- "$script_dir/.." && pwd)
+repo_dir=$(CDPATH='' cd -- "$skill_dir/.." && pwd)
 export PYTHONDONTWRITEBYTECODE=1
 
 python3 - <<'PY'
@@ -52,6 +53,12 @@ PY
 
 python3 "$script_dir/workflow_contract.py" validate-contract >/dev/null
 python3 "$script_dir/workflow_contract.py" validate-package "$skill_dir" >/dev/null
+if [[ -f "$repo_dir/README.md" ]]; then
+  grep -Fq 'Prefer Goal-backed execution by default' "$repo_dir/README.md" || {
+    printf 'README.md must document the default Goal-backed execution policy.\n' >&2
+    exit 1
+  }
+fi
 
 validator="${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py"
 if [[ -f "$validator" ]]; then
