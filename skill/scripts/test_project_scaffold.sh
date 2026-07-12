@@ -387,6 +387,53 @@ text_dir = project / "evidence" / "text-layer"
     + "\n",
     encoding="utf-8",
 )
+
+page_index = project / "work" / "page-index.json"
+page_index.write_text(
+    json.dumps(
+        {
+            "schema_version": 1,
+            "kind": "page-complexity-index",
+            "source": {
+                "path": str(source),
+                "sha256": digest,
+                "size_bytes": size,
+                "page_count": 3,
+            },
+            "policy": {
+                "source_kind": "mixed",
+                "traits": ["book"],
+                "batch_sizes": {"low": 30, "medium": 10, "high": 5, "critical": 1},
+                "worker_output": "compact-summary-with-detail-artifact",
+                "evidence": "local-text-triage-before-rendered-page-escalation",
+            },
+            "pages": [
+                {
+                    "page": page,
+                    "text_chars": 0,
+                    "complexity": "critical",
+                    "route": "visual-transcription",
+                    "recommended_batch_size": 1,
+                }
+                for page in (1, 2, 3)
+            ],
+            "batches": [
+                {
+                    "batch_id": "plan-001",
+                    "owned_pages": [1],
+                    "context_pages": [2],
+                    "complexity": "critical",
+                    "route": "visual-transcription",
+                    "worker_mode": "single-page",
+                    "detail_policy": "summary-first",
+                }
+            ],
+        },
+        indent=2,
+    )
+    + "\n",
+    encoding="utf-8",
+)
 PY
 
 moved_pdf="$tmp_dir/moved.pdf"
@@ -427,9 +474,13 @@ for relative in (
     "evidence/source-pages/manifest.json",
     "evidence/text-layer/manifest.json",
     "batch-manifest.json",
+    "work/page-index.json",
 ):
     manifest = json.loads((project / relative).read_text(encoding="utf-8"))
-    actual = manifest["source_path"] if relative.startswith("evidence/") else manifest["source"]["path"]
+    if relative.startswith("evidence/"):
+        actual = manifest["source_path"]
+    else:
+        actual = manifest["source"]["path"]
     if actual != expected:
         raise SystemExit(f"moved source path was not refreshed in {relative}")
 PY

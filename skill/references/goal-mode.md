@@ -41,13 +41,13 @@ Keep the objective concise. Reference the skill and workflow contract instead of
 
 For resumable or goal-backed reconstruction, keep one parent Goal as the controller. Do not create a Goal per page. The parent owns `conversion-state.md`, `conversion-notes.md`, `batch-manifest.json`, shared LaTeX source, compilation, and the terminal outcome.
 
-Use subagents only for bounded work with disjoint ownership. When the runtime supports model inheritance, omit the child `model` and reasoning overrides so the worker uses the parent capability, but start it with an isolated context rather than copying the full Goal history. Pass `fork_context: false` when available and give the worker a compact context packet: source digest, owned pages or regions, read-only neighbor pages, evidence paths, style/document-IR snapshot hashes, route, output directory, and the page-IR schema.
+Use subagents only for bounded work with disjoint ownership. Run `scripts/plan_batches.py` once the source text-layer evidence exists and dispatch the batches recorded in `work/page-index.json`; do not default to one worker per page. When the runtime supports model inheritance, omit the child `model` and reasoning overrides so the worker uses the parent capability, but start it with an isolated context rather than copying the full Goal history. Pass `fork_context: false` when available and give the worker a compact context packet: source digest, owned pages or regions, read-only neighbor pages, evidence paths, style/document-IR snapshot hashes, route, output directory, and the page-IR schema.
 
-Workers write only their own shard under `work/shards/` or return a compact artifact manifest. They must not edit `main.tex`, shared chapter files, inventories, state, notes, or Goal status. A page is an evidence unit, not necessarily a semantic boundary: workers report `continuity`, object candidates, uncertainties, and proposed lifecycle status for the parent reducer to resolve.
+Workers write only their own shard under `work/shards/` or return a compact artifact manifest. New workers should use page-IR schema version 2: each page carries counts and status, `worker_summary.text` is at most 1200 characters, and detailed blocks, objects, continuity, and uncertainties live in a hashed `detail_artifact`. Legacy v1 shards remain readable for migration. Workers must not edit `main.tex`, shared chapter files, inventories, state, notes, or Goal status. A page is an evidence unit, not necessarily a semantic boundary: workers report continuity, object candidates, uncertainties, and proposed lifecycle status for the parent reducer to resolve in the detail artifact.
 
 Merge shards through `scripts/merge_shards.py` at one integration point. The merger verifies source identity, unique page ownership, artifact hashes, snapshot compatibility, and idempotency before updating `batch-manifest.json`. Cross-page blocks, global labels and references, glyph maps, bibliography, index, glossary, shared preamble, and final compilation remain serialized parent work.
 
-Keep child responses short and durable. The parent should record only batch IDs, coverage, hashes, blockers, and the next action in Goal context; full transcripts and page IR remain in project files. Close completed workers, retry only failed or stale shards, and invalidate shards when the source digest or referenced snapshot changes.
+Keep child responses short and durable. The parent should record only batch IDs, coverage, compact summaries, hashes, blockers, usage, and the next action in Goal context; full transcripts and detail artifacts remain in project files. Do not read every detail artifact after a successful merge. Load detail only for a blocker, uncertainty, cross-page reconciliation, or failed integration. Close completed workers, retry only failed or stale shards, and invalidate shards when the source digest or referenced snapshot changes.
 
 ## Continuation
 
@@ -57,9 +57,9 @@ On every Goal continuation:
 2. Verify the recorded source identity before source-aware work.
 3. Check that active files and evidence for the recorded checkpoint still exist.
 4. Perform the next concrete milestone or bounded batch.
-5. If the milestone uses workers, dispatch non-overlapping shards and merge their validated results before editing shared source.
+5. If the milestone uses workers, dispatch the non-overlapping batches from `work/page-index.json`, merge their validated results before editing shared source, and keep only the merger summary in Goal context.
 6. Compile and inspect the affected output when the milestone changes final LaTeX.
-7. Update state, notes, manifests, inventories, and the batch ledger only after supporting files or checks exist.
+7. Update state, notes, manifests, inventories, and the batch ledger only after supporting files or checks exist. Run `scripts/report_worker_usage.py PROJECT_DIR` when worker usage data is available.
 8. Run the applicable workflow query or validation command and continue while the valid outcome remains `in-progress`.
 
 Do not yield merely because one batch or the first successful compile finished. Continue automatically while meaningful work remains and no user-decision boundary has been reached.

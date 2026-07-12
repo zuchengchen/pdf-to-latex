@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import fcntl
 import hashlib
 import json
@@ -18,7 +19,10 @@ from pathlib import Path
 from typing import Any, Iterator
 
 
-SCHEMA_VERSION = 1
+MANIFEST_SCHEMA_VERSION = 1
+LEGACY_SHARD_SCHEMA_VERSION = 1
+COMPACT_SHARD_SCHEMA_VERSION = 2
+SUPPORTED_SHARD_SCHEMA_VERSIONS = {LEGACY_SHARD_SCHEMA_VERSION, COMPACT_SHARD_SCHEMA_VERSION}
 MANIFEST_NAME = "batch-manifest.json"
 LOCK_NAME = ".batch-manifest.lock"
 BATCH_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -47,6 +51,10 @@ def sha256_file(path: Path) -> str:
 
 def is_positive_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value > 0
+
+
+def is_nonnegative_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
 def require_nonempty_string(value: Any, field: str) -> str:
@@ -177,11 +185,112 @@ def validate_snapshot(value: Any, field: str) -> str | None:
     return require_sha256(value, field)
 
 
+def validate_usage(value: Any, field: str) -> dict[str, int] | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise MergeError(f"{field} must be an object when present.")
+    allowed = {
+        "input_tokens",
+        "output_tokens",
+        "cached_input_tokens",
+        "reasoning_tokens",
+        "duration_ms",
+        "retry_count",
+    }
+    unknown = sorted(set(value) - allowed)
+    if unknown:
+        raise MergeError(f"{field} contains unknown fields: {', '.join(unknown)}")
+    result: dict[str, int] = {}
+    for name, raw in value.items():
+        if not is_nonnegative_int(raw):
+            raise MergeError(f"{field}.{name} must be a non-negative integer.")
+        result[name] = raw
+    if (
+        result.get("cached_input_tokens", 0) > result.get("input_tokens", 0)
+        and "cached_input_tokens" in result
+        and "input_tokens" in result
+    ):
+        raise MergeError(f"{field}.cached_input_tokens exceeds input_tokens.")
+    return result
+
+
+def summarize_page_records(
+    page_records: dict[int, dict[str, Any]], schema_version: int
+) -> dict[str, Any]:
+    status_counts = Counter(record["status"] for record in page_records.values())
+    summary = {
+        "owned_page_count": len(page_records),
+        "status_counts": {status: status_counts.get(status, 0) for status in sorted(STATUSES)},
+        "blocked_page_count": status_counts.get("blocked", 0),
+        "uncertain_page_count": 0,
+        "block_count": 0,
+        "object_count": 0,
+        "continuity_count": 0,
+        "uncertainty_count": 0,
+    }
+    for record in page_records.values():
+        if schema_version == COMPACT_SHARD_SCHEMA_VERSION:
+            block_count = record["block_count"]
+            object_count = record["object_count"]
+            continuity_count = record["continuity_count"]
+            uncertainty_count = record["uncertainty_count"]
+        else:
+            block_count = len(record["blocks"])
+            object_count = len(record["objects"])
+            continuity_count = len(record["continuity"])
+            uncertainty_count = len(record["uncertainties"])
+        summary["block_count"] += block_count
+        summary["object_count"] += object_count
+        summary["continuity_count"] += continuity_count
+        summary["uncertainty_count"] += uncertainty_count
+        if uncertainty_count > 0:
+            summary["uncertain_page_count"] += 1
+    summary["review_required"] = bool(
+        summary["blocked_page_count"] or summary["uncertain_page_count"]
+    )
+    return summary
+
+
+def validate_worker_summary(
+    value: Any,
+    expected: dict[str, Any],
+    required: bool,
+) -> dict[str, Any] | None:
+    if value is None:
+        if required:
+            raise MergeError("Compact shard must include worker_summary.")
+        return None
+    if not isinstance(value, dict):
+        raise MergeError("worker_summary must be an object.")
+    text = value.get("text")
+    if not isinstance(text, str) or not text.strip():
+        raise MergeError("worker_summary.text must be a non-empty string.")
+    if len(text) > 1200:
+        raise MergeError("worker_summary.text must be at most 1200 characters.")
+    for field in ("owned_page_count", "blocked_page_count", "uncertain_page_count"):
+        if not is_nonnegative_int(value.get(field)):
+            raise MergeError(f"worker_summary.{field} must be a non-negative integer.")
+        if value[field] != expected[field]:
+            raise MergeError(
+                f"worker_summary.{field} does not match page records: "
+                f"expected {expected[field]}, found {value[field]}"
+            )
+    return {
+        "text": text.strip(),
+        "owned_page_count": value["owned_page_count"],
+        "blocked_page_count": value["blocked_page_count"],
+        "uncertain_page_count": value["uncertain_page_count"],
+    }
+
+
 def validate_shard(project: Path, shard_path: Path, expected: dict[str, Any]) -> dict[str, Any]:
     require_regular_nonempty(shard_path, "Shard")
     shard = read_json(shard_path, "shard")
-    if shard.get("schema_version") != SCHEMA_VERSION:
-        raise MergeError(f"Shard schema_version must be {SCHEMA_VERSION}: {shard_path}")
+    shard_schema_version = shard.get("schema_version")
+    if shard_schema_version not in SUPPORTED_SHARD_SCHEMA_VERSIONS:
+        allowed = ", ".join(str(item) for item in sorted(SUPPORTED_SHARD_SCHEMA_VERSIONS))
+        raise MergeError(f"Shard schema_version must be one of {allowed}: {shard_path}")
     if shard.get("kind") != "page-ir-shard":
         raise MergeError(f"Shard kind must be page-ir-shard: {shard_path}")
     batch_id = require_nonempty_string(shard.get("batch_id"), "batch_id")
@@ -221,14 +330,25 @@ def validate_shard(project: Path, shard_path: Path, expected: dict[str, Any]) ->
             raise MergeError(f"Shard page {page} is not in owned_pages.")
         require_nonempty_string(record.get("route"), f"page {page}.route")
         page_status = validate_status(record.get("status"), f"page {page}.status")
-        for field in ("blocks", "objects", "continuity", "uncertainties"):
-            if not isinstance(record.get(field), list):
-                raise MergeError(f"Shard page {page}.{field} must be an array.")
+        if shard_schema_version == COMPACT_SHARD_SCHEMA_VERSION:
+            for field in ("block_count", "object_count", "continuity_count", "uncertainty_count"):
+                if not is_nonnegative_int(record.get(field)):
+                    raise MergeError(f"Shard page {page}.{field} must be a non-negative integer.")
+        else:
+            for field in ("blocks", "objects", "continuity", "uncertainties"):
+                if not isinstance(record.get(field), list):
+                    raise MergeError(f"Shard page {page}.{field} must be an array.")
         validate_blocker_fields(record, page_status, f"page {page}")
         page_records[page] = record
     missing_pages = sorted(set(owned_pages) - set(page_records))
     if missing_pages:
         raise MergeError(f"Shard does not contain page records for owned pages: {missing_pages}")
+
+    summary = summarize_page_records(page_records, shard_schema_version)
+    worker_summary = validate_worker_summary(
+        shard.get("worker_summary"), summary, shard_schema_version == COMPACT_SHARD_SCHEMA_VERSION
+    )
+    usage = validate_usage(shard.get("usage"), "Shard usage")
 
     artifacts = shard.get("artifacts")
     if not isinstance(artifacts, list):
@@ -243,11 +363,21 @@ def validate_shard(project: Path, shard_path: Path, expected: dict[str, Any]) ->
         require_regular_nonempty(artifact_path, "Artifact")
         artifact_records.append({"path": relative, "sha256": sha256_file(artifact_path)})
 
+    detail_artifact = None
+    if shard_schema_version == COMPACT_SHARD_SCHEMA_VERSION:
+        raw_detail_artifact = require_nonempty_string(
+            shard.get("detail_artifact"), "detail_artifact"
+        )
+        _, detail_artifact = project_relative(project, raw_detail_artifact, "detail_artifact")
+        if detail_artifact not in seen_artifacts:
+            raise MergeError("Compact shard detail_artifact must be listed in artifacts.")
+
     try:
         shard_relative = shard_path.relative_to(project).as_posix()
     except ValueError as exc:
         raise MergeError(f"Shard must stay inside the project: {shard_path}") from exc
     return {
+        "schema_version": shard_schema_version,
         "batch_id": batch_id,
         "owned_pages": owned_pages,
         "context_pages": context_pages,
@@ -258,6 +388,10 @@ def validate_shard(project: Path, shard_path: Path, expected: dict[str, Any]) ->
         "shard_relative": shard_relative,
         "shard_sha256": sha256_file(shard_path),
         "artifacts": artifact_records,
+        "summary": summary,
+        "worker_summary": worker_summary,
+        "usage": usage,
+        "detail_artifact": detail_artifact,
     }
 
 
@@ -266,8 +400,8 @@ def validate_manifest(project: Path, manifest_path: Path) -> dict[str, Any]:
         raise MergeError(f"Batch manifest must not be a symbolic link: {manifest_path}")
     require_regular_nonempty(manifest_path, "Batch manifest")
     manifest = read_json(manifest_path, "batch manifest")
-    if manifest.get("schema_version") != SCHEMA_VERSION:
-        raise MergeError(f"Batch manifest schema_version must be {SCHEMA_VERSION}.")
+    if manifest.get("schema_version") != MANIFEST_SCHEMA_VERSION:
+        raise MergeError(f"Batch manifest schema_version must be {MANIFEST_SCHEMA_VERSION}.")
     source = manifest.get("source")
     if not isinstance(source, dict):
         raise MergeError("Batch manifest is missing source identity.")
@@ -301,6 +435,7 @@ def validate_manifest(project: Path, manifest_path: Path) -> dict[str, Any]:
             raise MergeError(f"Manifest batch {batch_id}.owned_pages must contain at least one page.")
         status = validate_status(record.get("status"), f"Manifest batch {batch_id}.status")
         validate_blocker_fields(record, status, f"Manifest batch {batch_id}")
+        validate_usage(record.get("usage"), f"Manifest batch {batch_id}.usage")
         for page in pages:
             previous = owned_pages.get(page)
             if previous is not None:
@@ -333,6 +468,7 @@ def merge_snapshots(context: dict[str, Any], shard_infos: list[dict[str, Any]]) 
 def build_batch_record(info: dict[str, Any]) -> dict[str, Any]:
     record: dict[str, Any] = {
         "batch_id": info["batch_id"],
+        "shard_schema_version": info["schema_version"],
         "owned_pages": info["owned_pages"],
         "context_pages": info["context_pages"],
         "source": {
@@ -344,6 +480,7 @@ def build_batch_record(info: dict[str, Any]) -> dict[str, Any]:
         "shard_sha256": info["shard_sha256"],
         "artifacts": info["artifacts"],
         "status": info["status"],
+        "summary": info["summary"],
         "attempt": 1,
         "merged_at": utc_now(),
     }
@@ -353,6 +490,12 @@ def build_batch_record(info: dict[str, Any]) -> dict[str, Any]:
     for field in ("reason", "next_action"):
         if field in info["shard"]:
             record[field] = info["shard"][field]
+    if info["worker_summary"] is not None:
+        record["worker_summary"] = info["worker_summary"]
+    if info["usage"] is not None:
+        record["usage"] = info["usage"]
+    if info["detail_artifact"] is not None:
+        record["detail_artifact"] = info["detail_artifact"]
     return record
 
 

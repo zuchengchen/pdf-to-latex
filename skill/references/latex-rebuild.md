@@ -173,7 +173,7 @@ Prefer structural references over source page numbers after semantic reflow unle
 
 Reconstruct by chapter, section, or high-risk object batch. After each batch:
 
-1. Validate and merge the batch's page-IR shards through the single integration point.
+1. Validate and merge the batch's compact page-IR shards through the single integration point. Read the summary in `batch-manifest.json`; open a detail artifact only for blockers, uncertainties, cross-page continuity, or integration failures.
 2. Merge page evidence into semantic source, joining cross-page blocks before emitting final fragments.
 3. Reconcile route, document-model, object, and batch-ledger statuses.
 4. Compile under safe settings.
@@ -182,7 +182,7 @@ Reconstruct by chapter, section, or high-risk object batch. After each batch:
 
 Keep batches small enough that regressions can be attributed to recent changes. A page or region shard may contain a local `.tex` fragment, but it must not be treated as a semantic page boundary or copied directly into `main.tex` without continuity and object reconciliation. The main agent owns shared files, merges, compilation, and final decisions. Subagents may return bounded transcripts, page-IR artifacts, or findings, but should not independently edit shared source or state.
 
-Use `scripts/merge_shards.py` to enforce source identity, non-overlapping page ownership, artifact hashes, snapshot compatibility, and idempotent retries before a shard changes the batch ledger. Compile only after the merged source is updated; do not run concurrent builds against shared auxiliary files or the final PDF.
+Use `scripts/merge_shards.py` to enforce source identity, non-overlapping page ownership, artifact hashes, snapshot compatibility, compact-summary consistency, usage-field validity, and idempotent retries before a shard changes the batch ledger. Run `scripts/report_worker_usage.py` to inspect batch cost data. Compile only after the merged source is updated; do not run concurrent builds against shared auxiliary files or the final PDF.
 
 ## Durable Records
 

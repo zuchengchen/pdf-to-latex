@@ -23,7 +23,14 @@ Use this reference for source-aware inspection, evidence planning, source identi
 4. Read metadata and page count when possible. Record page size, orientation, encryption, and mixed-size evidence.
 5. Sample the digital text layer and representative rendered pages. Include the first page, an early body page, a middle page, the final page, and visible formula-, table-, appendix-, or reference-heavy pages.
 6. Set `Source kind`, applicable `Document traits`, `Delivery level`, `Execution mode`, and `Verification scope` using `workflow-contract.json`.
-7. Estimate unreadable or visually complex regions, useful batch size, first milestone, and required tools before broad work.
+7. Estimate unreadable or visually complex regions, useful batch size, first milestone, and required tools before broad work. After the scaffold and page-bounded text evidence exist, run:
+
+   ```bash
+   python3 "$SKILL_DIR/scripts/plan_batches.py" SOURCE.pdf PROJECT_DIR \
+     --source-kind digital --traits none
+   ```
+
+   Treat `PROJECT_DIR/work/page-index.json` as a source-bound routing artifact. It uses local `pdftotext` statistics only; it does not replace visual inspection or invoke OCR.
 
 Keep pre-scaffold work small. Its purpose is to choose a safe target and viable route. Write durable findings after the scaffold exists, except for a read-only `review`, which keeps all working notes outside the project.
 
@@ -170,6 +177,7 @@ Use `resumable` or `goal-backed` execution for work that cannot reliably finish 
 - Use roughly 5-10 pages for scanned, formula-heavy, table-heavy, or visually complex batches.
 - Use roughly 20-50 pages for mostly digital prose after page-bounded evidence exists.
 - Use one-page or one-region shards only for high-risk pages; use a bounded worker pool instead of one long-lived agent per source page.
+- Use the generated plan as the default routing policy: ordinary digital prose is batched at roughly 20-50 pages, complex pages at roughly 5-10 pages, and critical or image-only pages at one page or one region. Override the batch sizes only when evidence shows that a different boundary is safer.
 - Update source identity, manifest coverage, batch ownership, shard hashes, completed ranges, blockers, and the next concrete batch after each milestone.
 - Sample every structural area during review, not only early pages.
 

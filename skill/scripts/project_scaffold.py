@@ -53,6 +53,7 @@ SOURCE_RECORD_FILES = (
     "glyph-map.md",
 )
 BATCH_MANIFEST_FILE = "batch-manifest.json"
+PAGE_INDEX_FILE = "work/page-index.json"
 BATCHED_OPERATIONS = {"convert", "resume", "refine"}
 BATCHED_EXECUTION_MODES = {"resumable", "goal-backed"}
 
@@ -472,6 +473,32 @@ def update_batch_manifest_source(path: Path, identity: SourceIdentity) -> bytes 
     return (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
+def update_page_index_source(path: Path, identity: SourceIdentity) -> bytes | None:
+    if path.is_symlink():
+        raise ScaffoldError(f"Project page index must not be a symbolic link: {path}")
+    if not path.is_file():
+        return None
+    try:
+        index = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ScaffoldError(f"Could not read page index {path}: {exc}") from exc
+    if not isinstance(index, dict) or index.get("schema_version") != 1:
+        raise ScaffoldError(f"Page index has unsupported schema: {path}")
+    if index.get("kind") != "page-complexity-index":
+        raise ScaffoldError(f"Page index has unsupported kind: {path}")
+    source = index.get("source")
+    if not isinstance(source, dict):
+        raise ScaffoldError(f"Page index is missing source identity: {path}")
+    recorded = (source.get("sha256"), source.get("size_bytes"), source.get("page_count"))
+    expected = (identity.sha256, identity.size_bytes, identity.page_count)
+    if recorded != expected:
+        raise ScaffoldError(f"Page index source identity does not match the project source: {path}")
+    if source.get("path") == identity.path:
+        return None
+    source["path"] = identity.path
+    return (json.dumps(index, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
 def rebind_source_path(target: Path, identity: SourceIdentity) -> None:
     evidence_root = target / "evidence"
 
@@ -493,6 +520,11 @@ def rebind_source_path(target: Path, identity: SourceIdentity) -> None:
             updated = update_batch_manifest_source(batch_manifest, identity)
             if updated is not None:
                 updates[batch_manifest] = updated
+        page_index = target / PAGE_INDEX_FILE
+        if page_index.exists() or page_index.is_symlink():
+            updated = update_page_index_source(page_index, identity)
+            if updated is not None:
+                updates[page_index] = updated
         for path, manifest in evidence_manifest_updates(target, identity):
             updates[path] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode(
                 "utf-8"
