@@ -173,13 +173,16 @@ Prefer structural references over source page numbers after semantic reflow unle
 
 Reconstruct by chapter, section, or high-risk object batch. After each batch:
 
-1. Merge page evidence into semantic source.
-2. Reconcile route, document-model, and object statuses.
-3. Compile under safe settings.
-4. Inspect relevant log findings and rendered pages.
-5. Record the completed batch and next concrete action.
+1. Validate and merge the batch's page-IR shards through the single integration point.
+2. Merge page evidence into semantic source, joining cross-page blocks before emitting final fragments.
+3. Reconcile route, document-model, object, and batch-ledger statuses.
+4. Compile under safe settings.
+5. Inspect relevant log findings and rendered pages.
+6. Record the completed batch and next concrete action.
 
-Keep batches small enough that regressions can be attributed to recent changes. The main agent owns shared files, merges, compilation, and final decisions. Subagents may return bounded transcripts or findings, but should not independently edit shared source or state.
+Keep batches small enough that regressions can be attributed to recent changes. A page or region shard may contain a local `.tex` fragment, but it must not be treated as a semantic page boundary or copied directly into `main.tex` without continuity and object reconciliation. The main agent owns shared files, merges, compilation, and final decisions. Subagents may return bounded transcripts, page-IR artifacts, or findings, but should not independently edit shared source or state.
+
+Use `scripts/merge_shards.py` to enforce source identity, non-overlapping page ownership, artifact hashes, snapshot compatibility, and idempotent retries before a shard changes the batch ledger. Compile only after the merged source is updated; do not run concurrent builds against shared auxiliary files or the final PDF.
 
 ## Durable Records
 

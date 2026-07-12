@@ -112,6 +112,8 @@ Treat `--force` as permission to replace after success, never permission to dele
 
 Maintain machine-readable manifests for rendered and extracted evidence. Include source digest, page count, selected pages, resolution or extraction mode, tool identity, and generation time. Keep manifests consistent with actual files.
 
+For resumable or goal-backed parallel work, keep worker output separate from final source. Store an `assets/schemas/page-ir.schema.json`-conforming shard under `work/shards/` with non-overlapping owned pages, read-only context pages, source identity, snapshot hashes, artifact paths, and uncertainties. Register successful shards through `scripts/merge_shards.py`; do not let workers update the shared manifest or state directly.
+
 ## Reading Order And Objects
 
 Determine logical reading order before final LaTeX:
@@ -134,6 +136,8 @@ Page or region:
 Route: digital-text | visual-transcription | asset-crop | semantic-object | blocked
 Evidence:
 Batch:
+Shard:
+Owner:
 Target source file:
 Reconstruction status:
 Compile check:
@@ -150,6 +154,7 @@ Digital prose may use page-bounded text evidence plus visual correction. Scanned
 Run a completeness audit before broad publication drafting and again before final source-aware delivery:
 
 - Every meaningful page or region has a route, owner, target, and status.
+- Every worker-owned page set has one shard owner, a source-identity match, and a merge record; context pages do not create a second owner.
 - Every required figure, table, formula group, citation block, appendix, front/back-matter item, glossary/index item, and unresolved visual region appears in an inventory or documented compact equivalent.
 - The document model covers the routed content without duplicating page fragments.
 - Every blocked item names source evidence, reason, and concrete next action.
@@ -164,7 +169,8 @@ Use `resumable` or `goal-backed` execution for work that cannot reliably finish 
 
 - Use roughly 5-10 pages for scanned, formula-heavy, table-heavy, or visually complex batches.
 - Use roughly 20-50 pages for mostly digital prose after page-bounded evidence exists.
-- Update source identity, manifest coverage, completed ranges, blockers, and the next concrete batch after each milestone.
+- Use one-page or one-region shards only for high-risk pages; use a bounded worker pool instead of one long-lived agent per source page.
+- Update source identity, manifest coverage, batch ownership, shard hashes, completed ranges, blockers, and the next concrete batch after each milestone.
 - Sample every structural area during review, not only early pages.
 
 Goal mode may improve continuity, but its availability does not change delivery quality. A resumable state file remains the authoritative restart point.

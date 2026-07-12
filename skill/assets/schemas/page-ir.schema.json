@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pdf-to-latex/page-ir-shard.schema.json",
+  "title": "PDF-to-LaTeX page IR shard",
+  "description": "A bounded worker result. It is evidence for integration, not final workflow state.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "batch_id",
+    "source",
+    "owned_pages",
+    "context_pages",
+    "pages",
+    "artifacts",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "kind": {"const": "page-ir-shard"},
+    "batch_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["sha256", "size_bytes", "page_count"],
+      "properties": {
+        "path": {"type": "string"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size_bytes": {"type": "integer", "minimum": 1},
+        "page_count": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": true
+    },
+    "owned_pages": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "integer", "minimum": 1}
+    },
+    "context_pages": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "integer", "minimum": 1}
+    },
+    "style_profile_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "document_ir_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "page",
+          "route",
+          "status",
+          "blocks",
+          "objects",
+          "continuity",
+          "uncertainties"
+        ],
+        "properties": {
+          "page": {"type": "integer", "minimum": 1},
+          "route": {"type": "string", "minLength": 1},
+          "status": {
+            "enum": [
+              "pending",
+              "in-progress",
+              "rebuilt",
+              "blocked",
+              "omitted-with-reason"
+            ]
+          },
+          "blocks": {"type": "array"},
+          "objects": {"type": "array"},
+          "continuity": {"type": "array"},
+          "uncertainties": {"type": "array"},
+          "target": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "reason": {"type": "string"},
+    "next_action": {"type": "string"},
+    "created_at": {"type": "string"}
+  },
+  "additionalProperties": true
+}

@@ -79,6 +79,12 @@ starts or continues Goal mode when the current Codex runtime permits it and
 falls back to the same-quality `resumable` workflow when Goal startup is
 unavailable or disallowed.
 
+## Parallel Reconstruction
+
+Long resumable and Goal-backed conversions use one parent Goal as the controller and a bounded pool of isolated workers. Workers may inspect one page, region, or small structural batch and produce a page-IR shard, but they do not edit shared LaTeX, workflow state, or the final PDF. Page ownership is non-overlapping; neighboring pages are read-only context because page boundaries are not semantic boundaries.
+
+The scaffold records worker ownership and artifact hashes in `batch-manifest.json`, stores shards under `work/shards/`, and merges them through `skill/scripts/merge_shards.py`. Cross-page continuity, global labels and references, bibliography/index/glossary, final source edits, compilation, and Goal completion remain parent-agent responsibilities. A worker can inherit the parent model capability without inheriting the full Goal history; the parent passes a compact snapshot and evidence packet instead.
+
 ## Safety And Quality
 
 - Ignores project `.latexmkrc` files and disables shell escape by default.
@@ -129,6 +135,7 @@ pdf-to-latex/
     ├── SKILL.md
     ├── agents/openai.yaml
     ├── assets/templates/
+    ├── assets/schemas/page-ir.schema.json
     ├── references/
     │   ├── goal-mode.md
     │   ├── workflow-contract.json
@@ -139,6 +146,7 @@ pdf-to-latex/
     │   ├── book-production.md
     │   └── math-polish.md
     └── scripts/
+        └── merge_shards.py
 ```
 
 ## Development Validation

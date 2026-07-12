@@ -192,7 +192,8 @@ for relative in \
   style-profile.md \
   document-ir.md \
   math-inventory.md \
-  glyph-map.md; do
+  glyph-map.md \
+  batch-manifest.json; do
   assert_file "$project/$relative"
 done
 for relative in \
@@ -205,7 +206,10 @@ for relative in \
   evidence/source-pages \
   evidence/rebuilt-pages \
   evidence/text-layer \
-  evidence/crops; do
+  evidence/crops \
+  work/shards \
+  work/merged \
+  work/review-findings; do
   assert_dir "$project/$relative"
 done
 assert_absent "$project/goal-objective.md"
@@ -217,6 +221,20 @@ grep -Fq 'Source page size: 612 x 792 pts (letter)' "$project/style-profile.md" 
 if grep -R -E '\{\{[A-Z0-9_]+\}\}' "$project" >/dev/null 2>&1; then
   fail 'scaffold contains unresolved placeholders'
 fi
+python3 - "$project/batch-manifest.json" "$source_pdf" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+manifest = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+source = pathlib.Path(sys.argv[2]).resolve()
+assert manifest["schema_version"] == 1
+assert manifest["source"]["path"] == str(source)
+assert manifest["source"]["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+assert manifest["source"]["page_count"] == 3
+assert manifest["batches"] == []
+PY
 
 set +e
 "$gate" "$project" >/dev/null 2>&1
@@ -408,9 +426,11 @@ expected = sys.argv[2]
 for relative in (
     "evidence/source-pages/manifest.json",
     "evidence/text-layer/manifest.json",
+    "batch-manifest.json",
 ):
     manifest = json.loads((project / relative).read_text(encoding="utf-8"))
-    if manifest["source_path"] != expected:
+    actual = manifest["source_path"] if relative.startswith("evidence/") else manifest["source"]["path"]
+    if actual != expected:
         raise SystemExit(f"moved source path was not refreshed in {relative}")
 PY
 
@@ -477,6 +497,7 @@ printf '%s\n' '\documentclass{article}\begin{document}Refine\end{document}' >"$r
 assert_file "$refine_project/conversion-state.md"
 assert_file "$refine_project/conversion-notes.md"
 assert_file "$refine_project/style-profile.md"
+assert_absent "$refine_project/batch-manifest.json"
 grep -Fq 'Source PDF: unavailable' "$refine_project/conversion-state.md" || fail 'project-only state should record unavailable source'
 
 printf 'preserve ensure content\n' >>"$refine_project/main.tex"

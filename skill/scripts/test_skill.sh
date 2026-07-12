@@ -100,6 +100,7 @@ python3 "$script_dir/toolchain_probe.py" --json >/dev/null
 "$script_dir/test_skill_update.sh"
 "$script_dir/test_project_scaffold.sh"
 "$script_dir/test_evidence_pipeline.sh"
+"$script_dir/test_merge_shards.sh"
 if [[ "$mode" == portable ]]; then
   "$script_dir/test_latex_pipeline.sh" --portable
 else

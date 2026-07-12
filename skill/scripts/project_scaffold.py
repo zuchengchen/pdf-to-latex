@@ -52,6 +52,9 @@ SOURCE_RECORD_FILES = (
     "math-inventory.md",
     "glyph-map.md",
 )
+BATCH_MANIFEST_FILE = "batch-manifest.json"
+BATCHED_OPERATIONS = {"convert", "resume", "refine"}
+BATCHED_EXECUTION_MODES = {"resumable", "goal-backed"}
 
 
 class ScaffoldError(RuntimeError):
@@ -351,6 +354,9 @@ def template_values(
     for name, value in values.items():
         if name != "REQUIRED_GATES":
             validate_template_scalar(name, value)
+    for name, value in list(values.items()):
+        if name != "REQUIRED_GATES":
+            values[f"{name}_JSON"] = json.dumps(value, ensure_ascii=True)
     return values
 
 
@@ -420,6 +426,52 @@ def validate_existing_state(
     return True
 
 
+def support_files(args: argparse.Namespace) -> list[str]:
+    if (
+        args.operation in BATCHED_OPERATIONS
+        and args.execution_mode in BATCHED_EXECUTION_MODES
+        and args.verification_scope == "source-aware"
+    ):
+        return [BATCH_MANIFEST_FILE]
+    return []
+
+
+def project_files(args: argparse.Namespace) -> list[str]:
+    files = required_files(args)
+    for relative in support_files(args):
+        if relative not in files:
+            files.append(relative)
+    return files
+
+
+def update_batch_manifest_source(path: Path, identity: SourceIdentity) -> bytes | None:
+    if path.is_symlink():
+        raise ScaffoldError(f"Project batch manifest must not be a symbolic link: {path}")
+    if not path.is_file():
+        return None
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ScaffoldError(f"Could not read batch manifest {path}: {exc}") from exc
+    if not isinstance(manifest, dict) or manifest.get("schema_version") != 1:
+        raise ScaffoldError(f"Batch manifest has unsupported schema: {path}")
+    source = manifest.get("source")
+    if not isinstance(source, dict):
+        raise ScaffoldError(f"Batch manifest is missing source identity: {path}")
+    recorded = (
+        source.get("sha256"),
+        source.get("size_bytes"),
+        source.get("page_count"),
+    )
+    expected = (identity.sha256, identity.size_bytes, identity.page_count)
+    if recorded != expected:
+        raise ScaffoldError(f"Batch manifest source identity does not match the project source: {path}")
+    if source.get("path") == identity.path:
+        return None
+    source["path"] = identity.path
+    return (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
 def rebind_source_path(target: Path, identity: SourceIdentity) -> None:
     evidence_root = target / "evidence"
 
@@ -436,6 +488,11 @@ def rebind_source_path(target: Path, identity: SourceIdentity) -> None:
             updated = update_metadata_field(path, "Source PDF", identity.path)
             if updated is not None:
                 updates[path] = updated
+        batch_manifest = target / BATCH_MANIFEST_FILE
+        if batch_manifest.exists() or batch_manifest.is_symlink():
+            updated = update_batch_manifest_source(batch_manifest, identity)
+            if updated is not None:
+                updates[batch_manifest] = updated
         for path, manifest in evidence_manifest_updates(target, identity):
             updates[path] = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode(
                 "utf-8"
@@ -513,6 +570,14 @@ def planned_directories(target: Path, files: list[str], traits: set[str]) -> set
         directories.update({target / "figures", target / "tables"})
     if "book" in traits:
         directories.update({target / "frontmatter", target / "chapters", target / "backmatter"})
+    if BATCH_MANIFEST_FILE in files:
+        directories.update(
+            {
+                target / "work" / "shards",
+                target / "work" / "merged",
+                target / "work" / "review-findings",
+            }
+        )
     expanded: set[Path] = set()
     for directory in directories:
         current = directory
@@ -617,7 +682,7 @@ def init_project(args: argparse.Namespace) -> int:
             f"Target directory is non-empty and has no matching schema-2 project state: {target}"
         )
 
-    files = required_files(args)
+    files = project_files(args)
     target_created = not target.exists()
     target.mkdir(parents=True, exist_ok=True)
     created: list[Path] = []
@@ -701,7 +766,7 @@ def ensure_project(args: argparse.Namespace) -> int:
         if current.content_key != identity.content_key:
             raise ScaffoldError("Existing state source identity does not match the current PDF.")
 
-    files = required_files(args)
+    files = project_files(args)
     created: list[Path] = []
     created_directories: list[Path] = []
     try:
