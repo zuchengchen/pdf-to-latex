@@ -82,4 +82,47 @@ for batch in batches:
     assert not set(batch["owned_pages"]) & set(batch["context_pages"])
 PY
 
+python3 - "$planner" "$source_pdf" "$tmp_dir" <<'PY'
+import os
+import pathlib
+import subprocess
+import sys
+
+planner, source, root = map(pathlib.Path, sys.argv[1:])
+for case in ("directory-link", "file-link", "dangling-link", "directory-at-log", "fifo-at-log", "file-at-logs"):
+    project = root / case
+    (project / "work").mkdir(parents=True)
+    index = project / "work/page-index.json"
+    index.write_text("preserve existing index\n", encoding="utf-8")
+    outside = root / (case + "-outside")
+    outside.mkdir()
+    victim = outside / "page-triage.log"
+    victim.write_text("preserve outside log\n", encoding="utf-8")
+    logs = project / "logs"
+    if case == "directory-link":
+        logs.symlink_to(outside, target_is_directory=True)
+    elif case == "file-at-logs":
+        logs.write_text("not a directory\n", encoding="utf-8")
+    else:
+        logs.mkdir()
+        log = logs / "page-triage.log"
+        if case == "file-link":
+            log.symlink_to(victim)
+        elif case == "dangling-link":
+            log.symlink_to(outside / "must-not-be-created")
+        elif case == "directory-at-log":
+            log.mkdir()
+        else:
+            os.mkfifo(log)
+    result = subprocess.run(
+        [sys.executable, str(planner), str(source), str(project)],
+        capture_output=True, text=True, timeout=10, check=False,
+    )
+    assert result.returncode == 1, (case, result.stdout, result.stderr)
+    assert "Batch planning failed:" in result.stderr, result.stderr
+    assert victim.read_text(encoding="utf-8") == "preserve outside log\n", case
+    assert not (outside / "must-not-be-created").exists(), case
+    assert index.read_text(encoding="utf-8") == "preserve existing index\n", case
+PY
+
 printf 'Batch planning tests passed.\n'

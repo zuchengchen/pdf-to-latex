@@ -184,6 +184,21 @@ Keep batches small enough that regressions can be attributed to recent changes. 
 
 Use `scripts/merge_shards.py` to enforce source identity, non-overlapping page ownership, artifact hashes, snapshot compatibility, compact-summary consistency, usage-field validity, and idempotent retries before a shard changes the batch ledger. Run `scripts/report_worker_usage.py` to inspect batch cost data. Compile only after the merged source is updated; do not run concurrent builds against shared auxiliary files or the final PDF.
 
+### Retrying A Registered Batch
+
+For a failed or stale batch, keep its `batch_id` and exact owned-page set, but write the new shard and changed artifacts into a fresh attempt directory. Do not overwrite old attempt files or delete ledger entries to free page ownership. Explicitly replace the registered result:
+
+```bash
+python3 "$SKILL_DIR/scripts/merge_shards.py" PROJECT_DIR \
+  work/shards/BATCH_ID/attempt-2/shard.json --replace-batch BATCH_ID
+```
+
+The merger verifies prior files against their recorded hashes, retains a flat `history` of prior records, and increments `attempt` atomically. Repeating an identical merge is still a no-op. Replacement cannot change the source identity, page coverage, or another batch's ownership. A changed source requires the separate source-replacement workflow, not a retry flag.
+
+Every supplied shard must include each snapshot hash already bound in the ledger, including bindings established by another shard in the same merge request. Omitted hashes are compatible only while that context field remains unbound. When the parent changes an agreed style/document-IR binding, invalidate affected results and replace their attempts before claiming completion; the replacement flag never bypasses the current binding.
+
+Usage reports sum reported values across current and historical attempts, without counting page coverage twice. Missing measurements are unknown (`null` in JSON), not zero. Inspect per-field attempt coverage before interpreting partial totals; uncached-input and cache-hit metrics are unknown unless every attempt supplies both input fields.
+
 ## Durable Records
 
 For writable resumable work, keep `conversion-state.md` concise and factual. Record canonical fields, source identity, current phase, completed checkpoints, latest successful command, active files, next action, and specific blockers. Use `conversion-notes.md` for evidence, decisions, substitutions, approximations, commands, review results, and public sources.

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Reject unsafe batch-planning log paths and missing bound shard snapshot hashes.
+- Add explicit batch replacement with immutable prior artifacts, atomic attempt
+  history, and preserved page ownership.
+- Keep unused worker drafts out of final artifact scans while checking actual
+  recorder inputs and retaining security preflight coverage.
+- Share worker usage validation, retain historical attempt costs, and distinguish
+  missing measurements from zero with per-field coverage.
 - Prefer automatic Goal-backed execution for full, broad, multi-batch, and
   publication-scale writable work without a separate confirmation prompt.
 - Add a concise Goal startup, continuation, completion, and resumable-fallback

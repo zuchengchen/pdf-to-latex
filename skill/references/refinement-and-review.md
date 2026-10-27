@@ -173,9 +173,11 @@ The checker validates canonical fields, required files, gate values, blockers, a
 Run the artifact and strict publication helpers as applicable:
 
 ```bash
-"$SKILL_DIR/scripts/check_latex_artifacts.sh" PROJECT_DIR
+"$SKILL_DIR/scripts/check_latex_artifacts.sh" PROJECT_DIR --fls-file PROJECT_DIR/main.fls
 "$SKILL_DIR/scripts/publication_gate.sh" PROJECT_DIR main.tex
 ```
+
+Use the recorder from the current successful build (adjust the filename for a different entrypoint). Unincluded drafts under `work/shards/` are retained evidence, not final source. Recorder-discovered inputs are still scanned even when they live in a worker or evidence directory; the publication gate supplies its fresh recorder automatically. Without a recorder, the artifact helper provides only a source-tree check, not complete included-source coverage. Security preflight continues to inspect worker source files.
 
 Use outcomes consistently:
 

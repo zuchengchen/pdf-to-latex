@@ -89,6 +89,8 @@ New workers should emit compact page-IR v2 shards: page status and counts stay i
 
 The scaffold records worker ownership and artifact hashes in `batch-manifest.json`, stores shards under `work/shards/`, and merges them through `skill/scripts/merge_shards.py`. Cross-page continuity, global labels and references, bibliography/index/glossary, final source edits, compilation, and Goal completion remain parent-agent responsibilities. A worker can inherit the parent model capability without inheriting the full Goal history; the parent passes a compact snapshot and evidence packet instead.
 
+Retry a registered failed or stale batch with `merge_shards.py PROJECT_DIR NEW_SHARD --replace-batch BATCH_ID`. Keep the same batch ID and page coverage, and write changed output to fresh paths. The merger preserves old files and attempt history instead of silently overwriting results. Bound snapshot hashes cannot be omitted. Usage reports include historical attempts and expose missing measurements and per-field coverage rather than treating unknown usage as zero.
+
 ## Safety And Quality
 
 - Ignores project `.latexmkrc` files and disables shell escape by default.

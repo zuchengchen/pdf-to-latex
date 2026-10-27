@@ -18,7 +18,13 @@ from typing import Any, Sequence
 
 sys.dont_write_bytecode = True
 
-from pdf_evidence import EvidenceError, SourceIdentity, source_identity  # noqa: E402
+from pdf_evidence import (  # noqa: E402
+    EvidenceError,
+    SourceIdentity,
+    append_log,
+    prepare_log_path,
+    source_identity,
+)
 
 
 SCHEMA_VERSION = 1
@@ -85,14 +91,6 @@ def positive_int(value: str) -> int:
     if parsed <= 0:
         raise argparse.ArgumentTypeError(f"must be a positive integer: {value}")
     return parsed
-
-
-def append_log(log_path: Path, message: str) -> None:
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    with log_path.open("a", encoding="utf-8") as handle:
-        handle.write(message)
-        if not message.endswith("\n"):
-            handle.write("\n")
 
 
 def tool_environment() -> dict[str, str]:
@@ -408,7 +406,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if work_dir.is_symlink() or (work_dir.exists() and not work_dir.is_dir()):
             raise TriageError(f"Project work directory must be a real directory: {work_dir}")
         work_dir.mkdir(parents=True, exist_ok=True)
-        log_path = project / "logs" / "page-triage.log"
+        log_path = prepare_log_path(project, "page-triage.log")
         identity = source_identity(args.source_pdf, log_path)
         validate_project_manifest(project, identity)
         page_texts, extractor = extract_page_texts(

@@ -125,4 +125,97 @@ assert report["usage_coverage"] == 1.0
 assert report["cache_hit_ratio"] == 0.2
 PY
 
+python3 - "$script_dir" "$project" "$tmp_dir" <<'PY'
+import json
+import pathlib
+import shutil
+import subprocess
+import sys
+
+scripts, original, root = map(pathlib.Path, sys.argv[1:])
+sys.path.insert(0, str(scripts))
+from merge_shards import MergeError, merge
+from report_worker_usage import UsageReportError, aggregate
+
+valid = [
+    None,
+    {},
+    {"cached_input_tokens": 23},
+    {"input_tokens": 100},
+    {"input_tokens": 0, "cached_input_tokens": 0},
+    {"duration_ms": 0},
+]
+invalid = [
+    [], "not an object", {"input_tokens": True}, {"input_tokens": -1},
+    {"input_tokens": 1.5}, {"input_tokens": 1, "cached_input_tokens": 2},
+    {"unknown_tokens": 1},
+]
+for number, usage in enumerate(valid + invalid):
+    project = root / f"usage-case-{number}"
+    shutil.copytree(original, project)
+    ledger = project / "batch-manifest.json"
+    manifest = json.loads(ledger.read_text(encoding="utf-8"))
+    manifest["batches"] = []
+    ledger.write_text(json.dumps(manifest), encoding="utf-8")
+    before = ledger.read_bytes()
+    shard_path = project / "work/shards/batch-v2/shard.json"
+    shard = json.loads(shard_path.read_text(encoding="utf-8"))
+    shard["usage"] = usage
+    shard_path.write_text(json.dumps(shard), encoding="utf-8")
+    if number >= len(valid):
+        try:
+            merge(str(project), [str(shard_path)])
+        except MergeError:
+            pass
+        else:
+            raise AssertionError(f"Merge accepted invalid usage: {usage}")
+        try:
+            aggregate({"batches": [{"owned_pages": [1], "usage": usage}]})
+        except UsageReportError:
+            pass
+        else:
+            raise AssertionError(f"Report accepted invalid usage: {usage}")
+        assert ledger.read_bytes() == before
+        continue
+    assert merge(str(project), [str(shard_path)]) == (1, 0)
+    result = subprocess.run(
+        [sys.executable, str(scripts / "report_worker_usage.py"), str(project), "--format", "json"],
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    known = usage or {}
+    assert report["input_tokens"] == known.get("input_tokens")
+    assert report["cached_input_tokens"] == known.get("cached_input_tokens")
+    assert report["usage_coverage"] == float(bool(known))
+    for field, coverage in report["usage_field_coverage"].items():
+        assert coverage == float(field in known), (field, report)
+    complete = "input_tokens" in known and "cached_input_tokens" in known
+    assert (report["uncached_input_tokens"] is not None) == complete
+    assert (report["cache_hit_ratio"] is not None) == complete
+    result = subprocess.run(
+        [sys.executable, str(scripts / "report_worker_usage.py"), str(project)],
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    if not complete:
+        assert "Cache hit ratio: unknown" in result.stdout
+
+mixed = aggregate({"batches": [
+    {"owned_pages": [1], "usage": {"input_tokens": 1000, "cached_input_tokens": 200}},
+    {"owned_pages": [2], "usage": {"cached_input_tokens": 23}},
+]})
+assert mixed["input_tokens"] == 1000 and mixed["cached_input_tokens"] == 223
+assert mixed["usage_field_coverage"]["input_tokens"] == 0.5
+assert mixed["cache_hit_ratio"] is None and mixed["uncached_input_tokens"] is None
+empty = aggregate({"batches": []})
+assert empty["input_tokens"] is None and empty["usage_coverage"] == 0.0
+try:
+    aggregate({"batches": [{"owned_pages": [[]], "history": [{"owned_pages": [1]}]}]})
+except UsageReportError as exc:
+    assert "invalid owned_pages" in str(exc)
+else:
+    raise AssertionError("Expected malformed attempt coverage to be rejected")
+PY
+
 printf 'Worker usage tests passed.\n'

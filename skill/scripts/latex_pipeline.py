@@ -467,13 +467,17 @@ def strip_tex_comment(line: str) -> str:
     return line
 
 
-def iter_source_files(project: Path, extra: Iterable[Path] = ()) -> Iterable[Path]:
+def iter_source_files(
+    project: Path, extra: Iterable[Path] = (), *, include_worker_artifacts: bool = True
+) -> Iterable[Path]:
     yielded: set[Path] = set()
     for path in project.rglob("*"):
         if not path.is_file() or path.suffix.lower() not in SOURCE_SUFFIXES:
             continue
         relative_parts = path.relative_to(project).parts
         if relative_parts and relative_parts[0] in RESERVED_OUTPUT_DIRS:
+            continue
+        if not include_worker_artifacts and relative_parts[:2] == ("work", "shards"):
             continue
         yielded.add(path)
         yield path
@@ -1289,7 +1293,10 @@ def artifact_scan(project: Path, fls_file: Path | None = None) -> int:
             print(f"External source symlink is not allowed: {path}", file=sys.stderr)
         return 1
 
-    paths = set(iter_source_files(project))
+    # Keep immutable worker drafts as evidence, not final source. Recorder inputs
+    # below still include any shard fragment actually read by the build. Security
+    # preflight deliberately continues to inspect worker source files.
+    paths = set(iter_source_files(project, include_worker_artifacts=False))
     if fls_file is not None:
         paths.update(recorder_project_inputs(fls_file, project))
     text_paths: list[Path] = []

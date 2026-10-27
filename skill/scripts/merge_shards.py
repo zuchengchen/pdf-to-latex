@@ -28,6 +28,14 @@ LOCK_NAME = ".batch-manifest.lock"
 BATCH_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 STATUSES = {"pending", "in-progress", "rebuilt", "blocked", "omitted-with-reason"}
+USAGE_FIELDS = (
+    "input_tokens",
+    "output_tokens",
+    "cached_input_tokens",
+    "reasoning_tokens",
+    "duration_ms",
+    "retry_count",
+)
 
 
 class MergeError(RuntimeError):
@@ -190,15 +198,7 @@ def validate_usage(value: Any, field: str) -> dict[str, int] | None:
         return None
     if not isinstance(value, dict):
         raise MergeError(f"{field} must be an object when present.")
-    allowed = {
-        "input_tokens",
-        "output_tokens",
-        "cached_input_tokens",
-        "reasoning_tokens",
-        "duration_ms",
-        "retry_count",
-    }
-    unknown = sorted(set(value) - allowed)
+    unknown = sorted(set(value) - set(USAGE_FIELDS))
     if unknown:
         raise MergeError(f"{field} contains unknown fields: {', '.join(unknown)}")
     result: dict[str, int] = {}
@@ -213,6 +213,41 @@ def validate_usage(value: Any, field: str) -> dict[str, int] | None:
     ):
         raise MergeError(f"{field}.cached_input_tokens exceeds input_tokens.")
     return result
+
+
+def batch_attempts(record: dict[str, Any], field: str) -> list[dict[str, Any]]:
+    """Read the flat, chronological history plus the current attempt."""
+    history = record.get("history", [])
+    if not isinstance(history, list):
+        raise MergeError(f"{field}.history must be an array.")
+    current_pages = record.get("owned_pages", [])
+    if (
+        not isinstance(current_pages, list)
+        or any(not is_positive_int(page) for page in current_pages)
+        or len(set(current_pages)) != len(current_pages)
+    ):
+        raise MergeError(f"{field} has invalid owned_pages.")
+    attempts = [*history, record]
+    for number, attempt in enumerate(attempts, start=1):
+        if not isinstance(attempt, dict):
+            raise MergeError(f"{field} attempt {number} must be an object.")
+        if number <= len(history) and "history" in attempt:
+            raise MergeError(f"{field} attempt history must not be nested.")
+        attempt_number = attempt.get("attempt", 1)
+        if not is_positive_int(attempt_number) or attempt_number != number:
+            raise MergeError(f"{field} attempt numbers must be consecutive from 1.")
+        if attempt.get("batch_id") != record.get("batch_id"):
+            raise MergeError(f"{field} attempt {number} must preserve batch_id.")
+        pages = attempt.get("owned_pages", [])
+        if (
+            not isinstance(pages, list)
+            or any(not is_positive_int(page) for page in pages)
+            or len(set(pages)) != len(pages)
+        ):
+            raise MergeError(f"{field} attempt {number} has invalid owned_pages.")
+        if set(pages) != set(current_pages):
+            raise MergeError(f"{field} attempt {number} must preserve owned_pages.")
+    return attempts
 
 
 def summarize_page_records(
@@ -433,15 +468,17 @@ def validate_manifest(project: Path, manifest_path: Path) -> dict[str, Any]:
         pages = validate_page_list(record.get("owned_pages"), f"Manifest batch {batch_id}.owned_pages", page_count)
         if not pages:
             raise MergeError(f"Manifest batch {batch_id}.owned_pages must contain at least one page.")
-        status = validate_status(record.get("status"), f"Manifest batch {batch_id}.status")
-        validate_blocker_fields(record, status, f"Manifest batch {batch_id}")
-        validate_usage(record.get("usage"), f"Manifest batch {batch_id}.usage")
+        for attempt in batch_attempts(record, f"Manifest batch {batch_id}"):
+            prefix = f"Manifest batch {batch_id} attempt {attempt.get('attempt', 1)}"
+            status = validate_status(attempt.get("status"), f"{prefix}.status")
+            validate_blocker_fields(attempt, status, prefix)
+            validate_usage(attempt.get("usage"), f"{prefix}.usage")
+            validate_identity(attempt.get("source", source), expected, f"{prefix}.source")
         for page in pages:
             previous = owned_pages.get(page)
             if previous is not None:
                 raise MergeError(f"Manifest page {page} is owned by both {previous} and {batch_id}.")
             owned_pages[page] = batch_id
-        validate_identity(record.get("source", source), expected, f"Manifest batch {batch_id}.source")
     return {
         "manifest": manifest,
         "expected": expected,
@@ -462,6 +499,13 @@ def merge_snapshots(context: dict[str, Any], shard_infos: list[dict[str, Any]]) 
                 raise MergeError(f"Shard {field} does not match the batch manifest context.")
             value = candidate
         if value is not None:
+            # Resolve the binding first, so omission cannot bypass a binding made
+            # by a later shard in the same request.
+            for info in shard_infos:
+                if info["snapshots"][field] is None:
+                    raise MergeError(
+                        f"Shard {info['batch_id']} must provide {field} for the bound context."
+                    )
             context[field] = value
 
 
@@ -496,6 +540,40 @@ def build_batch_record(info: dict[str, Any]) -> dict[str, Any]:
         record["usage"] = info["usage"]
     if info["detail_artifact"] is not None:
         record["detail_artifact"] = info["detail_artifact"]
+    return record
+
+
+def replacement_record(
+    project: Path, previous: dict[str, Any], info: dict[str, Any]
+) -> dict[str, Any]:
+    batch_id = info["batch_id"]
+    if sorted(previous["owned_pages"]) != info["owned_pages"]:
+        raise MergeError(f"Replacement batch {batch_id} must preserve owned_pages.")
+    attempts = batch_attempts(previous, f"Batch {batch_id}")
+    # Do not archive hashes pointing to overwritten files. Retry into fresh
+    # paths; unchanged shared artifacts may be reused.
+    for attempt in attempts:
+        artifacts = attempt.get("artifacts")
+        if not isinstance(artifacts, list):
+            raise MergeError(f"Batch {batch_id} has no valid artifact history.")
+        files = [{"path": attempt.get("shard"), "sha256": attempt.get("shard_sha256")}, *artifacts]
+        for item in files:
+            if not isinstance(item, dict):
+                raise MergeError(f"Batch {batch_id} has an invalid historical artifact.")
+            path, _ = project_relative(project, item.get("path"), "Previous attempt file")
+            digest = require_sha256(item.get("sha256"), "Previous attempt file.sha256")
+            require_regular_nonempty(path, "Previous attempt file")
+            if sha256_file(path) != digest:
+                raise MergeError(
+                    f"Batch {batch_id} previous attempt file changed: {path}; "
+                    "preserve old files and write retries to fresh paths."
+                )
+    record = build_batch_record(info)
+    record["attempt"] = len(attempts) + 1
+    record["history"] = [
+        {key: value for key, value in attempt.items() if key != "history"}
+        for attempt in attempts
+    ]
     return record
 
 
@@ -554,7 +632,9 @@ def write_manifest_atomic(path: Path, manifest: dict[str, Any]) -> None:
             temporary.unlink(missing_ok=True)
 
 
-def merge(project_dir: str, raw_shards: list[str]) -> tuple[int, int]:
+def merge(
+    project_dir: str, raw_shards: list[str], *, replace_batches: list[str] | None = None
+) -> tuple[int, int]:
     project = Path(project_dir).expanduser().resolve(strict=True)
     if not project.is_dir():
         raise MergeError(f"Project directory is not a directory: {project}")
@@ -573,27 +653,45 @@ def merge(project_dir: str, raw_shards: list[str]) -> tuple[int, int]:
         infos = [validate_shard(project, path, manifest_info["expected"]) for path in shard_paths]
         merge_snapshots(manifest_info["context"], infos)
         existing = manifest_info["batches_by_id"]
+        replace_ids = set(replace_batches or [])
+        if len(replace_ids) != len(replace_batches or []):
+            raise MergeError("Each --replace-batch must name a distinct batch.")
+        for batch_id in sorted(replace_ids):
+            if batch_id not in existing:
+                raise MergeError(f"Cannot replace unknown batch {batch_id}.")
+            if not any(info["batch_id"] == batch_id for info in infos):
+                raise MergeError(f"Replacement batch {batch_id} has no supplied shard.")
         owned_pages = dict(manifest_info["owned_pages"])
         new_records: list[dict[str, Any]] = []
+        replacements: dict[str, dict[str, Any]] = {}
         skipped = 0
         pending_ids: dict[str, str] = {}
         pending_pages: dict[int, str] = {}
         for info in infos:
             batch_id = info["batch_id"]
-            existing_record = existing.get(batch_id)
-            if existing_record is not None:
-                if existing_record.get("shard_sha256") != info["shard_sha256"]:
-                    raise MergeError(f"Batch {batch_id} already exists with a different shard hash.")
-                if existing_record.get("artifacts") != info["artifacts"]:
-                    raise MergeError(f"Batch {batch_id} has changed artifact hashes.")
-                skipped += 1
-                continue
             previous_pending = pending_ids.get(batch_id)
             if previous_pending is not None:
                 if previous_pending != info["shard_sha256"]:
                     raise MergeError(f"Batch {batch_id} appears more than once with different shard hashes.")
                 raise MergeError(f"Batch {batch_id} appears more than once in one merge request.")
             pending_ids[batch_id] = info["shard_sha256"]
+            existing_record = existing.get(batch_id)
+            if existing_record is not None:
+                if (
+                    existing_record.get("shard_sha256") == info["shard_sha256"]
+                    and existing_record.get("artifacts") == info["artifacts"]
+                ):
+                    skipped += 1
+                    continue
+                if batch_id in replace_ids:
+                    replacements[batch_id] = replacement_record(project, existing_record, info)
+                    continue
+                if existing_record.get("shard_sha256") != info["shard_sha256"]:
+                    raise MergeError(
+                        f"Batch {batch_id} already exists with a different shard hash; "
+                        f"use --replace-batch {batch_id} for an explicit retry."
+                    )
+                raise MergeError(f"Batch {batch_id} has changed artifact hashes.")
             for page in info["owned_pages"]:
                 previous = owned_pages.get(page) or pending_pages.get(page)
                 if previous is not None:
@@ -601,19 +699,25 @@ def merge(project_dir: str, raw_shards: list[str]) -> tuple[int, int]:
                 pending_pages[page] = batch_id
             new_records.append(build_batch_record(info))
 
-        if not new_records:
+        if not new_records and not replacements:
             return 0, skipped
         manifest = manifest_info["manifest"]
         manifest["context"] = manifest_info["context"]
-        manifest.setdefault("batches", []).extend(new_records)
+        manifest["batches"] = [
+            replacements.get(record["batch_id"], record) for record in manifest["batches"]
+        ] + new_records
         write_manifest_atomic(manifest_path, manifest)
-        return len(new_records), skipped
+        return len(new_records) + len(replacements), skipped
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("project_dir", help="Project containing batch-manifest.json")
     parser.add_argument("shards", nargs="+", help="Project-relative or absolute shard JSON paths")
+    parser.add_argument(
+        "--replace-batch", action="append", default=[], metavar="BATCH_ID",
+        help="Replace this batch with an explicit retry; preserve page ownership and attempt history.",
+    )
     return parser
 
 
@@ -621,8 +725,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
-        merged, skipped = merge(args.project_dir, args.shards)
-    except MergeError as exc:
+        merged, skipped = merge(args.project_dir, args.shards, replace_batches=args.replace_batch)
+    except (MergeError, OSError) as exc:
         print(f"Shard merge failed: {exc}", file=sys.stderr)
         return 1
     print(f"Merged {merged} shard(s); skipped {skipped} idempotent shard(s).")

@@ -252,6 +252,38 @@ if "$script_dir/check_latex_artifacts.sh" "$inc_artifact_project" >/dev/null 2>&
   exit 1
 fi
 
+worker_artifact_project="$tmp_dir/worker-artifact"
+mkdir -p "$worker_artifact_project/work/shards/old"
+printf '%s\n' '\documentclass{article}\begin{document}Clean final text\end{document}' \
+  >"$worker_artifact_project/main.tex"
+printf 'TODO math\n' >"$worker_artifact_project/work/shards/old/page.tex"
+"$script_dir/check_latex_artifacts.sh" "$worker_artifact_project" >/dev/null
+printf 'INPUT main.tex\n' >"$worker_artifact_project/main.fls"
+"$script_dir/check_latex_artifacts.sh" "$worker_artifact_project" \
+  --fls-file "$worker_artifact_project/main.fls" >/dev/null
+printf 'INPUT work/shards/old/page.tex\n' >>"$worker_artifact_project/main.fls"
+if "$script_dir/check_latex_artifacts.sh" "$worker_artifact_project" \
+  --fls-file "$worker_artifact_project/main.fls" >/dev/null 2>&1; then
+  printf 'Expected recorder-included worker artifacts to fail the final source scan.\n' >&2
+  exit 1
+fi
+python3 - "$script_dir" "$worker_artifact_project" <<'PY'
+import pathlib
+import sys
+
+sys.path.insert(0, sys.argv[1])
+from latex_pipeline import preflight_project
+
+project = pathlib.Path(sys.argv[2])
+fragment = project / "work/shards/old/page.tex"
+fragment.write_text("\\immediate\\write18{exit 1}\n", encoding="utf-8")
+findings = preflight_project(
+    project, main_path=project / "main.tex", allow_project_rc=False, allow_shell_escape=False
+)
+assert any(finding.category == "shell-escape-source" for finding in findings)
+fragment.write_text("TODO math\n", encoding="utf-8")
+PY
+
 external_source="$tmp_dir/external-source.tex"
 printf 'External source\n' >"$external_source"
 external_project="$tmp_dir/logs/external-project"
@@ -479,13 +511,32 @@ if ! command -v xelatex >/dev/null 2>&1 \
 fi
 
 simple_project="$tmp_dir/simple"
-mkdir -p "$simple_project"
+mkdir -p "$simple_project/work/shards/old"
+printf '\\pdfglyph{unresolved}\n' >"$simple_project/work/shards/old/page.tex"
 printf '%s\n' \
   '\documentclass{article}' \
   '\begin{document}' \
   'Safe publication text.' \
   '\end{document}' >"$simple_project/main.tex"
 "$script_dir/latex_healthcheck.sh" "$simple_project" main.tex >/dev/null
+
+# An included worker fragment must still block publication after a real build.
+printf '%s\n' \
+  '\documentclass{article}' \
+  '\begin{document}' \
+  '\input{work/shards/old/page}' \
+  '\end{document}' >"$worker_artifact_project/main.tex"
+"$script_dir/latex_healthcheck.sh" "$worker_artifact_project" main.tex >/dev/null
+if "$script_dir/publication_gate.sh" "$worker_artifact_project" main.tex \
+  --render-dpi 72 >/dev/null 2>&1; then
+  printf 'Expected an actually included worker draft to fail publication.\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'FAIL: Final source artifact scan' \
+  "$worker_artifact_project/logs/publication_gate_summary.txt"; then
+  printf 'Expected the included worker draft to fail specifically at the artifact gate.\n' >&2
+  exit 1
+fi
 
 reserved_name_project="$tmp_dir/reserved-name-source"
 mkdir -p "$reserved_name_project"

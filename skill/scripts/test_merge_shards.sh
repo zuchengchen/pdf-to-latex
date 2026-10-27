@@ -204,4 +204,179 @@ before=$(hash_file "$project/batch-manifest.json")
 expect_failure "$merge" "$project" "$symlink_shard"
 assert_hash "$before" "$project/batch-manifest.json"
 
+python3 - "$script_dir" "$tmp_dir" "$project/batch-manifest.json" <<'PY'
+import copy
+import json
+import pathlib
+import subprocess
+import sys
+
+scripts, root, template_path = map(pathlib.Path, sys.argv[1:])
+sys.path.insert(0, str(scripts))
+from merge_shards import MergeError, merge
+from report_worker_usage import aggregate
+
+template = json.loads(template_path.read_text(encoding="utf-8"))
+template["batches"] = []
+
+
+def project_at(name):
+    project = root / name
+    project.mkdir()
+    (project / "batch-manifest.json").write_text(json.dumps(template), encoding="utf-8")
+    return project
+
+
+def write_attempt(project, name, *, batch_id="retry", page=1, status="rebuilt", version=1):
+    folder = project / "work/shards" / name
+    folder.mkdir(parents=True)
+    detail = folder / "details.json"
+    detail.write_text(json.dumps({"page": page, "text": name}), encoding="utf-8")
+    record = {
+        "page": page, "route": "digital-text", "status": status,
+        "blocks": [], "objects": [], "continuity": [], "uncertainties": [],
+    }
+    shard = {
+        "schema_version": version, "kind": "page-ir-shard", "batch_id": batch_id,
+        "source": template["source"], "owned_pages": [page], "context_pages": [],
+        **template["context"], "status": status, "pages": [record],
+        "artifacts": [detail.relative_to(project).as_posix()],
+        "usage": {"input_tokens": 100, "cached_input_tokens": 20},
+    }
+    if status == "blocked":
+        for item in (shard, record):
+            item.update(reason="Formula unreadable", next_action="Inspect a larger crop")
+    if version == 2:
+        for field in ("blocks", "objects", "continuity", "uncertainties"):
+            record.pop(field)
+        record.update(block_count=1, object_count=0, continuity_count=0, uncertainty_count=0)
+        shard["detail_artifact"] = shard["artifacts"][0]
+        shard["worker_summary"] = {
+            "text": "One page reconstructed", "owned_page_count": 1,
+            "blocked_page_count": int(status == "blocked"), "uncertain_page_count": 0,
+        }
+    path = folder / "shard.json"
+    path.write_text(json.dumps(shard), encoding="utf-8")
+    return path
+
+
+def reject(project, paths, message, replacements=None):
+    ledger = project / "batch-manifest.json"
+    before = ledger.read_bytes()
+    try:
+        merge(str(project), [str(path) for path in paths], replace_batches=replacements)
+    except MergeError as exc:
+        assert message in str(exc), str(exc)
+    else:
+        raise AssertionError("Expected merge rejection")
+    assert ledger.read_bytes() == before, "Rejected merge modified the ledger"
+
+
+project = project_at("retry-project")
+ledger = project / "batch-manifest.json"
+first = write_attempt(project, "attempt-1", status="blocked")
+assert merge(str(project), [str(first)]) == (1, 0)
+original = json.loads(ledger.read_text(encoding="utf-8"))["batches"][0]
+first_bytes = first.read_bytes()
+retry = write_attempt(project, "attempt-2", version=2)
+reject(project, [retry], "different shard hash")
+other_id = write_attempt(project, "other-id", batch_id="other")
+reject(project, [other_id], "already owned")
+reject(project, [retry], "unknown batch", ["missing"])
+reject(project, [other_id], "no supplied shard", ["retry"])
+reject(project, [retry], "distinct batch", ["retry", "retry"])
+reject(project, [first, retry], "appears more than once", ["retry"])
+other_page = write_attempt(project, "other-page", page=2)
+reject(project, [other_page], "preserve owned_pages", ["retry"])
+wrong_source = write_attempt(project, "wrong-source")
+shard = json.loads(wrong_source.read_text(encoding="utf-8"))
+shard["source"]["sha256"] = "d" * 64
+wrong_source.write_text(json.dumps(shard), encoding="utf-8")
+reject(project, [wrong_source], "source identity", ["retry"])
+
+old_detail = project / original["artifacts"][0]["path"]
+detail_bytes = old_detail.read_bytes()
+old_detail.write_text("overwritten", encoding="utf-8")
+reject(project, [retry], "previous attempt file changed", ["retry"])
+old_detail.write_bytes(detail_bytes)
+
+# A late collision must roll back the entire replacement request.
+reject(project, [retry, other_id], "already owned", ["retry"])
+result = subprocess.run(
+    [sys.executable, str(scripts / "merge_shards.py"), str(project), str(retry),
+     "--replace-batch", "retry"], capture_output=True, text=True, check=False,
+)
+assert result.returncode == 0, result.stderr
+manifest = json.loads(ledger.read_text(encoding="utf-8"))
+active = manifest["batches"][0]
+assert len(manifest["batches"]) == 1
+assert active["attempt"] == 2 and active["status"] == "rebuilt"
+assert active["owned_pages"] == [1]
+assert active["history"] == [original]
+assert first.read_bytes() == first_bytes and old_detail.read_bytes() == detail_bytes
+assert "reason" not in active and "next_action" not in active
+before = ledger.read_bytes()
+assert merge(str(project), [str(retry)], replace_batches=["retry"]) == (0, 1)
+assert ledger.read_bytes() == before
+
+# Retry a now-stale rebuilt result without nesting or losing attempt history.
+third = write_attempt(project, "attempt-3", version=2)
+assert merge(str(project), [str(third)], replace_batches=["retry"]) == (1, 0)
+manifest = json.loads(ledger.read_text(encoding="utf-8"))
+active = manifest["batches"][0]
+assert active["attempt"] == 3 and len(active["history"]) == 2
+assert all("history" not in item for item in active["history"])
+assert [item["status"] for item in active["history"]] == ["blocked", "rebuilt"]
+report = aggregate(manifest)
+assert report["page_count"] == 1 and report["batch_count"] == 1
+assert report["attempt_count"] == 3
+assert report["input_tokens"] == 300 and report["cached_input_tokens"] == 60
+assert report["uncached_input_tokens"] == 240 and report["cache_hit_ratio"] == 0.2
+
+valid_bytes = ledger.read_bytes()
+for field, value, message in (
+    ("attempt", 5, "consecutive"),
+    ("batch_id", "another-batch", "preserve batch_id"),
+    ("owned_pages", [2], "preserve owned_pages"),
+    ("history", [], "must not be nested"),
+    ("usage", {"input_tokens": -1}, "non-negative"),
+):
+    invalid = copy.deepcopy(manifest)
+    invalid["batches"][0]["history"][0][field] = value
+    ledger.write_text(json.dumps(invalid), encoding="utf-8")
+    reject(project, [third], message)
+    ledger.write_bytes(valid_bytes)
+
+# Bound context hashes are mandatory for both supported shard formats.
+for version in (1, 2):
+    for field in template["context"]:
+        for invalid in ("missing", None, "d" * 64):
+            project = project_at(f"snapshot-{version}-{field}-{invalid}")
+            path = write_attempt(project, "candidate", version=version)
+            shard = json.loads(path.read_text(encoding="utf-8"))
+            if invalid == "missing":
+                shard.pop(field)
+            else:
+                shard[field] = invalid
+            path.write_text(json.dumps(shard), encoding="utf-8")
+            reject(project, [path], field)
+
+# Binding a previously unbound context is independent of request order.
+for reverse in (False, True):
+    project = project_at(f"initial-binding-{reverse}")
+    ledger = project / "batch-manifest.json"
+    manifest = copy.deepcopy(template)
+    manifest["context"] = {}
+    ledger.write_text(json.dumps(manifest), encoding="utf-8")
+    legacy = write_attempt(project, "legacy", batch_id="legacy")
+    shard = json.loads(legacy.read_text(encoding="utf-8"))
+    for field in template["context"]:
+        shard.pop(field)
+    legacy.write_text(json.dumps(shard), encoding="utf-8")
+    bound = write_attempt(project, "bound", batch_id="bound", page=2)
+    paths = [legacy, bound]
+    reject(project, paths[::-1] if reverse else paths, "must provide")
+    assert merge(str(project), [str(legacy)]) == (1, 0)
+PY
+
 printf 'Shard merge tests passed.\n'
